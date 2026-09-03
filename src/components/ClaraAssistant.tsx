@@ -456,14 +456,14 @@ const ClaraAssistant: React.FC<ClaraAssistantProps> = ({ onPageChange }) => {
   // Restaure les tables sauvées dans IndexedDB après actualisation page
   useEffect(() => {
     console.log('🔄 [React Restore] useEffect triggered', {
-      sessionId: currentSession?.id?.substring(0, 20),
+      stableSessionId: stableSessionId?.substring(0, 20),
       messagesLength: messages?.length || 0,
       timestamp: Date.now()
     });
     
-    // Guard 1 : Pas de session active
-    if (!currentSession?.id) {
-      console.log('⏸️ [React Restore] No active session, skipping restoration');
+    // Guard 1 : Pas de session stable (utilise stableSessionId au lieu de currentSession)
+    if (!stableSessionId) {
+      console.log('⏸️ [React Restore] No stable session, skipping restoration');
       return;
     }
     
@@ -479,8 +479,11 @@ const ClaraAssistant: React.FC<ClaraAssistantProps> = ({ onPageChange }) => {
       return;
     }
     
+    // ✅ CRITIQUE: Injecter stableSessionId dans le bridge AVANT restauration
+    flowiseTableBridge.setCurrentSession(stableSessionId);
+    
     console.log('🔄 [React Restore] Déclenchement restauration tables...', {
-      sessionId: currentSession.id.substring(0, 30) + '...',
+      sessionId: stableSessionId.substring(0, 30) + '...',
       messagesCount: messages.length,
       timestamp: Date.now()
     });
@@ -498,7 +501,7 @@ const ClaraAssistant: React.FC<ClaraAssistantProps> = ({ onPageChange }) => {
         console.error('❌ [React Restore] Erreur restauration tables:', error);
       });
     
-  }, [currentSession?.id, messages]); // Déclencher au changement session OU messages
+  }, [stableSessionId, messages]); // ✅ FIX: Utiliser stableSessionId (toujours disponible) au lieu de currentSession?.id
 
   
   // Auto TTS state - track latest AI response for voice synthesis
