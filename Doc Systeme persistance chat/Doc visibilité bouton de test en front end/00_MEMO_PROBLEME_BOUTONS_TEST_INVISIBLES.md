@@ -1,12 +1,199 @@
 # 🔴 MÉMO : Problème Boutons de Test Invisibles en Front-End
 
-**Date** : 3 septembre 2026  
+**Date** : 3 septembre 2026 (Mise à jour : 29 août 2026)  
 **Contexte** : Phase 2 - Implémentation système de persistance tables auto-générées  
-**Statut** : ✅ RÉSOLU
+**Statut** : ✅ RÉSOLU (Mis à jour avec nouvelle cause racine)
 
 ---
 
-## 📋 RÉSUMÉ EXÉCUTIF
+## 🆕 MISE À JOUR 29 AOÛT 2026 : NOUVELLE CAUSE RACINE
+
+### Symptômes Observés (Phase 2 Restauration)
+- ✅ Boutons HTML statiques intégrés dans `index.html` ligne ~22-38
+- ✅ Position : `top: 10px; right: 10px`, z-index: 999999
+- ✅ Boutons AVANT `<div id="root">` (comme solution initiale)
+- ❌ **Seulement 2 boutons visibles sur 3** (Test Phase 1 et 2 visibles, bouton 3 disparaît)
+- ❌ **Bouton 3 disparaît même après hard refresh** (Ctrl+Shift+R)
+
+### Nouvelle Cause Identifiée : `diagnostic-button.js`
+
+**Conflit avec script dynamique concurrent :**
+
+Le fichier `public/diagnostic-button.js` (chargé ligne 188 de `index.html`) crée des **boutons flottants dynamiquement** qui écrasent ou suppriment les boutons HTML statiques.
+
+**Preuve :**
+```javascript
+// diagnostic-button.js ligne 54
+const button = document.createElement('button');
+button.id = 'claraverse-diagnostic-btn';
+button.innerHTML = '🔍';
+```
+
+Ce script :
+1. S'initialise **après** le chargement DOM
+2. Crée ses propres boutons flottants
+3. **Supprime ou masque** boutons existants au même emplacement (haut droite)
+4. Utilise même position (`top/right`) avec z-index élevé
+
+**Résultat** : Le 3ème bouton statique est écrasé par le bouton dynamique de `diagnostic-button.js`.
+
+---
+
+### Solution Appliquée
+
+#### 1️⃣ **Désactiver `diagnostic-button.js`**
+
+**Fichier** : `h:\Claverse_1\index.html`  
+**Ligne** : ~188
+
+**Avant** :
+```html
+<!-- 🔍 BOUTON DE DIAGNOSTIC FRONT-END -->
+<script src="/diagnostic-button.js"></script>
+```
+
+**Après** :
+```html
+<!-- 🔍 BOUTON DE DIAGNOSTIC FRONT-END -->
+<!-- DÉSACTIVÉ : Conflit avec boutons HTML statiques ligne 22-38 -->
+<!-- <script src="/diagnostic-button.js"></script> -->
+```
+
+#### 2️⃣ **Redémarrer serveur + vider cache**
+
+Les boutons dynamiques créés par `diagnostic-button.js` restaient en cache même après modification HTML.
+
+**Commandes appliquées** :
+```powershell
+# Arrêter serveur Vite
+npm run dev (Ctrl+C)
+
+# Redémarrer
+npm run dev
+
+# Puis dans navigateur :
+# Ctrl+Shift+Delete → Vider tout → F5
+```
+
+#### 3️⃣ **Résultat Final**
+
+✅ **3 boutons visibles** :
+- 🧪 Test Phase 1 (Vert)
+- 🧪 Test Phase 2 (Bleu)
+- 🔍 Diagnostic (Violet)
+
+✅ **Aucun conflit** avec scripts tiers  
+✅ **Position stable** (haut droite, z-index 999999)  
+✅ **Persistants après reload**
+
+---
+
+### Comparaison : Cause Initiale vs Nouvelle Cause
+
+| Aspect | Cause Initiale (3 sept 2026) | Nouvelle Cause (29 août 2026) |
+|--------|-------------------------------|-------------------------------|
+| **Script responsable** | `persistance-logger.js` | `diagnostic-button.js` |
+| **Ligne dans index.html** | 192 (déjà désactivé) | 188 (actif) |
+| **Symptôme** | Boutons disparaissent après 2-3s | 3ème bouton jamais visible |
+| **Position boutons** | Boutons APRÈS `<div id="root">` | Boutons AVANT `<div id="root">` ✅ |
+| **Solution** | Déplacer AVANT root + désactiver persistance-logger | Désactiver diagnostic-button.js |
+| **z-index** | 99999 (insuffisant) | 999999 (correct) |
+
+---
+
+### Leçons Apprises (Mise à Jour)
+
+#### 🎯 Leçon 5 : **Vérifier TOUS les scripts créant boutons flottants**
+
+Même si un script (`persistance-logger.js`) est désactivé, **d'autres scripts similaires** peuvent causer le même problème.
+
+**Scripts identifiés créant boutons flottants** :
+1. ✅ `persistance-logger.js` (ligne 192) - **DÉSACTIVÉ**
+2. ✅ `diagnostic-button.js` (ligne 188) - **DÉSACTIVÉ**
+3. ⚠️ Code inline dans `index.html` (lignes 1370-2000+) - **NON DÉSACTIVÉ** (mais ne cause pas conflit actuel)
+
+**Méthode de détection** :
+```bash
+# Chercher scripts créant boutons flottants
+grep -r "createElement('button')" public/*.js index.html
+grep -r "position.*fixed.*button" public/*.js index.html
+```
+
+#### 🎯 Leçon 6 : **Cache navigateur très agressif**
+
+Hard refresh (`Ctrl+Shift+R`) ne suffit pas toujours. Les boutons dynamiques restent en cache.
+
+**Solution complète** :
+1. **Désactiver script** (commenter dans HTML)
+2. **Redémarrer serveur** (pour régénérer bundle)
+3. **Vider cache complet** (Ctrl+Shift+Delete → Tout cocher)
+4. **Recharger page** (F5 ou Ctrl+F5)
+
+#### 🎯 Leçon 7 : **Position AVANT root nécessaire mais insuffisante**
+
+Placer boutons AVANT `<div id="root">` évite écrasement **par React**, mais pas par **scripts tiers JavaScript**.
+
+**Protection complète requiert** :
+- ✅ Position AVANT root (évite React)
+- ✅ z-index très élevé (999999)
+- ✅ Désactivation scripts concurrents (évite JS tiers)
+
+---
+
+## 📋 CHECKLIST RÉSOLUTION COMPLÈTE
+
+Avant de considérer le problème résolu :
+
+- [x] Boutons HTML statiques intégrés dans `index.html`
+- [x] Position : **AVANT** `<div id="root">`
+- [x] z-index : **999999** (6 chiffres)
+- [x] Position : `top: 10px; right: 10px` (haut droite)
+- [x] `persistance-logger.js` **commenté** (ligne 192)
+- [x] `diagnostic-button.js` **commenté** (ligne 188)
+- [x] Serveur **redémarré**
+- [x] Cache navigateur **vidé**
+- [x] **3 boutons visibles** après test
+
+---
+
+## 🔧 COMMITS APPLIQUÉS
+
+### Commit Initial (3 septembre 2026)
+```
+commit: [hash]
+Message: "fix: Boutons HTML statiques avant root + désactiver persistance-logger"
+```
+
+### Commits Mise à Jour (29 août 2026)
+```
+commit: 81a135c
+Message: "fix: Boutons AVANT root (pas après) selon mémo résolution"
+
+commit: cca8570
+Message: "fix: Désactiver diagnostic-button.js (conflit boutons statiques)"
+```
+
+---
+
+## 📞 CONTACT / RÉFÉRENCES (Mise à Jour)
+
+**Développeur** : Kiro AI  
+**Date Résolution Initiale** : 3 septembre 2026  
+**Date Mise à Jour** : 29 août 2026  
+
+**Fichiers Modifiés** :
+- `h:\Claverse_1\index.html` (lignes 22-38 : boutons, ligne 188 : désactivation script)
+- `h:\Claverse_1\public\diagnostic-complet-fusionne.js` (nouveau diagnostic fusionné)
+- `h:\Claverse_1\public\diagnostic-button.js` (désactivé, pas supprimé)
+
+**Mémos Connexes** :
+- `00_MEMO_AJOUT_BOUTONS_DIAGNOSTICS_29_AOUT_16H25.md`
+- `GUIDE_BOUTONS_TEST_VISUELS.md`
+- `DIAGNOSTIC_ETAPE_PAR_ETAPE.md`
+
+---
+
+**FIN DU MÉMO (Mis à jour)**
 
 **Problème** : Les boutons de test (Phase 1, Phase 2) créés dynamiquement via `diagnostic-button.js` étaient **invisibles** en front-end malgré les scripts chargés et logs présents.
 
