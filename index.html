@@ -20,7 +20,9 @@
 </head>
 
 <body>
-  <!-- 🧪 BOUTONS DE TEST VISIBLES (EN HAUT À DROITE) -->
+  <div id="root"></div>
+  
+  <!-- 🧪 BOUTONS DE TEST VISIBLES (EN HAUT À DROITE) - APRÈS root pour éviter écrasement React -->
   <div style="position: fixed; top: 10px; right: 10px; z-index: 999999; display: flex; gap: 10px; flex-direction: column;">
     <button onclick="window.testPhase1 && window.testPhase1().then(r => alert('Phase 1: ' + r.tests.filter(t => t.passed).length + '/' + r.tests.length + ' tests passés'))" 
             style="padding: 12px 20px; background: #10b981; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
@@ -44,12 +46,14 @@
     </button>
   </div>
   
-  <div id="root"></div>
   <script type="module" src="/src/main.tsx"></script>
 
   <!-- ========================================== -->
   <!-- SYSTÈME DE RESTAURATION UNIQUE -->
   <!-- ========================================== -->
+  
+  <!-- 🔧 INITIALISATION INDEXEDDB - DOIT ÊTRE EN PREMIER -->
+  <script src="/init-indexeddb.js"></script>
 
   <!-- 1. Gestionnaire de verrouillage - DOIT être chargé EN PREMIER -->
   <script src="/restore-lock-manager.js"></script>
@@ -165,6 +169,25 @@
   <script src="/test-phase-2-modifications.js"></script>
   <script src="/test-phase-3-persistance.js"></script>
   <script src="/test-diagnostic-complet.js"></script>
+  
+  <!-- 🔍 LANCER DIAGNOSTIC AUTO (10 secondes après chargement) -->
+  <script>
+    setTimeout(() => {
+      if (window.diagnosticCompletPersistance) {
+        console.log("🔍 Lancement diagnostic automatique...");
+        window.diagnosticCompletPersistance().then(r => {
+          const message = `🔍 DIAGNOSTIC AUTO\n\n` +
+            `✅ Tests passés: ${r.passedCount}/${r.totalCount}\n\n` +
+            `Détails dans Console F12 (touche F12)\n\n` +
+            r.results.map((res, i) => 
+              `${i+1}. ${res.passed ? '✅' : '❌'} ${res.test}`
+            ).join('\n');
+          
+          alert(message);
+        });
+      }
+    }, 10000); // 10 secondes pour laisser React + services se charger
+  </script>
   
   <!-- 🔍 DIAGNOSTIC DÉTAILLÉ PERSISTANCE -->
   <script src="/diagnostic-persistence-detailed.js"></script>
