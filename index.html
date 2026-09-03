@@ -32,12 +32,8 @@
             style="padding: 12px 20px; background: #06b6d4; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
       🧪 Test Phase 2
     </button>
-    <button onclick="window.testPhase3Persistance && window.testPhase3Persistance().then(r => { const passed = r.tests.filter(t => t.passed).length; const total = r.tests.length; const details = r.tests.map((t,i) => (t.passed ? '✅' : '❌') + ' ' + (i+1) + '. ' + t.name).join('\\n'); alert('PHASE 3: ' + passed + '/' + total + ' tests passés\\n\\n' + details + '\\n\\n💡 Appuyez F5 pour tester persistance !'); })"
-            style="padding: 12px 20px; background: #8b5cf6; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
-      🧪 Test Phase 3
-    </button>
     <button onclick="window.diagnosticComplet && window.diagnosticComplet()"
-            style="padding: 12px 20px; background: #f59e0b; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
+            style="padding: 12px 20px; background: #8b5cf6; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
       🔍 Diagnostic
     </button>
   </div>
