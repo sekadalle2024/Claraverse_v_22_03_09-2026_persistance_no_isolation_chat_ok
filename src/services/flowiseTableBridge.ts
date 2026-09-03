@@ -1522,6 +1522,8 @@ export class FlowiseTableBridge {
                                 || document.querySelector('#chat-messages')
                                 || document.body;
         
+        console.log(`📍 [Conteneur] Trouvé: ${messagesContainer.className || messagesContainer.tagName}`);
+        
         if (!messagesContainer) {
           console.error(`❌ Impossible de trouver conteneur pour restauration`);
           return;
