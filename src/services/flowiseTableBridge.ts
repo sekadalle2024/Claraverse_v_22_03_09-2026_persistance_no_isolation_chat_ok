@@ -777,6 +777,8 @@ export class FlowiseTableBridge {
 
       // Save the table with messageId link
       // Requirements: 10.4
+      console.log(`💾 [DEBUG] Sauvegarde table: keyword="${keyword}", sessionId="${this.currentSessionId?.substring(0, 8)}...", messageId="${messageId}"`);
+      
       const tableId = await flowiseTableService.saveGeneratedTable(
         this.currentSessionId,
         tableElement,
@@ -2350,6 +2352,9 @@ export class FlowiseTableBridge {
         messages
       );
 
+      console.log(`📊 [DEBUG] Timeline récupérée: ${timeline.length} items total`);
+      console.log(`📊 [DEBUG] Timeline détail:`, timeline.map(t => ({ type: t.type, sessionId: t.sessionId?.substring(0, 8), keyword: (t as any).keyword })));
+
       // 🛡️ FILTRAGE DÉFENSIF STRICT - Isolation sessions (ROOT CAUSE FIX)
       // Ne garder QUE les tables de la session actuelle pour éviter contamination
       const filteredTimeline = timeline.filter(item => {
@@ -2359,6 +2364,8 @@ export class FlowiseTableBridge {
         }
         return belongsToSession;
       });
+
+      console.log(`📊 [DEBUG] Après filtrage session: ${filteredTimeline.length} items`);
 
       if (filteredTimeline.length === 0) {
         console.log(`ℹ️ No timeline items for session ${this.currentSessionId}`);
@@ -2373,6 +2380,8 @@ export class FlowiseTableBridge {
 
       // Filter only table items
       const tableItems = filteredTimeline.filter(item => item.type === 'table') as TableTimelineItem[];
+
+      console.log(`📊 [DEBUG] Tables à restaurer: ${tableItems.length}`);
 
       if (tableItems.length === 0) {
         console.log(`ℹ️ No tables to restore for session ${this.currentSessionId}`);

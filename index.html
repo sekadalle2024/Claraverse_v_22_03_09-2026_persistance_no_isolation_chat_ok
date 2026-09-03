@@ -36,11 +36,11 @@
             style="padding: 12px 20px; background: #8b5cf6; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
       🧪 Test Phase 3
     </button>
-    <button onclick="alert('1. Générez table (Assertion/Conclusion/CTR)\\n2. Test Phase 2 (4-5/5 attendu)\\n3. Test Phase 3 (sauvegarde DB)\\n4. F5 pour tester persistance')"
+    <button onclick="window.diagnosticIndexedDB && window.diagnosticIndexedDB()"
             style="padding: 12px 20px; background: #f59e0b; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
-      ℹ️ Aide
+      📊 Diag DB
     </button>
-    <button onclick="window.diagnosticCompletPersistance && window.diagnosticCompletPersistance().then(r => alert('DIAGNOSTIC: ' + r.passedCount + '/' + r.totalCount + ' tests passés\\n\\nVoir console F12 pour détails'))"
+    <button onclick="window.diagnosticRestauration && window.diagnosticRestauration()"
             style="padding: 12px 20px; background: #ef4444; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
       🔍 Diagnostic
     </button>
@@ -169,6 +169,8 @@
   <script src="/test-phase-2-modifications.js"></script>
   <script src="/test-phase-3-persistance.js"></script>
   <script src="/test-diagnostic-complet.js"></script>
+  <script src="/diagnostic-indexeddb-visual.js"></script>
+  <script src="/diagnostic-restauration-visual.js"></script>
   
   <!-- 🔍 LANCER DIAGNOSTIC AUTO (10 secondes après chargement) -->
   <script>

@@ -330,3 +330,182 @@ Avant de considérer le système fonctionnel :
 ---
 
 **Dernière mise à jour** : 29 Août 2026
+
+
+---
+
+## 🔍 LOGS DE RESTAURATION PHASE 2 (stableSessionId fix)
+
+### Déclenchement (ClaraAssistant.tsx ligne ~456-501)
+```
+🔄 [React Restore] useEffect triggered {stableSessionId: 'xxx', messagesLength: N}
+✅ Session manually set to: xxx
+🔄 [React Restore] Déclenchement restauration tables... {sessionId: 'xxx', messagesCount: N}
+```
+
+### Exécution (flowiseTableBridge.ts ligne ~2340-2415)
+```
+🔄 Restoring tables chronologically for session: xxx
+📊 [DEBUG] Timeline récupérée: X items total
+📊 [DEBUG] Timeline détail: [{type: 'message'/'table', sessionId: '...', keyword: '...'}]
+📊 [DEBUG] Après filtrage session: X items
+📊 [DEBUG] Tables à restaurer: X
+✅ Filtered timeline: X table(s) for session xxx
+✅ Restored X table(s) chronologically for session xxx
+```
+
+### Sauvegarde (flowiseTableBridge.ts ligne ~783)
+```
+💾 [DEBUG] Sauvegarde table: keyword="Table_Conso", sessionId="xxx...", messageId="yyy"
+✅ Table saved successfully: zzz (linked to message: yyy)
+```
+
+### Succès final
+```
+✅ [React Restore] Restauration réussie: X table(s)
+```
+
+### 🚨 Échecs possibles - NOUVEAUX LOGS DEBUG
+
+#### Si aucun log après "🔄 Restoring tables chronologically"
+**Hypothèse** : Exception levée dans `getSessionTimeline()`
+
+**Diagnostic** :
+- Chercher `❌ Error restoring tables chronologically` dans console
+- Vérifier que `flowiseTimelineService` est défini
+
+---
+
+#### Si "📊 [DEBUG] Timeline récupérée: 0 items"
+**Hypothèse** : Tables pas en IndexedDB OU `getSessionTimeline()` vide
+
+**Diagnostic** :
+1. Exécuter snippet diagnostic IndexedDB (copier-coller dans console) :
+   ```javascript
+   // Voir fichier: Doc Systeme persistance chat/SNIPPET_DIAGNOSTIC_INDEXEDDB.js
+   ```
+
+2. Vérifier si tables présentes en DB :
+   - Si **0 tables** → Problème sauvegarde (logs `✅ Table saved` absents)
+   - Si **tables présentes mais session différente** → SessionId mismatch
+
+**Solutions** :
+- **Sauvegarde échoue** : Vérifier logs `💾 [DEBUG] Sauvegarde table` et `✅ Table saved successfully`
+- **SessionId mismatch** : Comparer sessionId dans logs sauvegarde vs restauration
+
+---
+
+#### Si "📊 [DEBUG] Après filtrage session: 0 items"
+**Hypothèse** : SessionId mismatch entre sauvegarde et restauration
+
+**Diagnostic** :
+1. Noter sessionId dans log restauration :
+   ```
+   🔄 Restoring tables chronologically for session: RESTAURATION_ID
+   ```
+
+2. Vérifier sessionId utilisé pendant sauvegarde :
+   ```
+   💾 [DEBUG] Sauvegarde table: sessionId="SAUVEGARDE_ID..."
+   ```
+
+3. Comparer les deux :
+   - Si **DIFFÉRENTS** → Problem root cause : Bridge reçoit mauvais sessionId
+   - Si **IDENTIQUES** → Filtrage trop strict (bug ligne 2354)
+
+**Solutions** :
+- **SessionId différents** : Vérifier `stableSessionId` dans `ClaraAssistant.tsx` ligne 415-417
+- **Filtrage trop strict** : Logs `🚫 [ISOLATION]` indiquent tables filtrées
+
+---
+
+#### Si "📊 [DEBUG] Tables à restaurer: 0"
+**Hypothèse** : Timeline contient messages mais pas tables
+
+**Diagnostic** :
+```
+📊 [DEBUG] Timeline détail: [{type: 'message', ...}, {type: 'message', ...}]
+```
+
+**Cause** : Tables pas sauvegardées avec type 'table' dans timeline
+
+**Solution** :
+- Vérifier que `flowiseTableService.saveGeneratedTable()` sauvegarde correctement
+- Vérifier que timeline items ont `type: 'table'`
+
+---
+
+#### Si logs restauration présents MAIS tables n'apparaissent pas
+**Hypothèse** : Injection DOM échoue
+
+**Diagnostic** :
+1. Log présent :
+   ```
+   ✅ Restored 2 table(s) chronologically
+   ```
+
+2. Mais aucune table visible dans interface
+
+**Cause** : `injectTableIntoDOM()` échoue silencieusement
+
+**Solution** :
+- Vérifier que conteneur `.markdown-content` existe dans DOM
+- Vérifier erreurs JavaScript dans console après log restauration
+
+---
+
+## 📋 SNIPPET DIAGNOSTIC INDEXEDDB
+
+**Fichier** : `Doc Systeme persistance chat/SNIPPET_DIAGNOSTIC_INDEXEDDB.js`
+
+**Usage** :
+1. Générer table dans chat
+2. Ouvrir console (F12)
+3. Copier-coller contenu du fichier
+4. Appuyer Entrée
+
+**Output attendu** :
+```
+🔍 ===== DIAGNOSTIC INDEXEDDB =====
+
+✅ Base de données ouverte: FloTableDB version 2
+📦 Object stores: generatedTables
+
+📊 TOTAL TABLES EN DB: 2
+
+📁 TABLES PAR SESSION:
+
+  Session 481d3e2c...: 2 table(s)
+    - "Table_Consolidation" (a5cfecc4...) créée le 29/08/2026 14:23:10
+    - "Table_Resultat" (b7fdda21...) créée le 29/08/2026 14:23:15
+
+🎯 SESSION ACTUELLE: 481d3e2c...
+   → 2 table(s) pour cette session
+
+✅ Diagnostic terminé
+```
+
+**Si problème** :
+- `⚠️ AUCUNE TABLE EN BASE` → Sauvegarde échoue
+- `⚠️ PROBLÈME: Aucune table pour la session actuelle` → SessionId mismatch
+- `⚠️ Session actuelle non définie` → Pas encore de message envoyé
+
+---
+
+## 🎯 CHECKLIST DIAGNOSTIC RESTAURATION (Phase 2)
+
+Après avoir généré une table et appuyé F5 :
+
+- [ ] **Restauration déclenchée** : `🔄 Restoring tables chronologically`
+- [ ] **Session définie** : `✅ Session manually set to: xxx`
+- [ ] **Timeline récupérée** : `📊 [DEBUG] Timeline récupérée: X items` (X > 0)
+- [ ] **Filtrage session OK** : `📊 [DEBUG] Après filtrage session: X items` (X > 0)
+- [ ] **Tables identifiées** : `📊 [DEBUG] Tables à restaurer: X` (X > 0)
+- [ ] **Restauration exécutée** : `✅ Restored X table(s) chronologically`
+- [ ] **Tables visibles** : Interface affiche les tables
+
+**Si bloqué à une étape** : Voir section "🚨 Échecs possibles" ci-dessus.
+
+---
+
+**Mise à jour** : 29 Août 2026 16:05 (Ajout logs debug Phase 2)
