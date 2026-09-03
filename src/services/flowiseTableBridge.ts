@@ -59,6 +59,12 @@ export class FlowiseTableBridge {
   private readonly RETRY_DELAY_MS = 2000;
   private retryAttempts: Map<string, number> = new Map();
   private lazyLoadingEnabled: boolean = true; // Task 13.1: Enable lazy loading by default
+  
+  // 🆕 AUTO-SAVE: Propriétés pour sauvegarde automatique modifications
+  private mutationObserver: MutationObserver | null = null;
+  private dirtyTables: Set<string> = new Set(); // IDs tables modifiées
+  private autoSaveInterval: NodeJS.Timeout | null = null;
+  private readonly AUTO_SAVE_INTERVAL_MS = 10000; // 10 secondes
 
   constructor() {
     this.initializeEventListeners();
@@ -70,6 +76,9 @@ export class FlowiseTableBridge {
     this.initializeRestoration().catch(error => {
       console.error('❌ Error during initialization restoration:', error);
     });
+    
+    // 🆕 AUTO-SAVE: Démarrer surveillance modifications
+    this.startAutoSaveSystem();
   }
 
   /**
@@ -2578,3 +2587,169 @@ export class FlowiseTableBridge {
 export const flowiseTableBridge = new FlowiseTableBridge();
 
 console.log('✅ FlowiseTableBridge singleton created and initialized');
+
+  // ========================================================================
+  // 🆕 AUTO-SAVE SYSTEM: Sauvegarde automatique modifications utilisateur
+  // ========================================================================
+
+  /**
+   * Démarrer le système d'auto-sauvegarde
+   * Surveillance modifications + sauvegarde périodique
+   */
+  private startAutoSaveSystem(): void {
+    console.log('🔄 [AUTO-SAVE] Démarrage système auto-sauvegarde...');
+    
+    // 1. Créer MutationObserver pour détecter modifications tables
+    this.mutationObserver = new MutationObserver((mutations) => {
+      this.handleTableMutations(mutations);
+    });
+
+    // 2. Observer le conteneur principal (body pour capturer toutes tables)
+    this.mutationObserver.observe(document.body, {
+      childList: true,      // Ajout/suppression éléments (colonnes, lignes)
+      subtree: true,        // Observer tous descendants
+      characterData: true,  // Modifications texte cellules
+      attributes: true,     // Changements attributs
+      attributeFilter: ['data-keyword', 'data-table-id', 'contenteditable']
+    });
+
+    // 3. Interval sauvegarde périodique (10 secondes)
+    this.autoSaveInterval = setInterval(() => {
+      this.performAutoSave();
+    }, this.AUTO_SAVE_INTERVAL_MS);
+
+    console.log(`✅ [AUTO-SAVE] Système démarré (interval: ${this.AUTO_SAVE_INTERVAL_MS}ms)`);
+  }
+
+  /**
+   * Gérer les mutations détectées par MutationObserver
+   */
+  private handleTableMutations(mutations: MutationRecord[]): void {
+    for (const mutation of mutations) {
+      // Trouver la table parent du nœud modifié
+      let node: Node | null = mutation.target;
+      
+      while (node && node !== document.body) {
+        if (node instanceof HTMLTableElement) {
+          const tableId = node.getAttribute('data-table-id');
+          const keyword = node.getAttribute('data-keyword');
+          
+          if (tableId || keyword) {
+            // Marquer table comme "dirty" (modifiée)
+            const identifier = tableId || keyword || '';
+            this.dirtyTables.add(identifier);
+            console.log(`🔄 [AUTO-SAVE] Table modifiée détectée: "${identifier}"`);
+          }
+          break;
+        }
+        node = node.parentNode;
+      }
+    }
+  }
+
+  /**
+   * Effectuer sauvegarde automatique des tables modifiées
+   */
+  private async performAutoSave(): Promise<void> {
+    if (this.dirtyTables.size === 0) {
+      // Aucune modification en attente
+      return;
+    }
+
+    console.log(`💾 [AUTO-SAVE] Sauvegarde de ${this.dirtyTables.size} table(s) modifiée(s)...`);
+
+    const savedTables: string[] = [];
+    const failedTables: string[] = [];
+
+    // Parcourir toutes les tables "dirty"
+    for (const identifier of this.dirtyTables) {
+      try {
+        // Trouver la table dans le DOM
+        const table = document.querySelector<HTMLTableElement>(
+          `table[data-table-id="${identifier}"], table[data-keyword="${identifier}"]`
+        );
+
+        if (!table) {
+          console.warn(`⚠️ [AUTO-SAVE] Table "${identifier}" introuvable dans DOM, skip`);
+          this.dirtyTables.delete(identifier);
+          continue;
+        }
+
+        // Extraire les données de la table
+        const keyword = table.getAttribute('data-keyword') || identifier;
+        const tableId = table.getAttribute('data-table-id') || this.generateTableId();
+        const html = table.outerHTML;
+        const fingerprint = this.generateFingerprint(html);
+
+        // Sauvegarder dans IndexedDB
+        await flowiseTableService.saveGeneratedTable({
+          id: tableId,
+          sessionId: this.currentSessionId || 'unknown',
+          keyword,
+          html,
+          fingerprint,
+          source: 'user_edit', // Nouvelle source pour modifications utilisateur
+          timestamp: Date.now(),
+          messageId: undefined
+        });
+
+        savedTables.push(keyword);
+        this.dirtyTables.delete(identifier);
+        console.log(`✅ [AUTO-SAVE] Table "${keyword}" sauvegardée`);
+
+      } catch (error) {
+        console.error(`❌ [AUTO-SAVE] Erreur sauvegarde table "${identifier}":`, error);
+        failedTables.push(identifier);
+      }
+    }
+
+    // Résumé sauvegarde
+    if (savedTables.length > 0) {
+      console.log(`✅ [AUTO-SAVE] ${savedTables.length} table(s) sauvegardée(s): ${savedTables.join(', ')}`);
+    }
+    if (failedTables.length > 0) {
+      console.warn(`⚠️ [AUTO-SAVE] ${failedTables.length} échec(s): ${failedTables.join(', ')}`);
+    }
+  }
+
+  /**
+   * Générer un fingerprint unique pour détecter changements
+   */
+  private generateFingerprint(html: string): string {
+    // Hash simple basé sur contenu HTML (sans timestamp)
+    let hash = 0;
+    for (let i = 0; i < html.length; i++) {
+      const char = html.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash; // Convert to 32bit integer
+    }
+    return `fp_${Math.abs(hash).toString(36)}`;
+  }
+
+  /**
+   * Générer un ID unique pour nouvelle table
+   */
+  private generateTableId(): string {
+    return `table_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  }
+
+  /**
+   * Arrêter le système d'auto-sauvegarde (cleanup)
+   */
+  public stopAutoSaveSystem(): void {
+    console.log('🛑 [AUTO-SAVE] Arrêt système auto-sauvegarde...');
+    
+    if (this.mutationObserver) {
+      this.mutationObserver.disconnect();
+      this.mutationObserver = null;
+    }
+
+    if (this.autoSaveInterval) {
+      clearInterval(this.autoSaveInterval);
+      this.autoSaveInterval = null;
+    }
+
+    this.dirtyTables.clear();
+    console.log('✅ [AUTO-SAVE] Système arrêté');
+  }
+}
