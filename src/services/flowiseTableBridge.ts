@@ -1502,18 +1502,6 @@ export class FlowiseTableBridge {
       // Find an existing table with the same keyword (ne devrait pas exister vu check ci-dessus)
       const existingTable = this.findTableByKeyword(tableData.keyword);
       
-      if (!existingTable) {
-        console.log(`ℹ️ No existing table found for keyword "${tableData.keyword}", skipping restoration`);
-        return;
-      }
-
-      // ✅ CORRECTION DOUBLONS: Mettre à jour la table existante au lieu de créer nouveau wrapper
-      // Vérifier si la table a déjà été restaurée (éviter doublons)
-      if (existingTable.getAttribute('data-restored') === 'true') {
-        console.log(`ℹ️ Table "${tableData.keyword}" déjà restaurée, skip duplication`);
-        return;
-      }
-
       // Créer un conteneur temporaire pour parser le HTML
       const tempDiv = document.createElement('div');
       tempDiv.innerHTML = tableData.html;
@@ -1521,6 +1509,56 @@ export class FlowiseTableBridge {
 
       if (!restoredTable) {
         console.error(`❌ HTML invalide pour table "${tableData.keyword}"`);
+        return;
+      }
+
+      if (!existingTable) {
+        // 🆕 APRÈS F5: Aucune table dans DOM → CRÉER la table
+        console.log(`🆕 Creating new table for keyword "${tableData.keyword}" (no existing table in DOM)`);
+        
+        // Trouver le conteneur principal des messages Clara
+        const messagesContainer = document.querySelector('.messages-container') 
+                                || document.querySelector('.markdown-content')
+                                || document.querySelector('#chat-messages')
+                                || document.body;
+        
+        if (!messagesContainer) {
+          console.error(`❌ Impossible de trouver conteneur pour restauration`);
+          return;
+        }
+
+        // Créer un wrapper pour la table restaurée
+        const wrapper = document.createElement('div');
+        wrapper.className = 'restored-table-wrapper';
+        wrapper.setAttribute('data-keyword', tableData.keyword);
+        wrapper.setAttribute('data-table-id', tableData.id);
+        wrapper.setAttribute('data-session-id', tableData.sessionId);
+        wrapper.setAttribute('data-restored', 'true');
+        wrapper.setAttribute('data-restored-timestamp', Date.now().toString());
+        
+        // Copier les attributs importants sur la table
+        restoredTable.setAttribute('data-keyword', tableData.keyword);
+        restoredTable.setAttribute('data-table-id', tableData.id);
+        restoredTable.setAttribute('data-restored', 'true');
+        
+        // Injecter dans le wrapper puis dans le DOM
+        wrapper.appendChild(restoredTable);
+        messagesContainer.appendChild(wrapper);
+        
+        console.log(`✅ Created and injected new table "${tableData.keyword}" (${tableData.id})`);
+        
+        // 🔔 LOG via système centralisé
+        if (window.PersistanceLogger) {
+          window.PersistanceLogger.logTableRestored(tableData.keyword, tableData.id);
+        }
+        
+        return;
+      }
+
+      // ✅ CORRECTION DOUBLONS: Mettre à jour la table existante au lieu de créer nouveau wrapper
+      // Vérifier si la table a déjà été restaurée (éviter doublons)
+      if (existingTable.getAttribute('data-restored') === 'true') {
+        console.log(`ℹ️ Table "${tableData.keyword}" déjà restaurée, skip duplication`);
         return;
       }
 
