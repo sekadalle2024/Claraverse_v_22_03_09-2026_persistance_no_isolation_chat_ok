@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Diagnostic Persistance - ClaraVerse</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    .header {
+      background: white;
+      border-radius: 12px;
+      padding: 30px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    .header h1 {
+      color: #667eea;
+      margin-bottom: 10px;
+    }
+    
+    .header p {
+      color: #666;
+    }
+    
+    .controls {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    .btn-group {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    
+    button {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      flex: 1;
+      min-width: 150px;
+    }
+    
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+    
+    .btn-primary {
+      background: #667eea;
+      color: white;
+    }
+    
+    .btn-success {
+      background: #48bb78;
+      color: white;
+    }
+    
+    .btn-warning {
+      background: #ed8936;
+      color: white;
+    }
+    
+    .btn-danger {
+      background: #f56565;
+      color: white;
+    }
+    
+    .results {
+      background: white;
+      border-radius: 12px;
+      padding: 30px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    .section {
+      margin-bottom: 30px;
+      padding-bottom: 20px;
+      border-bottom: 2px solid #e2e8f0;
+    }
+    
+    .section:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+    }
+    
+    .section h2 {
+      color: #2d3748;
+      margin-bottom: 15px;
+      font-size: 20px;
+    }
+    
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 15px;
+      margin-bottom: 15px;
+    }
+    
+    .info-item {
+      background: #f7fafc;
+      padding: 15px;
+      border-radius: 8px;
+      border-left: 4px solid #667eea;
+    }
+    
+    .info-label {
+      font-size: 12px;
+      color: #718096;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 5px;
+      font-weight: 600;
+    }
+    
+    .info-value {
+      font-size: 16px;
+      color: #2d3748;
+      font-weight: 500;
+      word-break: break-all;
+    }
+    
+    .status-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    
+    .status-success {
+      background: #c6f6d5;
+      color: #22543d;
+    }
+    
+    .status-error {
+      background: #fed7d7;
+      color: #742a2a;
+    }
+    
+    .status-warning {
+      background: #feebc8;
+      color: #7c2d12;
+    }
+    
+    .log-container {
+      background: #1a202c;
+      color: #e2e8f0;
+      padding: 20px;
+      border-radius: 8px;
+      font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+      font-size: 13px;
+      line-height: 1.6;
+      max-height: 400px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+    
+    .table-list {
+      background: #f7fafc;
+      padding: 15px;
+      border-radius: 8px;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    
+    .table-item {
+      background: white;
+      padding: 12px;
+      margin-bottom: 10px;
+      border-radius: 6px;
+      border-left: 3px solid #667eea;
+    }
+    
+    .table-item:last-child {
+      margin-bottom: 0;
+    }
+    
+    .empty-state {
+      text-align: center;
+      padding: 40px;
+      color: #a0aec0;
+    }
+    
+    .loader {
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid #667eea;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 20px auto;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🔍 Diagnostic Persistance ClaraVerse</h1>
+      <p>Outil de diagnostic pour identifier les problèmes de sauvegarde/restauration des tables</p>
+    </div>
+    
+    <div class="controls">
+      <div class="btn-group">
+        <button class="btn-primary" onclick="runFullDiagnostic()">🚀 Diagnostic Complet</button>
+        <button class="btn-success" onclick="testSessionDetection()">🔑 Tester Détection Session</button>
+        <button class="btn-warning" onclick="inspectLocalStorage()">💾 Inspecter localStorage</button>
+        <button class="btn-danger" onclick="clearAllData()">🗑️ Effacer Tout</button>
+      </div>
+    </div>
+    
+    <div class="results" id="results">
+      <div class="empty-state">
+        <h3>👆 Cliquez sur un bouton pour démarrer le diagnostic</h3>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ==========================================
+    // FONCTIONS DE DIAGNOSTIC
+    // ==========================================
+    
+    async function runFullDiagnostic() {
+      const results = document.getElementById('results');
+      results.innerHTML = '<div class="loader"></div>';
+      
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      let html = '';
+      
+      // 1. Détection SessionId
+      html += generateSessionSection();
+      
+      // 2. Inspection localStorage
+      html += generateStorageSection();
+      
+      // 3. Tables dans le DOM
+      html += generateTablesSection();
+      
+      // 4. Configuration conso.js
+      html += generateConsoConfigSection();
+      
+      // 5. Logs récents
+      html += generateLogsSection();
+      
+      results.innerHTML = html;
+    }
+    
+    function generateSessionSection() {
+      const session = detectSession();
+      const status = session.found ? 'success' : 'error';
+      const statusText = session.found ? 'Session Détectée ✓' : 'Session Non Détectée ✗';
+      
+      return `
+        <div class="section">
+          <h2>🔑 Détection du Session ID</h2>
+          <div class="info-grid">
+            <div class="info-item">
+              <div class="info-label">Statut</div>
+              <div class="info-value">
+                <span class="status-badge status-${status}">${statusText}</span>
+              </div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Session ID</div>
+              <div class="info-value">${session.id || 'Non trouvé'}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Source</div>
+              <div class="info-value">${session.source || 'N/A'}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Clé Storage Attendue</div>
+              <div class="info-value">${session.storageKey}</div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+    
+    function generateStorageSection() {
+      const storage = inspectStorage();
+      
+      let keysHtml = '';
+      if (storage.keys.length === 0) {
+        keysHtml = '<p style="color: #a0aec0;">Aucune clé de table trouvée dans localStorage</p>';
+      } else {
+        keysHtml = '<div class="table-list">';
+        storage.keys.forEach(key => {
+          const data = JSON.parse(localStorage.getItem(key) || '{}');
+          const tableCount = Object.keys(data).length;
+          keysHtml += `
+            <div class="table-item">
+              <strong>${key}</strong><br>
+              <small style="color: #718096;">${tableCount} table(s) | Taille: ${storage.sizes[key] || 0} Ko</small>
+            </div>
+          `;
+        });
+        keysHtml += '</div>';
+      }
+      
+      return `
+        <div class="section">
+          <h2>💾 Inspection localStorage</h2>
+          <div class="info-grid">
+            <div class="info-item">
+              <div class="info-label">Nombre de Clés</div>
+              <div class="info-value">${storage.keys.length}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Taille Totale</div>
+              <div class="info-value">${storage.totalSize} Ko</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Quota Utilisé</div>
+              <div class="info-value">${storage.quotaPercent}%</div>
+            </div>
+          </div>
+          <h3 style="margin: 20px 0 10px 0;">Clés Trouvées:</h3>
+          ${keysHtml}
+        </div>
+      `;
+    }
+    
+    function generateTablesSection() {
+      const tables = findAllTables();
+      
+      let tablesHtml = '';
+      if (tables.length === 0) {
+        tablesHtml = '<p style="color: #a0aec0;">Aucune table trouvée dans le DOM</p>';
+      } else {
+        tablesHtml = '<div class="table-list">';
+        tables.forEach((table, index) => {
+          const headers = getTableHeaders(table);
+          const rowCount = table.querySelectorAll('tr').length - 1;
+          tablesHtml += `
+            <div class="table-item">
+              <strong>Table ${index + 1}</strong><br>
+              <small style="color: #718096;">
+                ID: ${table.dataset.tableId || 'Non assigné'}<br>
+                En-têtes: ${headers.join(', ')}<br>
+                Lignes: ${rowCount}
+              </small>
+            </div>
+          `;
+        });
+        tablesHtml += '</div>';
+      }
+      
+      return `
+        <div class="section">
+          <h2>📊 Tables dans le DOM</h2>
+          <div class="info-grid">
+            <div class="info-item">
+              <div class="info-label">Nombre de Tables</div>
+              <div class="info-value">${tables.length}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Tables avec ID</div>
+              <div class="info-value">${tables.filter(t => t.dataset.tableId).length}</div>
+            </div>
+          </div>
+          <h3 style="margin: 20px 0 10px 0;">Liste des Tables:</h3>
+          ${tablesHtml}
+        </div>
+      `;
+    }
+    
+    function generateConsoConfigSection() {
+      const processor = window.claraverseProcessor;
+      const hasProcessor = !!processor;
+      
+      return `
+        <div class="section">
+          <h2>⚙️ Configuration conso.js</h2>
+          <div class="info-grid">
+            <div class="info-item">
+              <div class="info-label">Script Chargé</div>
+              <div class="info-value">
+                <span class="status-badge status-${hasProcessor ? 'success' : 'error'}">
+                  ${hasProcessor ? 'OUI ✓' : 'NON ✗'}
+                </span>
+              </div>
+            </div>
+            ${hasProcessor ? `
+            <div class="info-item">
+              <div class="info-label">SessionId dans Processor</div>
+              <div class="info-value">${processor.currentSessionId || 'null'}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Storage Key Actuelle</div>
+              <div class="info-value">${processor.getStorageKey ? processor.getStorageKey() : 'N/A'}</div>
+            </div>
+            ` : ''}
+          </div>
+        </div>
+      `;
+    }
+    
+    function generateLogsSection() {
+      return `
+        <div class="section">
+          <h2>📝 Logs Console (Derniers)</h2>
+          <div class="log-container">
+Ouvrez la console F12 et cherchez:
+- 🔑 SessionId initial: xxx
+- 💾 [conso.js] Storage key: xxx
+- 🆔 ID généré et assigné: xxx
+- ✅ Table sauvegardée
+
+Si aucun log n'apparaît, conso.js ne s'exécute pas correctement.
+          </div>
+        </div>
+      `;
+    }
+    
+    // ==========================================
+    // FONCTIONS UTILITAIRES
+    // ==========================================
+    
+    function detectSession() {
+      // Stratégie 1: attributs data
+      let sessionElement = document.querySelector('[data-session-id]');
+      if (sessionElement && sessionElement.dataset.sessionId) {
+        return {
+          found: true,
+          id: sessionElement.dataset.sessionId,
+          source: 'data-session-id',
+          storageKey: `claraverse_tables_data_${sessionElement.dataset.sessionId}`
+        };
+      }
+      
+      sessionElement = document.querySelector('[data-chat-session-id]');
+      if (sessionElement && sessionElement.dataset.chatSessionId) {
+        return {
+          found: true,
+          id: sessionElement.dataset.chatSessionId,
+          source: 'data-chat-session-id',
+          storageKey: `claraverse_tables_data_${sessionElement.dataset.chatSessionId}`
+        };
+      }
+      
+      // Stratégie 2: URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlSessionId = urlParams.get('sessionId') || urlParams.get('chatId');
+      if (urlSessionId) {
+        return {
+          found: true,
+          id: urlSessionId,
+          source: 'URL parameter',
+          storageKey: `claraverse_tables_data_${urlSessionId}`
+        };
+      }
+      
+      return {
+        found: false,
+        id: null,
+        source: null,
+        storageKey: 'claraverse_tables_data_unsaved'
+      };
+    }
+    
+    function inspectStorage() {
+      const keys = Object.keys(localStorage).filter(k => k.startsWith('claraverse_tables_data'));
+      const sizes = {};
+      let totalSize = 0;
+      
+      keys.forEach(key => {
+        const value = localStorage.getItem(key);
+        const size = new Blob([value]).size / 1024; // Ko
+        sizes[key] = size.toFixed(2);
+        totalSize += size;
+      });
+      
+      // Estimer le quota (généralement 5-10 MB)
+      const estimatedQuota = 5000; // Ko
+      const quotaPercent = ((totalSize / estimatedQuota) * 100).toFixed(2);
+      
+      return {
+        keys,
+        sizes,
+        totalSize: totalSize.toFixed(2),
+        quotaPercent
+      };
+    }
+    
+    function findAllTables() {
+      const selectors = [
+        'table.min-w-full',
+        'div.prose table',
+        'table'
+      ];
+      
+      let allTables = [];
+      selectors.forEach(selector => {
+        try {
+          const tables = document.querySelectorAll(selector);
+          allTables = [...allTables, ...Array.from(tables)];
+        } catch (e) {}
+      });
+      
+      return [...new Set(allTables)];
+    }
+    
+    function getTableHeaders(table) {
+      const headers = [];
+      const headerCells = table.querySelectorAll('thead th, tr:first-child th, tr:first-child td');
+      headerCells.forEach(cell => {
+        headers.push(cell.textContent.trim() || '[vide]');
+      });
+      return headers;
+    }
+    
+    function testSessionDetection() {
+      const results = document.getElementById('results');
+      const session = detectSession();
+      
+      results.innerHTML = `
+        <div class="section">
+          <h2>🔑 Test Détection Session</h2>
+          ${generateSessionSection()}
+          <div style="margin-top: 20px; padding: 20px; background: #edf2f7; border-radius: 8px;">
+            <h3 style="margin-bottom: 10px;">Recommandations:</h3>
+            ${session.found ? `
+              <p style="color: #22543d;">✓ SessionId détecté avec succès</p>
+              <p style="color: #718096; margin-top: 10px;">La clé de stockage sera: <strong>${session.storageKey}</strong></p>
+            ` : `
+              <p style="color: #742a2a;">✗ SessionId NON détecté</p>
+              <p style="color: #718096; margin-top: 10px;">
+                Vérifiez que l'application React a bien ajouté l'attribut [data-session-id] 
+                sur un élément du DOM (généralement le conteneur principal).
+              </p>
+            `}
+          </div>
+        </div>
+      `;
+    }
+    
+    function inspectLocalStorage() {
+      const results = document.getElementById('results');
+      results.innerHTML = generateStorageSection();
+    }
+    
+    function clearAllData() {
+      if (confirm('⚠️ Êtes-vous sûr de vouloir effacer TOUTES les données de tables ?\\n\\nCette action est irréversible !')) {
+        const keys = Object.keys(localStorage).filter(k => k.startsWith('claraverse_tables_data'));
+        keys.forEach(key => localStorage.removeItem(key));
+        alert(`✅ ${keys.length} clé(s) effacée(s)`);
+        runFullDiagnostic();
+      }
+    }
+  </script>
+</body>
+</html>

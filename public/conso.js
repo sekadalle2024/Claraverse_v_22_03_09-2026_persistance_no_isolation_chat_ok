@@ -32,7 +32,8 @@
       this.dropdownVisible = false;
       this.currentDropdown = null;
       this.isInitialized = false;
-      this.storageKey = "claraverse_tables_data";
+      this.storageKey = "claraverse_tables_data"; // ⚠️ SERA REMPLACÉ PAR getStorageKey()
+      this.currentSessionId = null; // ✅ S3: Tracking du sessionId courant
       this.autoSaveDelay = 500; // Délai avant sauvegarde automatique
       this.saveTimeout = null; // Pour le debounce
 
@@ -48,6 +49,7 @@
       this.waitForReact(() => {
         // Test de localStorage au démarrage
         this.testLocalStorage();
+        this.setupSessionListener(); // ✅ S3: Détection et écoute du sessionId
         this.setupGlobalEventListeners();
         this.startTableMonitoring();
         this.restoreAllTablesData(); // Restaurer les données sauvegardées
@@ -94,6 +96,68 @@
         }
         return false;
       }
+    }
+
+    // ==========================================
+    // ✅ S3: DÉTECTION DU SESSION ID
+    // ==========================================
+    // Inspiré de flowiseTableBridge.detectSessionId() (ligne ~450)
+    detectCurrentSessionId() {
+      // Stratégie 1: Chercher dans les attributs data
+      const sessionElement = document.querySelector('[data-session-id], [data-chat-session-id]');
+      if (sessionElement) {
+        const sessionId = sessionElement.dataset.sessionId || sessionElement.dataset.chatSessionId;
+        if (sessionId && sessionId !== 'undefined') {
+          return sessionId;
+        }
+      }
+
+      // Stratégie 2: Chercher dans l'URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlSessionId = urlParams.get('sessionId') || urlParams.get('chatId');
+      if (urlSessionId) {
+        return urlSessionId;
+      }
+
+      // Stratégie 3: Retourner null si non trouvé (mode unsaved)
+      debug.warn("⚠️ SessionId non détecté - mode 'unsaved'");
+      return null;
+    }
+
+    // ==========================================
+    // ✅ S1: CLÉ DE STOCKAGE SCOPÉE PAR SESSION
+    // ==========================================
+    getStorageKey() {
+      const sessionId = this.currentSessionId || this.detectCurrentSessionId();
+      
+      if (sessionId) {
+        const scopedKey = `claraverse_tables_data_${sessionId}`;
+        console.log('💾 [conso.js] Storage key:', scopedKey);
+        return scopedKey;
+      }
+      
+      // Fallback: clé unsaved si pas de session
+      console.log('💾 [conso.js] Storage key: claraverse_tables_data_unsaved (no session)');
+      return 'claraverse_tables_data_unsaved';
+    }
+
+    // ==========================================
+    // ÉCOUTE DE L'ÉVÉNEMENT SESSION CHANGED
+    // ==========================================
+    setupSessionListener() {
+      document.addEventListener('claraverse:session:changed', (event) => {
+        const newSessionId = event.detail?.sessionId;
+        if (newSessionId && newSessionId !== this.currentSessionId) {
+          debug.log(`🔄 Session changée: ${this.currentSessionId} → ${newSessionId}`);
+          this.currentSessionId = newSessionId;
+          // Recharger les données de la nouvelle session
+          this.restoreAllTablesData();
+        }
+      });
+      
+      // Détection initiale au démarrage
+      this.currentSessionId = this.detectCurrentSessionId();
+      debug.log(`🔑 SessionId initial: ${this.currentSessionId || 'non détecté'}`);
     }
 
     waitForReact(callback) {
@@ -843,6 +907,12 @@
       consoTable.dataset.keyword = "Table_Consolidation";
       // ✅ CRITIQUE: Ajouter data-table-id stable
       consoTable.dataset.tableId = `table_consolidation_${tableId}`;
+      
+      // ✅ PHASE 2: Tags pour persistance forcée
+      consoTable.dataset.consoGenerated = "true"; // Marque table auto-générée
+      consoTable.dataset.createdTimestamp = Date.now().toString(); // Horodatage création
+      consoTable.dataset.tablePosition = "1"; // Ordre: 1=Conso, 2=Résultat, 3=Modélisée
+      
       consoTable.style.cssText = `
           margin-bottom: 1.5rem;
           border-collapse: separate;
@@ -1606,6 +1676,11 @@
           debug.log("✏️ Ajout data-table-id:", stableId);
         }
         
+        // ✅ PHASE 2: Tags pour persistance forcée
+        potentialTable.dataset.consoGenerated = "true"; // Marque table auto-générée
+        potentialTable.dataset.createdTimestamp = Date.now().toString(); // Horodatage
+        potentialTable.dataset.tablePosition = "2"; // Ordre: 1=Conso, 2=Résultat, 3=Modélisée
+        
         const tableHeaders = this.getTableHeaders(potentialTable);
         const colResultat = tableHeaders.findIndex(h => h.text.includes("resultat") || h.text.includes("résultat"));
         
@@ -1999,7 +2074,11 @@
       const headerText = headers
         .map((h) => h.text.trim().toLowerCase().replace(/\s+/g, "_"))
         .join("__");
-      const hash = this.hashCode(headerText);
+      
+      // ✅ S2: Inclure sessionId dans le hash pour éviter collisions inter-chats
+      const sessionId = this.currentSessionId || this.detectCurrentSessionId();
+      const hashInput = sessionId ? `${sessionId}::${headerText}` : headerText;
+      const hash = this.hashCode(hashInput);
 
       // Compter les tables avec ce hash pour différencier les tables similaires
       const existingTables = document.querySelectorAll(
@@ -2008,12 +2087,12 @@
       const suffix =
         existingTables.length > 0 ? `_${existingTables.length}` : "";
 
-      // ID stable basé sur les en-têtes normalisés
+      // ID stable basé sur les en-têtes normalisés + sessionId
       const uniqueId = `table_${hash}${suffix}`;
 
       table.dataset.tableId = uniqueId;
       table.setAttribute("data-table-id", uniqueId);
-      debug.log(`🆔 ID généré et assigné: ${uniqueId}`);
+      debug.log(`🆔 ID généré et assigné: ${uniqueId} (session: ${sessionId ? sessionId.substring(0, 8) : 'none'})`);
       return uniqueId;
     }
 
@@ -2059,7 +2138,8 @@
      */
     loadAllData() {
       try {
-        const data = localStorage.getItem(this.storageKey);
+        const storageKey = this.getStorageKey(); // ✅ S1: Utiliser clé scopée
+        const data = localStorage.getItem(storageKey);
         return data ? JSON.parse(data) : {};
       } catch (error) {
         debug.error("Erreur lors du chargement des données:", error);
@@ -2072,7 +2152,8 @@
      */
     saveAllData(data) {
       try {
-        localStorage.setItem(this.storageKey, JSON.stringify(data));
+        const storageKey = this.getStorageKey(); // ✅ S1: Utiliser clé scopée
+        localStorage.setItem(storageKey, JSON.stringify(data));
         debug.log("💾 Données sauvegardées dans localStorage");
       } catch (error) {
         debug.error("❌ Erreur lors de la sauvegarde:", error);
