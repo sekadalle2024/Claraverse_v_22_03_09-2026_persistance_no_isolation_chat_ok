@@ -1,4 +1,4 @@
-/**
+﻿/**
  * FlowiseTableBridge
  * 
  * Bridge service that connects Flowise.js events with the FlowiseTableService.
@@ -43,7 +43,7 @@ interface FlowiseTableIntegratedDetail {
   error?: string;
   timestamp: number;
   messageId?: string; // Optional messageId for linking to specific messages
-  forceUpdate?: boolean; // ✅ PHASE 2: Flag pour forcer mise à jour (bypass fingerprint)
+  forceUpdate?: boolean; // âœ… PHASE 2: Flag pour forcer mise Ã  jour (bypass fingerprint)
 }
 
 /**
@@ -60,9 +60,9 @@ export class FlowiseTableBridge {
   private retryAttempts: Map<string, number> = new Map();
   private lazyLoadingEnabled: boolean = true; // Task 13.1: Enable lazy loading by default
   
-  // 🆕 AUTO-SAVE: Propriétés pour sauvegarde automatique modifications
+  // ðŸ†• AUTO-SAVE: PropriÃ©tÃ©s pour sauvegarde automatique modifications
   private mutationObserver: MutationObserver | null = null;
-  private dirtyTables: Set<string> = new Set(); // IDs tables modifiées
+  private dirtyTables: Set<string> = new Set(); // IDs tables modifiÃ©es
   private autoSaveInterval: NodeJS.Timeout | null = null;
   private readonly AUTO_SAVE_INTERVAL_MS = 10000; // 10 secondes
 
@@ -74,10 +74,10 @@ export class FlowiseTableBridge {
     // Requirements: 1.2, 4.1, 4.2
     // Don't await - let it run in background
     this.initializeRestoration().catch(error => {
-      console.error('❌ Error during initialization restoration:', error);
+      console.error('âŒ Error during initialization restoration:', error);
     });
     
-    // 🆕 AUTO-SAVE: Démarrer surveillance modifications
+    // ðŸ†• AUTO-SAVE: DÃ©marrer surveillance modifications
     this.startAutoSaveSystem();
   }
 
@@ -86,8 +86,8 @@ export class FlowiseTableBridge {
    * Requirements: 1.2, 4.1, 4.2, 4.3, 4.4
    */
   private async initializeRestoration(): Promise<void> {
-    // 🚫 DÉSACTIVATION: Restauration désactivée pour prévenir contamination
-    console.log('🚫 [DISABLED] initializeRestoration disabled to prevent contamination');
+    // ðŸš« DÃ‰SACTIVATION: Restauration dÃ©sactivÃ©e pour prÃ©venir contamination
+    console.log('ðŸš« [DISABLED] initializeRestoration disabled to prevent contamination');
     return;
   }
 
@@ -113,14 +113,14 @@ export class FlowiseTableBridge {
         const sessionId = method();
         if (sessionId) {
           this.currentSessionId = sessionId;
-          console.log(`✅ Session detected from ${name}: ${sessionId}`);
+          console.log(`âœ… Session detected from ${name}: ${sessionId}`);
           
           // Log successful detection method
           this.logSessionDetection(name, sessionId, true);
           return;
         }
       } catch (error) {
-        console.warn(`⚠️ Session detection failed for ${name}:`, error);
+        console.warn(`âš ï¸ Session detection failed for ${name}:`, error);
         
         // Log failed detection attempt
         this.logSessionDetection(name, null, false, error);
@@ -130,12 +130,12 @@ export class FlowiseTableBridge {
     // All detection methods failed - fall back to temporary session
     try {
       this.currentSessionId = this.createTemporarySession();
-      console.warn(`⚠️ All session detection methods failed, created temporary session: ${this.currentSessionId}`);
+      console.warn(`âš ï¸ All session detection methods failed, created temporary session: ${this.currentSessionId}`);
       
       // Log fallback to temporary session
       this.logSessionDetection('Temporary Fallback', this.currentSessionId, true);
     } catch (error) {
-      console.error('❌ Critical error: Failed to create temporary session:', error);
+      console.error('âŒ Critical error: Failed to create temporary session:', error);
       
       // Last resort - set to null and log critical error
       this.currentSessionId = null;
@@ -201,7 +201,7 @@ export class FlowiseTableBridge {
   public clearSessionDetectionLogs(): void {
     try {
       sessionStorage.removeItem('flowise_session_detection_logs');
-      console.log('✅ Session detection logs cleared');
+      console.log('âœ… Session detection logs cleared');
     } catch (error) {
       console.error('Error clearing session detection logs:', error);
     }
@@ -225,7 +225,7 @@ export class FlowiseTableBridge {
 
       // Validate structure
       if (typeof window.claraverseState !== 'object') {
-        console.warn('⚠️ window.claraverseState is not an object');
+        console.warn('âš ï¸ window.claraverseState is not an object');
         return null;
       }
 
@@ -239,7 +239,7 @@ export class FlowiseTableBridge {
 
       // Validate session ID
       if (!sessionId || typeof sessionId !== 'string' || sessionId.trim() === '') {
-        console.warn('⚠️ Invalid session ID in React state:', sessionId);
+        console.warn('âš ï¸ Invalid session ID in React state:', sessionId);
         return null;
       }
 
@@ -266,7 +266,7 @@ export class FlowiseTableBridge {
       try {
         urlParams = new URLSearchParams(window.location.search);
       } catch (parseError) {
-        console.warn('⚠️ Failed to parse URL parameters:', parseError);
+        console.warn('âš ï¸ Failed to parse URL parameters:', parseError);
         return null;
       }
       
@@ -284,7 +284,7 @@ export class FlowiseTableBridge {
           if (trimmedId.length > 0 && trimmedId.length < 256) {
             return trimmedId;
           } else {
-            console.warn(`⚠️ Invalid session ID length from URL parameter ${paramName}:`, trimmedId.length);
+            console.warn(`âš ï¸ Invalid session ID length from URL parameter ${paramName}:`, trimmedId.length);
           }
         }
       }
@@ -338,7 +338,7 @@ export class FlowiseTableBridge {
               if (trimmedId.length > 0 && trimmedId.length < 256) {
                 return trimmedId;
               } else {
-                console.warn(`⚠️ Invalid session ID length from DOM attribute ${attrName}:`, trimmedId.length);
+                console.warn(`âš ï¸ Invalid session ID length from DOM attribute ${attrName}:`, trimmedId.length);
               }
             }
           }
@@ -374,7 +374,7 @@ export class FlowiseTableBridge {
       try {
         random = Math.random().toString(36).substring(2, 9);
       } catch (randomError) {
-        console.warn('⚠️ Math.random() failed, using fallback:', randomError);
+        console.warn('âš ï¸ Math.random() failed, using fallback:', randomError);
         // Fallback to a simple counter
         random = String(Date.now() % 1000000);
       }
@@ -401,7 +401,7 @@ export class FlowiseTableBridge {
 
       return tempSessionId;
     } catch (error) {
-      console.error('❌ Critical error creating temporary session:', error);
+      console.error('âŒ Critical error creating temporary session:', error);
       // Last resort fallback
       return `temp-session-emergency-${Date.now()}`;
     }
@@ -436,30 +436,30 @@ export class FlowiseTableBridge {
       const tempSessions = this.getTemporarySessions();
       
       if (tempSessions.length === 0) {
-        console.log('✅ No temporary sessions to clean up');
+        console.log('âœ… No temporary sessions to clean up');
         return 0;
       }
 
-      console.log(`🧹 Cleaning up ${tempSessions.length} temporary session(s)...`);
+      console.log(`ðŸ§¹ Cleaning up ${tempSessions.length} temporary session(s)...`);
 
       let deletedCount = 0;
       for (const tempSession of tempSessions) {
         try {
           const deleted = await flowiseTableService.deleteSessionTables(tempSession.id);
           deletedCount += deleted;
-          console.log(`🗑️ Deleted ${deleted} table(s) from temporary session: ${tempSession.id}`);
+          console.log(`ðŸ—‘ï¸ Deleted ${deleted} table(s) from temporary session: ${tempSession.id}`);
         } catch (error) {
-          console.error(`❌ Error deleting tables for temporary session ${tempSession.id}:`, error);
+          console.error(`âŒ Error deleting tables for temporary session ${tempSession.id}:`, error);
         }
       }
 
       // Clear temporary session list
       sessionStorage.removeItem('flowise_temp_sessions');
 
-      console.log(`✅ Cleaned up ${deletedCount} table(s) from ${tempSessions.length} temporary session(s)`);
+      console.log(`âœ… Cleaned up ${deletedCount} table(s) from ${tempSessions.length} temporary session(s)`);
       return deletedCount;
     } catch (error) {
-      console.error('❌ Error cleaning up temporary sessions:', error);
+      console.error('âŒ Error cleaning up temporary sessions:', error);
       return 0;
     }
   }
@@ -470,7 +470,7 @@ export class FlowiseTableBridge {
   public setCurrentSession(sessionId: string): void {
     if (sessionId && sessionId.trim() !== '') {
       this.currentSessionId = sessionId.trim();
-      console.log(`✅ Session manually set to: ${this.currentSessionId}`);
+      console.log(`âœ… Session manually set to: ${this.currentSessionId}`);
     }
   }
 
@@ -500,7 +500,7 @@ export class FlowiseTableBridge {
       // Method 1: Check if the table or its container has a data-message-id attribute
       const messageIdFromTable = tableElement.getAttribute('data-message-id');
       if (messageIdFromTable) {
-        console.log(`✅ Message ID detected from table attribute: ${messageIdFromTable}`);
+        console.log(`âœ… Message ID detected from table attribute: ${messageIdFromTable}`);
         return messageIdFromTable;
       }
 
@@ -510,7 +510,7 @@ export class FlowiseTableBridge {
         const messageId = currentElement.getAttribute('data-message-id') ||
                          currentElement.getAttribute('data-clara-message-id');
         if (messageId) {
-          console.log(`✅ Message ID detected from parent container: ${messageId}`);
+          console.log(`âœ… Message ID detected from parent container: ${messageId}`);
           return messageId;
         }
         currentElement = currentElement.parentElement;
@@ -522,7 +522,7 @@ export class FlowiseTableBridge {
         const messageId = messageContainer.getAttribute('data-message-id') ||
                          messageContainer.getAttribute('data-clara-message-id');
         if (messageId) {
-          console.log(`✅ Message ID detected from message container: ${messageId}`);
+          console.log(`âœ… Message ID detected from message container: ${messageId}`);
           return messageId;
         }
       }
@@ -533,7 +533,7 @@ export class FlowiseTableBridge {
         const messageId = container.getAttribute('data-message-id') ||
                          container.getAttribute('data-clara-message-id');
         if (messageId) {
-          console.log(`✅ Message ID detected from table container: ${messageId}`);
+          console.log(`âœ… Message ID detected from table container: ${messageId}`);
           return messageId;
         }
       }
@@ -544,16 +544,16 @@ export class FlowiseTableBridge {
         const lastMessage = assistantMessages[assistantMessages.length - 1];
         const messageId = lastMessage.getAttribute('data-message-id');
         if (messageId) {
-          console.log(`✅ Message ID detected from last assistant message: ${messageId}`);
+          console.log(`âœ… Message ID detected from last assistant message: ${messageId}`);
           return messageId;
         }
       }
 
-      console.log('ℹ️ No message ID detected for table');
+      console.log('â„¹ï¸ No message ID detected for table');
       return undefined;
 
     } catch (error) {
-      console.error('❌ Error detecting message context:', error);
+      console.error('âŒ Error detecting message context:', error);
       return undefined;
     }
   }
@@ -576,7 +576,7 @@ export class FlowiseTableBridge {
     // Listen for session change events
     document.addEventListener('claraverse:session:changed', this.handleSessionChanged.bind(this));
 
-    console.log('✅ FlowiseTableBridge event listeners initialized');
+    console.log('âœ… FlowiseTableBridge event listeners initialized');
   }
 
   /**
@@ -587,7 +587,7 @@ export class FlowiseTableBridge {
     const detail = customEvent.detail;
 
     if (!detail || !detail.table) {
-      console.warn('⚠️ Invalid flowise:table:integrated event, missing table');
+      console.warn('âš ï¸ Invalid flowise:table:integrated event, missing table');
       return;
     }
 
@@ -604,22 +604,22 @@ export class FlowiseTableBridge {
       sessionId: string;
       keyword: string;
       source: string;
-      forceUpdate?: boolean; // ✅ PHASE 2: Nouveau paramètre
+      forceUpdate?: boolean; // âœ… PHASE 2: Nouveau paramÃ¨tre
     }>;
     const detail = customEvent.detail;
 
     if (!detail || !detail.table) {
-      console.warn('⚠️ Invalid flowise:table:save:request event, missing table');
+      console.warn('âš ï¸ Invalid flowise:table:save:request event, missing table');
       return;
     }
 
-    // 🚨 LOG DIAGNOSTIC: Confirmer bypass via conso.js (Hypothèse Gemini)
-    console.log(`🚨 [DIAGNOSTIC] Événement save:request reçu via conso.js pour: "${detail.keyword}"`);
-    console.log(`💾 [Bridge] Handling save request for: ${detail.keyword}`);
+    // ðŸš¨ LOG DIAGNOSTIC: Confirmer bypass via conso.js (HypothÃ¨se Gemini)
+    console.log(`ðŸš¨ [DIAGNOSTIC] Ã‰vÃ©nement save:request reÃ§u via conso.js pour: "${detail.keyword}"`);
+    console.log(`ðŸ’¾ [Bridge] Handling save request for: ${detail.keyword}`);
     
-    // ✅ PHASE 2: Logger forceUpdate
+    // âœ… PHASE 2: Logger forceUpdate
     if (detail.forceUpdate) {
-      console.log(`🔄 [Bridge] forceUpdate=true détecté pour "${detail.keyword}"`);
+      console.log(`ðŸ”„ [Bridge] forceUpdate=true dÃ©tectÃ© pour "${detail.keyword}"`);
     }
 
     // Convert to FlowiseTableIntegratedDetail format
@@ -629,7 +629,7 @@ export class FlowiseTableBridge {
       source: (detail.source as FlowiseTableSource) || 'n8n',
       messageId: undefined, // Will be detected automatically
       timestamp: Date.now(),
-      forceUpdate: detail.forceUpdate // ✅ PHASE 2: Passer le flag
+      forceUpdate: detail.forceUpdate // âœ… PHASE 2: Passer le flag
     };
 
     this.handleTableIntegrated(integratedDetail);
@@ -644,15 +644,15 @@ export class FlowiseTableBridge {
     const detail = customEvent.detail;
 
     if (!detail || !detail.sessionId) {
-      console.warn('⚠️ Invalid claraverse:session:changed event, missing sessionId');
+      console.warn('âš ï¸ Invalid claraverse:session:changed event, missing sessionId');
       return;
     }
 
-    console.log(`🔄 Session changed from ${this.currentSessionId} to: ${detail.sessionId}`);
+    console.log(`ðŸ”„ Session changed from ${this.currentSessionId} to: ${detail.sessionId}`);
     this.currentSessionId = detail.sessionId;
     
-    // 🚫 DÉSACTIVATION: Ne pas restaurer au changement de session
-    console.log('🚫 [DISABLED] Skipping restoration on session change');
+    // ðŸš« DÃ‰SACTIVATION: Ne pas restaurer au changement de session
+    console.log('ðŸš« [DISABLED] Skipping restoration on session change');
     return;
   }
 
@@ -666,7 +666,7 @@ export class FlowiseTableBridge {
       // Find all restored table wrappers
       const restoredTables = document.querySelectorAll('[data-restored="true"]');
       
-      console.log(`🧹 Clearing ${restoredTables.length} restored table(s) from DOM`);
+      console.log(`ðŸ§¹ Clearing ${restoredTables.length} restored table(s) from DOM`);
       
       restoredTables.forEach(table => {
         table.remove();
@@ -680,7 +680,7 @@ export class FlowiseTableBridge {
         }
       });
     } catch (error) {
-      console.error('❌ Error clearing restored tables from DOM:', error);
+      console.error('âŒ Error clearing restored tables from DOM:', error);
     }
   }
 
@@ -692,11 +692,11 @@ export class FlowiseTableBridge {
   private async handleTableIntegrated(detail: FlowiseTableIntegratedDetail): Promise<void> {
     // Check if we have an active session
     if (!this.currentSessionId) {
-      console.warn('⚠️ No active session, attempting to detect session...');
+      console.warn('âš ï¸ No active session, attempting to detect session...');
       this.detectCurrentSession();
       
       if (!this.currentSessionId) {
-        console.error('❌ Cannot save table: no session detected');
+        console.error('âŒ Cannot save table: no session detected');
         this.emitTableError('No active session detected', detail);
         return;
       }
@@ -714,17 +714,17 @@ export class FlowiseTableBridge {
       // Generate fingerprint to check for duplicates
       const fingerprint = flowiseTableService.generateTableFingerprint(tableElement);
 
-      // 🛡️ ANTI-DOUBLONS: Vérifier par keyword+session (pas seulement fingerprint)
-      // Évite duplication même si contenu légèrement modifié
+      // ðŸ›¡ï¸ ANTI-DOUBLONS: VÃ©rifier par keyword+session (pas seulement fingerprint)
+      // Ã‰vite duplication mÃªme si contenu lÃ©gÃ¨rement modifiÃ©
       const existingByKeyword = await flowiseTableService.findTableByKeywordAndSession(
         this.currentSessionId,
         keyword
       );
 
       if (existingByKeyword) {
-        // ✅ PHASE 2: Si forceUpdate, toujours mettre à jour sans vérifier fingerprint
+        // âœ… PHASE 2: Si forceUpdate, toujours mettre Ã  jour sans vÃ©rifier fingerprint
         if (detail.forceUpdate) {
-          console.log(`🔄 [Bridge] ForceUpdate actif, mise à jour forcée: "${keyword}"`);
+          console.log(`ðŸ”„ [Bridge] ForceUpdate actif, mise Ã  jour forcÃ©e: "${keyword}"`);
           const updated = await flowiseTableService.updateGeneratedTable(
             existingByKeyword.id,
             tableElement,
@@ -734,14 +734,14 @@ export class FlowiseTableBridge {
           );
           
           if (updated) {
-            console.log(`✅ [Bridge] Table forcée à jour: ${existingByKeyword.id}${messageId ? ` (linked to message: ${messageId})` : ''}`);
+            console.log(`âœ… [Bridge] Table forcÃ©e Ã  jour: ${existingByKeyword.id}${messageId ? ` (linked to message: ${messageId})` : ''}`);
             this.emitTableSaved(existingByKeyword.id, this.currentSessionId, keyword, fingerprint);
           }
           return;
         }
         
-        // Sinon, comportement normal: vérifier fingerprint
-        // Table avec même keyword existe déjà dans cette session
+        // Sinon, comportement normal: vÃ©rifier fingerprint
+        // Table avec mÃªme keyword existe dÃ©jÃ  dans cette session
         const shouldUpdate = await this.shouldUpdateExistingTable(
           existingByKeyword,
           tableElement,
@@ -749,8 +749,8 @@ export class FlowiseTableBridge {
         );
         
         if (shouldUpdate) {
-          console.log(`🔄 Updating existing table "${keyword}" (${existingByKeyword.id})`);
-          // Mettre à jour table existante (modifications conso.js ou manuelles)
+          console.log(`ðŸ”„ Updating existing table "${keyword}" (${existingByKeyword.id})`);
+          // Mettre Ã  jour table existante (modifications conso.js ou manuelles)
           const updated = await flowiseTableService.updateGeneratedTable(
             existingByKeyword.id,
             tableElement,
@@ -760,33 +760,33 @@ export class FlowiseTableBridge {
           );
           
           if (updated) {
-            console.log(`✅ Table updated successfully: ${existingByKeyword.id}${messageId ? ` (linked to message: ${messageId})` : ''}`);
+            console.log(`âœ… Table updated successfully: ${existingByKeyword.id}${messageId ? ` (linked to message: ${messageId})` : ''}`);
             // Emit success event avec ID existant
             this.emitTableSaved(existingByKeyword.id, this.currentSessionId, keyword, fingerprint);
           }
           return;
         } else {
-          console.log(`ℹ️ Table "${keyword}" unchanged, skipping duplicate`);
+          console.log(`â„¹ï¸ Table "${keyword}" unchanged, skipping duplicate`);
           return;
         }
       }
 
       // Check if table already exists by fingerprint (fallback)
-      // ✅ PHASE 2: Skip fingerprint check si forceUpdate
+      // âœ… PHASE 2: Skip fingerprint check si forceUpdate
       if (!detail.forceUpdate) {
         const exists = await flowiseTableService.tableExists(this.currentSessionId, fingerprint);
 
         if (exists) {
-          console.log(`ℹ️ Table already saved (fingerprint: ${fingerprint.substring(0, 8)}...), skipping duplicate`);
+          console.log(`â„¹ï¸ Table already saved (fingerprint: ${fingerprint.substring(0, 8)}...), skipping duplicate`);
           return;
         }
       } else {
-        console.log(`🔄 [Bridge] ForceUpdate actif, skip vérification fingerprint pour nouvelle table`);
+        console.log(`ðŸ”„ [Bridge] ForceUpdate actif, skip vÃ©rification fingerprint pour nouvelle table`);
       }
 
       // Save the table with messageId link
       // Requirements: 10.4
-      console.log(`💾 [DEBUG] Sauvegarde table: keyword="${keyword}", sessionId="${this.currentSessionId?.substring(0, 8)}...", messageId="${messageId}"`);
+      console.log(`ðŸ’¾ [DEBUG] Sauvegarde table: keyword="${keyword}", sessionId="${this.currentSessionId?.substring(0, 8)}...", messageId="${messageId}"`);
       
       const tableId = await flowiseTableService.saveGeneratedTable(
         this.currentSessionId,
@@ -797,7 +797,7 @@ export class FlowiseTableBridge {
       );
 
       if (tableId) {
-        console.log(`✅ Table saved successfully: ${tableId}${messageId ? ` (linked to message: ${messageId})` : ''}`);
+        console.log(`âœ… Table saved successfully: ${tableId}${messageId ? ` (linked to message: ${messageId})` : ''}`);
         
         // Emit success event
         this.emitTableSaved(tableId, this.currentSessionId, keyword, fingerprint);
@@ -810,7 +810,7 @@ export class FlowiseTableBridge {
       }
 
     } catch (error) {
-      console.error('❌ Error saving table:', error);
+      console.error('âŒ Error saving table:', error);
       
       // Log the error with context
       this.logSaveError(error, detail);
@@ -833,14 +833,14 @@ export class FlowiseTableBridge {
     newTableElement: HTMLTableElement,
     newFingerprint: string
   ): Promise<boolean> {
-    // Si fingerprint différent → Contenu modifié → Mettre à jour
+    // Si fingerprint diffÃ©rent â†’ Contenu modifiÃ© â†’ Mettre Ã  jour
     if (existingTable.fingerprint !== newFingerprint) {
-      console.log(`🔄 Content changed for "${existingTable.keyword}" (fingerprint diff)`);
+      console.log(`ðŸ”„ Content changed for "${existingTable.keyword}" (fingerprint diff)`);
       return true;
     }
 
-    // Si fingerprint identique → Contenu inchangé → Skip
-    console.log(`ℹ️ Content unchanged for "${existingTable.keyword}"`);
+    // Si fingerprint identique â†’ Contenu inchangÃ© â†’ Skip
+    console.log(`â„¹ï¸ Content unchanged for "${existingTable.keyword}"`);
     return false;
   }
 
@@ -863,14 +863,14 @@ export class FlowiseTableBridge {
       // Task 11.3: Retry after 2 seconds
       const delay = this.RETRY_DELAY_MS;
       
-      console.log(`🔄 Retrying table save (attempt ${currentAttempts + 1}/${this.MAX_RETRY_ATTEMPTS}) in ${delay}ms...`);
+      console.log(`ðŸ”„ Retrying table save (attempt ${currentAttempts + 1}/${this.MAX_RETRY_ATTEMPTS}) in ${delay}ms...`);
       
       setTimeout(() => {
         this.handleTableIntegrated(detail);
       }, delay);
     } else {
       // Task 11.3: Emit error event after max retries
-      console.error(`❌ Max retry attempts (${this.MAX_RETRY_ATTEMPTS}) reached for table, giving up`);
+      console.error(`âŒ Max retry attempts (${this.MAX_RETRY_ATTEMPTS}) reached for table, giving up`);
       
       // Store final failure
       this.storeRetryMetadata(fingerprint, currentAttempts, lastError, detail, true);
@@ -1031,7 +1031,7 @@ export class FlowiseTableBridge {
   public clearRetryLogs(): void {
     try {
       sessionStorage.removeItem('flowise_retry_logs');
-      console.log('✅ Retry logs cleared');
+      console.log('âœ… Retry logs cleared');
     } catch (error) {
       console.error('Error clearing retry logs:', error);
     }
@@ -1044,7 +1044,7 @@ export class FlowiseTableBridge {
   public clearSaveErrorLogs(): void {
     try {
       sessionStorage.removeItem('flowise_save_errors');
-      console.log('✅ Save error logs cleared');
+      console.log('âœ… Save error logs cleared');
     } catch (error) {
       console.error('Error clearing save error logs:', error);
     }
@@ -1100,22 +1100,22 @@ export class FlowiseTableBridge {
    * Requirements: 1.2, 4.1, 4.2, 4.5, 10.2, 10.5
    * Task 11: Enhanced with graceful error handling
    * 
-   * 🚨 DÉSACTIVÉ TEMPORAIREMENT - Cause contamination entre chats
+   * ðŸš¨ DÃ‰SACTIVÃ‰ TEMPORAIREMENT - Cause contamination entre chats
    */
   public async restoreTablesForSession(sessionId: string): Promise<void> {
-    // 🚫 VÉRIFIER FLAG GLOBAL (défini dans index.html)
+    // ðŸš« VÃ‰RIFIER FLAG GLOBAL (dÃ©fini dans index.html)
     if ((window as any).DISABLE_TABLE_RESTORATION === true) {
-      console.log(`🚫 [DISABLED] Global flag detected - Skipping restoreTablesForSession for "${sessionId}"`);
+      console.log(`ðŸš« [DISABLED] Global flag detected - Skipping restoreTablesForSession for "${sessionId}"`);
       return;
     }
     
-    // 🚨 DÉSACTIVATION COMPLÈTE RESTAURATION (backup si flag absent)
-    console.log(`🚫 [DISABLED] Skipping restoreTablesForSession for "${sessionId}" - restoration temporarily disabled to prevent contamination`);
+    // ðŸš¨ DÃ‰SACTIVATION COMPLÃˆTE RESTAURATION (backup si flag absent)
+    console.log(`ðŸš« [DISABLED] Skipping restoreTablesForSession for "${sessionId}" - restoration temporarily disabled to prevent contamination`);
     return;
     
-    /* CODE ORIGINAL DÉSACTIVÉ
+    /* CODE ORIGINAL DÃ‰SACTIVÃ‰
     try {
-      console.log(`🔄 Restoring tables for session: ${sessionId}`);
+      console.log(`ðŸ”„ Restoring tables for session: ${sessionId}`);
 
       let tables: FlowiseGeneratedTableRecord[];
       
@@ -1123,7 +1123,7 @@ export class FlowiseTableBridge {
       try {
         tables = await flowiseTableService.restoreSessionTables(sessionId);
       } catch (restoreError) {
-        console.error('❌ Error fetching tables from storage:', restoreError);
+        console.error('âŒ Error fetching tables from storage:', restoreError);
         
         // Log restoration error
         this.logRestorationError('FetchError', restoreError, sessionId);
@@ -1136,17 +1136,17 @@ export class FlowiseTableBridge {
       }
 
       if (tables.length === 0) {
-        console.log(`ℹ️ No tables to restore for session ${sessionId}`);
+        console.log(`â„¹ï¸ No tables to restore for session ${sessionId}`);
         return;
       }
 
-      console.log(`📋 Found ${tables.length} table(s) to restore`);
+      console.log(`ðŸ“‹ Found ${tables.length} table(s) to restore`);
 
       // Sort tables chronologically by timestamp (Subtask 5.2)
       try {
         tables = this.sortTablesChronologically(tables);
       } catch (sortError) {
-        console.warn('⚠️ Error sorting tables, using original order:', sortError);
+        console.warn('âš ï¸ Error sorting tables, using original order:', sortError);
         // Continue with unsorted tables
       }
 
@@ -1155,7 +1155,7 @@ export class FlowiseTableBridge {
       try {
         tablesByContainer = this.groupTablesByContainer(tables);
       } catch (groupError) {
-        console.warn('⚠️ Error grouping tables, restoring individually:', groupError);
+        console.warn('âš ï¸ Error grouping tables, restoring individually:', groupError);
         // Fallback: restore tables individually without grouping
         for (const tableData of tables) {
           await this.safeInjectTableIntoDOM(tableData, sessionId);
@@ -1181,7 +1181,7 @@ export class FlowiseTableBridge {
             }
           }
         } catch (containerError) {
-          console.error(`❌ Error restoring tables for container ${containerId}:`, containerError);
+          console.error(`âŒ Error restoring tables for container ${containerId}:`, containerError);
           failureCount += containerTables.length;
           
           // Log container restoration error
@@ -1190,7 +1190,7 @@ export class FlowiseTableBridge {
       }
 
       if (successCount > 0) {
-        console.log(`✅ Restored ${successCount} table(s) for session ${sessionId}${failureCount > 0 ? ` (${failureCount} failed)` : ''}`);
+        console.log(`âœ… Restored ${successCount} table(s) for session ${sessionId}${failureCount > 0 ? ` (${failureCount} failed)` : ''}`);
         
         // Clean up duplicate original tables after restoration
         // Use longer delay to ensure Flowise has time to generate original tables
@@ -1205,14 +1205,14 @@ export class FlowiseTableBridge {
       }
 
       if (failureCount > 0) {
-        console.warn(`⚠️ Failed to restore ${failureCount} table(s) for session ${sessionId}`);
+        console.warn(`âš ï¸ Failed to restore ${failureCount} table(s) for session ${sessionId}`);
         
         // Emit partial restoration warning
         this.emitRestorationWarning(sessionId, successCount, failureCount);
       }
 
     } catch (error) {
-      console.error('❌ Critical error restoring tables:', error);
+      console.error('âŒ Critical error restoring tables:', error);
       
       // Log critical restoration error
       this.logRestorationError('CriticalError', error, sessionId);
@@ -1222,7 +1222,7 @@ export class FlowiseTableBridge {
       
       // Don't throw - gracefully fail
     }
-    */ // FIN CODE ORIGINAL DÉSACTIVÉ
+    */ // FIN CODE ORIGINAL DÃ‰SACTIVÃ‰
   }
 
   /**
@@ -1241,7 +1241,7 @@ export class FlowiseTableBridge {
       this.injectTableIntoDOM(tableData);
       return true;
     } catch (error) {
-      console.error(`❌ Error injecting table ${tableData.id}:`, error);
+      console.error(`âŒ Error injecting table ${tableData.id}:`, error);
       
       // Log individual table injection error
       this.logRestorationError('InjectionError', error, sessionId, undefined, tableData.id);
@@ -1344,7 +1344,7 @@ export class FlowiseTableBridge {
   public clearRestorationErrorLogs(): void {
     try {
       sessionStorage.removeItem('flowise_restoration_errors');
-      console.log('✅ Restoration error logs cleared');
+      console.log('âœ… Restoration error logs cleared');
     } catch (error) {
       console.error('Error clearing restoration error logs:', error);
     }
@@ -1356,7 +1356,7 @@ export class FlowiseTableBridge {
    */
   private cleanupDuplicateOriginalTables(): void {
     try {
-      console.log('🧹 Cleaning up duplicate original tables...');
+      console.log('ðŸ§¹ Cleaning up duplicate original tables...');
       
       // Get all restored tables and their header signatures
       const restoredTables = document.querySelectorAll('[data-restored="true"] table');
@@ -1403,7 +1403,7 @@ export class FlowiseTableBridge {
             .join('|');
           
           if (headers && restoredHeaderSignatures.has(headers)) {
-            console.log(`🗑️ Removing duplicate original table with headers: ${headers.substring(0, 50)}...`);
+            console.log(`ðŸ—‘ï¸ Removing duplicate original table with headers: ${headers.substring(0, 50)}...`);
             
             // Remove the table's container or wrapper
             const container = table.closest('[data-container-id]');
@@ -1422,13 +1422,13 @@ export class FlowiseTableBridge {
       });
       
       if (removedCount > 0) {
-        console.log(`✅ Removed ${removedCount} duplicate original table(s)`);
+        console.log(`âœ… Removed ${removedCount} duplicate original table(s)`);
       } else {
-        console.log('ℹ️ No duplicate original tables found');
+        console.log('â„¹ï¸ No duplicate original tables found');
       }
       
     } catch (error) {
-      console.error('❌ Error cleaning up duplicate tables:', error);
+      console.error('âŒ Error cleaning up duplicate tables:', error);
     }
   }
 
@@ -1469,32 +1469,32 @@ export class FlowiseTableBridge {
    * IMPORTANT: Matches tables by KEYWORD instead of containerID
    * because containerIDs change on each page reload.
    * 
-   * 🚨 DÉSACTIVÉ TEMPORAIREMENT - Cause doublons et contamination
+   * ðŸš¨ DÃ‰SACTIVÃ‰ TEMPORAIREMENT - Cause doublons et contamination
    */
   private injectTableIntoDOM(tableData: FlowiseGeneratedTableRecord): void {
-    // ✅ RESTAURATION RÉACTIVÉE - 29 août 2026
+    // âœ… RESTAURATION RÃ‰ACTIVÃ‰E - 29 aoÃ»t 2026
     
     try {
-      // ✅ EXCEPTION: Ne pas restaurer Table_Consolidation et Table_Resultat
-      // Ces tables sont gérées par conso.js avec des event listeners dynamiques
+      // âœ… EXCEPTION: Ne pas restaurer Table_Consolidation et Table_Resultat
+      // Ces tables sont gÃ©rÃ©es par conso.js avec des event listeners dynamiques
       if (tableData.keyword === 'Table_Consolidation' || 
           tableData.keyword === 'Table_Resultat' ||
           tableData.keyword.includes('Consolidation') ||
           tableData.keyword.includes('Resultat') ||
-          tableData.keyword.includes('Résultat')) {
-        console.log(`⏭️ Skip restoration of "${tableData.keyword}" (managed by conso.js)`);
+          tableData.keyword.includes('RÃ©sultat')) {
+        console.log(`â­ï¸ Skip restoration of "${tableData.keyword}" (managed by conso.js)`);
         return;
       }
       
-      // 🔥 CORRECTION CRITIQUE DOUBLONS: Compter toutes les tables avec ce keyword
+      // ðŸ”¥ CORRECTION CRITIQUE DOUBLONS: Compter toutes les tables avec ce keyword
       const allTablesWithKeyword = document.querySelectorAll(`table[data-keyword="${tableData.keyword}"]`);
       
       if (allTablesWithKeyword.length > 0) {
-        // Il existe DÉJÀ une ou plusieurs tables avec ce keyword dans le DOM
-        // C'est soit une restauration déjà effectuée, soit Flowise vient de la générer
-        console.log(`⏭️ Skip restoration of "${tableData.keyword}" - ${allTablesWithKeyword.length} table(s) already in DOM`);
+        // Il existe DÃ‰JÃ€ une ou plusieurs tables avec ce keyword dans le DOM
+        // C'est soit une restauration dÃ©jÃ  effectuÃ©e, soit Flowise vient de la gÃ©nÃ©rer
+        console.log(`â­ï¸ Skip restoration of "${tableData.keyword}" - ${allTablesWithKeyword.length} table(s) already in DOM`);
         
-        // Marquer toutes ces tables comme "déjà traitées" pour éviter future restauration
+        // Marquer toutes ces tables comme "dÃ©jÃ  traitÃ©es" pour Ã©viter future restauration
         allTablesWithKeyword.forEach(table => {
           if (!table.getAttribute('data-restored')) {
             table.setAttribute('data-skip-restore', 'true');
@@ -1505,25 +1505,25 @@ export class FlowiseTableBridge {
       }
       
       // Si on arrive ici, aucune table avec ce keyword n'existe dans le DOM
-      // On peut restaurer en toute sécurité
-      console.log(`🔄 Restoring "${tableData.keyword}" - no existing table found in DOM`);
+      // On peut restaurer en toute sÃ©curitÃ©
+      console.log(`ðŸ”„ Restoring "${tableData.keyword}" - no existing table found in DOM`);
       
       // Find an existing table with the same keyword (ne devrait pas exister vu check ci-dessus)
       const existingTable = this.findTableByKeyword(tableData.keyword);
       
-      // Créer un conteneur temporaire pour parser le HTML
+      // CrÃ©er un conteneur temporaire pour parser le HTML
       const tempDiv = document.createElement('div');
       tempDiv.innerHTML = tableData.html;
       const restoredTable = tempDiv.querySelector('table');
 
       if (!restoredTable) {
-        console.error(`❌ HTML invalide pour table "${tableData.keyword}"`);
+        console.error(`âŒ HTML invalide pour table "${tableData.keyword}"`);
         return;
       }
 
       if (!existingTable) {
-        // 🆕 APRÈS F5: Aucune table dans DOM → CRÉER la table
-        console.log(`🆕 Creating new table for keyword "${tableData.keyword}" (no existing table in DOM)`);
+        // ðŸ†• APRÃˆS F5: Aucune table dans DOM â†’ CRÃ‰ER la table
+        console.log(`ðŸ†• Creating new table for keyword "${tableData.keyword}" (no existing table in DOM)`);
         
         // Trouver le conteneur principal des messages Clara
         const messagesContainer = document.querySelector('.messages-container') 
@@ -1531,14 +1531,14 @@ export class FlowiseTableBridge {
                                 || document.querySelector('#chat-messages')
                                 || document.body;
         
-        console.log(`📍 [Conteneur] Trouvé: ${messagesContainer.className || messagesContainer.tagName}`);
+        console.log(`ðŸ“ [Conteneur] TrouvÃ©: ${messagesContainer.className || messagesContainer.tagName}`);
         
         if (!messagesContainer) {
-          console.error(`❌ Impossible de trouver conteneur pour restauration`);
+          console.error(`âŒ Impossible de trouver conteneur pour restauration`);
           return;
         }
 
-        // Créer un wrapper pour la table restaurée
+        // CrÃ©er un wrapper pour la table restaurÃ©e
         const wrapper = document.createElement('div');
         wrapper.className = 'restored-table-wrapper';
         wrapper.setAttribute('data-keyword', tableData.keyword);
@@ -1556,9 +1556,9 @@ export class FlowiseTableBridge {
         wrapper.appendChild(restoredTable);
         messagesContainer.appendChild(wrapper);
         
-        console.log(`✅ Created and injected new table "${tableData.keyword}" (${tableData.id})`);
+        console.log(`âœ… Created and injected new table "${tableData.keyword}" (${tableData.id})`);
         
-        // 🔔 LOG via système centralisé
+        // ðŸ”” LOG via systÃ¨me centralisÃ©
         if (window.PersistanceLogger) {
           window.PersistanceLogger.logTableRestored(tableData.keyword, tableData.id);
         }
@@ -1566,10 +1566,10 @@ export class FlowiseTableBridge {
         return;
       }
 
-      // ✅ CORRECTION DOUBLONS: Mettre à jour la table existante au lieu de créer nouveau wrapper
-      // Vérifier si la table a déjà été restaurée (éviter doublons)
+      // âœ… CORRECTION DOUBLONS: Mettre Ã  jour la table existante au lieu de crÃ©er nouveau wrapper
+      // VÃ©rifier si la table a dÃ©jÃ  Ã©tÃ© restaurÃ©e (Ã©viter doublons)
       if (existingTable.getAttribute('data-restored') === 'true') {
-        console.log(`ℹ️ Table "${tableData.keyword}" déjà restaurée, skip duplication`);
+        console.log(`â„¹ï¸ Table "${tableData.keyword}" dÃ©jÃ  restaurÃ©e, skip duplication`);
         return;
       }
 
@@ -1581,19 +1581,19 @@ export class FlowiseTableBridge {
         existingTable.className = restoredTable.className;
       }
       
-      // Marquer comme restaurée pour éviter futures duplications
+      // Marquer comme restaurÃ©e pour Ã©viter futures duplications
       existingTable.setAttribute('data-restored', 'true');
       existingTable.setAttribute('data-restored-timestamp', Date.now().toString());
       
-      // 🔔 LOG via système centralisé
+      // ðŸ”” LOG via systÃ¨me centralisÃ©
       if (window.PersistanceLogger) {
         window.PersistanceLogger.logTableRestored(tableData.keyword, tableData.id);
       }
 
-      console.log(`✅ Restored table "${tableData.keyword}" (${tableData.id}) by updating existing table`);
+      console.log(`âœ… Restored table "${tableData.keyword}" (${tableData.id}) by updating existing table`);
 
     } catch (error) {
-      console.log(`❌ Error restoring table ${tableData.id}:`, error);
+      console.log(`âŒ Error restoring table ${tableData.id}:`, error);
     }
   }
 
@@ -1604,48 +1604,48 @@ export class FlowiseTableBridge {
   private findTableByKeyword(keyword: string): HTMLTableElement | null {
     const tables = document.querySelectorAll('table');
     
-    // PRIORITÉ 1: Search by data-keyword attribute directly on table
+    // PRIORITÃ‰ 1: Search by data-keyword attribute directly on table
     // This is critical for conso.js tables restored from IndexedDB
     for (const table of tables) {
       const tableKeyword = (table as HTMLTableElement).dataset.keyword;
       if (tableKeyword === keyword) {
-        console.log(`✅ [Bridge] Table trouvée via data-keyword: "${keyword}"`);
+        console.log(`âœ… [Bridge] Table trouvÃ©e via data-keyword: "${keyword}"`);
         return table as HTMLTableElement;
       }
     }
     
-    // PRIORITÉ 2: Search by keyword attribute on wrapper (legacy n8n tables)
+    // PRIORITÃ‰ 2: Search by keyword attribute on wrapper (legacy n8n tables)
     for (const table of tables) {
       const wrapper = table.closest('[data-n8n-keyword]');
       if (wrapper?.getAttribute('data-n8n-keyword') === keyword) {
-        console.log(`✅ [Bridge] Table trouvée via data-n8n-keyword: "${keyword}"`);
+        console.log(`âœ… [Bridge] Table trouvÃ©e via data-n8n-keyword: "${keyword}"`);
         return table as HTMLTableElement;
       }
     }
     
-    // PRIORITÉ 3: Search by matching first header cell content
+    // PRIORITÃ‰ 3: Search by matching first header cell content
     // The keyword is often the first column header
     for (const table of tables) {
       const firstHeader = table.querySelector('th');
       if (firstHeader?.textContent?.trim().toLowerCase() === keyword.toLowerCase()) {
-        console.log(`✅ [Bridge] Table trouvée via premier <th>: "${keyword}"`);
+        console.log(`âœ… [Bridge] Table trouvÃ©e via premier <th>: "${keyword}"`);
         return table as HTMLTableElement;
       }
     }
     
-    // PRIORITÉ 4: Search by any header containing the keyword
+    // PRIORITÃ‰ 4: Search by any header containing the keyword
     for (const table of tables) {
       const headers = Array.from(table.querySelectorAll('th'));
       const hasMatchingHeader = headers.some(th => 
         th.textContent?.trim().toLowerCase().includes(keyword.toLowerCase())
       );
       if (hasMatchingHeader) {
-        console.log(`✅ [Bridge] Table trouvée via header contenant: "${keyword}"`);
+        console.log(`âœ… [Bridge] Table trouvÃ©e via header contenant: "${keyword}"`);
         return table as HTMLTableElement;
       }
     }
     
-    console.warn(`⚠️ [Bridge] Aucune table trouvée pour keyword: "${keyword}"`);
+    console.warn(`âš ï¸ [Bridge] Aucune table trouvÃ©e pour keyword: "${keyword}"`);
     return null;
   }
 
@@ -1704,11 +1704,11 @@ export class FlowiseTableBridge {
     if (insertionPoint) {
       // Insert before the insertion point
       chatContainer.insertBefore(container, insertionPoint);
-      console.log(`✅ Created new container: ${containerId} (inserted before existing element)`);
+      console.log(`âœ… Created new container: ${containerId} (inserted before existing element)`);
     } else {
       // Append at the end
       chatContainer.appendChild(container);
-      console.log(`✅ Created new container: ${containerId} (appended to end)`);
+      console.log(`âœ… Created new container: ${containerId} (appended to end)`);
     }
 
     return container;
@@ -1738,7 +1738,7 @@ export class FlowiseTableBridge {
       try {
         const element = document.querySelector(selector) as HTMLElement;
         if (element) {
-          console.log(`📍 Found chat container using selector: ${selector}`);
+          console.log(`ðŸ“ Found chat container using selector: ${selector}`);
           return element;
         }
       } catch (error) {
@@ -1748,7 +1748,7 @@ export class FlowiseTableBridge {
     }
 
     // Fallback to body
-    console.warn('⚠️ No chat container found, using document.body as fallback');
+    console.warn('âš ï¸ No chat container found, using document.body as fallback');
     return document.body;
   }
 
@@ -1823,7 +1823,7 @@ export class FlowiseTableBridge {
       setTimeout(() => {
         if (placeholder.isConnected && !flowiseTableLazyLoader.isLoaded(tableData.id)) {
           flowiseTableLazyLoader.preload(tableData.id).catch(error => {
-            console.error(`❌ Error preloading restored table ${tableData.id}:`, error);
+            console.error(`âŒ Error preloading restored table ${tableData.id}:`, error);
           });
         }
       }, 100);
@@ -1879,7 +1879,7 @@ export class FlowiseTableBridge {
    */
   public async restoreCurrentSession(): Promise<void> {
     if (!this.currentSessionId) {
-      console.warn('⚠️ No current session to restore');
+      console.warn('âš ï¸ No current session to restore');
       return;
     }
 
@@ -1894,11 +1894,11 @@ export class FlowiseTableBridge {
    */
   public async switchSession(sessionId: string): Promise<void> {
     if (!sessionId || sessionId.trim() === '') {
-      console.warn('⚠️ Invalid session ID provided');
+      console.warn('âš ï¸ Invalid session ID provided');
       return;
     }
 
-    console.log(`🔄 Manually switching session from ${this.currentSessionId} to ${sessionId}`);
+    console.log(`ðŸ”„ Manually switching session from ${this.currentSessionId} to ${sessionId}`);
     
     // Update current session
     this.currentSessionId = sessionId;
@@ -1921,7 +1921,7 @@ export class FlowiseTableBridge {
     try {
       return await flowiseTableService.restoreSessionTables(sessionId);
     } catch (error) {
-      console.error(`❌ Error getting tables for session ${sessionId}:`, error);
+      console.error(`âŒ Error getting tables for session ${sessionId}:`, error);
       return [];
     }
   }
@@ -1944,7 +1944,7 @@ export class FlowiseTableBridge {
    */
   public enableLazyLoading(): void {
     this.lazyLoadingEnabled = true;
-    console.log('✅ Lazy loading enabled');
+    console.log('âœ… Lazy loading enabled');
   }
 
   /**
@@ -1954,7 +1954,7 @@ export class FlowiseTableBridge {
    */
   public disableLazyLoading(): void {
     this.lazyLoadingEnabled = false;
-    console.log('✅ Lazy loading disabled');
+    console.log('âœ… Lazy loading disabled');
   }
 
   /**
@@ -1973,9 +1973,9 @@ export class FlowiseTableBridge {
   public async preloadTable(tableId: string): Promise<void> {
     try {
       await flowiseTableLazyLoader.preload(tableId);
-      console.log(`✅ Preloaded table: ${tableId}`);
+      console.log(`âœ… Preloaded table: ${tableId}`);
     } catch (error) {
-      console.error(`❌ Error preloading table ${tableId}:`, error);
+      console.error(`âŒ Error preloading table ${tableId}:`, error);
     }
   }
 
@@ -1987,9 +1987,9 @@ export class FlowiseTableBridge {
   public async preloadTables(tableIds: string[]): Promise<void> {
     try {
       await flowiseTableLazyLoader.preloadMultiple(tableIds);
-      console.log(`✅ Preloaded ${tableIds.length} table(s)`);
+      console.log(`âœ… Preloaded ${tableIds.length} table(s)`);
     } catch (error) {
-      console.error('❌ Error preloading tables:', error);
+      console.error('âŒ Error preloading tables:', error);
     }
   }
 
@@ -2013,7 +2013,7 @@ export class FlowiseTableBridge {
    */
   public clearLazyLoadingCache(): void {
     flowiseTableLazyLoader.clearCache();
-    console.log('✅ Lazy loading cache cleared');
+    console.log('âœ… Lazy loading cache cleared');
   }
 
   // ==================
@@ -2030,7 +2030,7 @@ export class FlowiseTableBridge {
     try {
       return await flowiseTableService.findOrphanedTables();
     } catch (error) {
-      console.error('❌ Error finding orphaned tables:', error);
+      console.error('âŒ Error finding orphaned tables:', error);
       return [];
     }
   }
@@ -2044,10 +2044,10 @@ export class FlowiseTableBridge {
   public async cleanupOrphanedTables(): Promise<number> {
     try {
       const deletedCount = await flowiseTableService.cleanupOrphanedTables();
-      console.log(`✅ Cleaned up ${deletedCount} orphaned table(s)`);
+      console.log(`âœ… Cleaned up ${deletedCount} orphaned table(s)`);
       return deletedCount;
     } catch (error) {
-      console.error('❌ Error cleaning up orphaned tables:', error);
+      console.error('âŒ Error cleaning up orphaned tables:', error);
       return 0;
     }
   }
@@ -2067,7 +2067,7 @@ export class FlowiseTableBridge {
     try {
       return await flowiseTableService.getOrphanedTableStats();
     } catch (error) {
-      console.error('❌ Error getting orphaned table stats:', error);
+      console.error('âŒ Error getting orphaned table stats:', error);
       return {
         totalTables: 0,
         orphanedTables: 0,
@@ -2088,7 +2088,7 @@ export class FlowiseTableBridge {
     try {
       return await flowiseTableService.isTableOrphaned(tableId);
     } catch (error) {
-      console.error('❌ Error checking if table is orphaned:', error);
+      console.error('âŒ Error checking if table is orphaned:', error);
       return false;
     }
   }
@@ -2113,7 +2113,7 @@ export class FlowiseTableBridge {
     keyword: string
   ): Promise<boolean> {
     if (!this.currentSessionId) {
-      console.warn('⚠️ No active session, cannot check Trigger_Table status');
+      console.warn('âš ï¸ No active session, cannot check Trigger_Table status');
       return true; // Allow processing if no session (fallback behavior)
     }
 
@@ -2125,7 +2125,7 @@ export class FlowiseTableBridge {
       );
 
       if (alreadyProcessed) {
-        console.log(`ℹ️ Trigger_Table already processed, skipping`);
+        console.log(`â„¹ï¸ Trigger_Table already processed, skipping`);
         return false;
       }
 
@@ -2136,7 +2136,7 @@ export class FlowiseTableBridge {
       );
 
       if (hasGeneratedTables) {
-        console.log(`ℹ️ Generated_Tables already exist for keyword "${keyword}", skipping Trigger_Table processing`);
+        console.log(`â„¹ï¸ Generated_Tables already exist for keyword "${keyword}", skipping Trigger_Table processing`);
         
         // Mark this Trigger_Table as processed to avoid future checks
         await flowiseTableService.markTriggerTableAsProcessed(
@@ -2149,11 +2149,11 @@ export class FlowiseTableBridge {
       }
 
       // All checks passed - this Trigger_Table should be processed
-      console.log(`✅ Trigger_Table should be processed (keyword: "${keyword}")`);
+      console.log(`âœ… Trigger_Table should be processed (keyword: "${keyword}")`);
       return true;
 
     } catch (error) {
-      console.error('❌ Error checking Trigger_Table status:', error);
+      console.error('âŒ Error checking Trigger_Table status:', error);
       return true; // Allow processing on error (fail-safe behavior)
     }
   }
@@ -2173,7 +2173,7 @@ export class FlowiseTableBridge {
     keyword: string
   ): Promise<void> {
     if (!this.currentSessionId) {
-      console.warn('⚠️ No active session, cannot mark Trigger_Table as processed');
+      console.warn('âš ï¸ No active session, cannot mark Trigger_Table as processed');
       return;
     }
 
@@ -2184,9 +2184,9 @@ export class FlowiseTableBridge {
         triggerTable
       );
       
-      console.log(`✅ Trigger_Table marked as processed (keyword: "${keyword}")`);
+      console.log(`âœ… Trigger_Table marked as processed (keyword: "${keyword}")`);
     } catch (error) {
-      console.error('❌ Error marking Trigger_Table as processed:', error);
+      console.error('âŒ Error marking Trigger_Table as processed:', error);
     }
   }
 
@@ -2199,7 +2199,7 @@ export class FlowiseTableBridge {
    */
   public async hasGeneratedTablesForKeyword(keyword: string): Promise<boolean> {
     if (!this.currentSessionId) {
-      console.warn('⚠️ No active session, cannot check for Generated_Tables');
+      console.warn('âš ï¸ No active session, cannot check for Generated_Tables');
       return false;
     }
 
@@ -2209,7 +2209,7 @@ export class FlowiseTableBridge {
         keyword
       );
     } catch (error) {
-      console.error('❌ Error checking for Generated_Tables:', error);
+      console.error('âŒ Error checking for Generated_Tables:', error);
       return false;
     }
   }
@@ -2235,7 +2235,7 @@ export class FlowiseTableBridge {
       const table = await flowiseTableService.getTableById(tableId);
       
       if (!table) {
-        console.error(`❌ Table not found: ${tableId}`);
+        console.error(`âŒ Table not found: ${tableId}`);
         return false;
       }
 
@@ -2247,11 +2247,11 @@ export class FlowiseTableBridge {
 
       await flowiseTableService.updateTable(updatedTable);
       
-      console.log(`✅ Linked table ${tableId} to message ${messageId}`);
+      console.log(`âœ… Linked table ${tableId} to message ${messageId}`);
       return true;
 
     } catch (error) {
-      console.error('❌ Error linking table to message:', error);
+      console.error('âŒ Error linking table to message:', error);
       return false;
     }
   }
@@ -2267,7 +2267,7 @@ export class FlowiseTableBridge {
     try {
       return await flowiseTableService.getTablesByMessageId(messageId);
     } catch (error) {
-      console.error(`❌ Error getting tables for message ${messageId}:`, error);
+      console.error(`âŒ Error getting tables for message ${messageId}:`, error);
       return [];
     }
   }
@@ -2285,7 +2285,7 @@ export class FlowiseTableBridge {
       const table = await flowiseTableService.getTableById(tableId);
       
       if (!table) {
-        console.error(`❌ Table not found: ${tableId}`);
+        console.error(`âŒ Table not found: ${tableId}`);
         return false;
       }
 
@@ -2297,11 +2297,11 @@ export class FlowiseTableBridge {
 
       await flowiseTableService.updateTable(updatedTable);
       
-      console.log(`✅ Unlinked table ${tableId} from message`);
+      console.log(`âœ… Unlinked table ${tableId} from message`);
       return true;
 
     } catch (error) {
-      console.error('❌ Error unlinking table from message:', error);
+      console.error('âŒ Error unlinking table from message:', error);
       return false;
     }
   }
@@ -2322,7 +2322,7 @@ export class FlowiseTableBridge {
    */
   public async getSessionTimeline(messages: any[]): Promise<TimelineItem[]> {
     if (!this.currentSessionId) {
-      console.warn('⚠️ No active session, cannot get timeline');
+      console.warn('âš ï¸ No active session, cannot get timeline');
       return [];
     }
 
@@ -2332,7 +2332,7 @@ export class FlowiseTableBridge {
         messages
       );
     } catch (error) {
-      console.error('❌ Error getting session timeline:', error);
+      console.error('âŒ Error getting session timeline:', error);
       return [];
     }
   }
@@ -2350,7 +2350,7 @@ export class FlowiseTableBridge {
     messages: any[]
   ): Promise<TimelineItem[]> {
     if (!this.currentSessionId) {
-      console.warn('⚠️ No active session, cannot get message timeline');
+      console.warn('âš ï¸ No active session, cannot get message timeline');
       return [];
     }
 
@@ -2361,7 +2361,7 @@ export class FlowiseTableBridge {
         messages
       );
     } catch (error) {
-      console.error(`❌ Error getting timeline for message ${messageId}:`, error);
+      console.error(`âŒ Error getting timeline for message ${messageId}:`, error);
       return [];
     }
   }
@@ -2377,50 +2377,50 @@ export class FlowiseTableBridge {
    * @returns Number of tables restored
    */
   public async restoreTablesChronologically(messages: any[]): Promise<number> {
-    // 🛡️ NIVEAU 3 - Vérification flag global (comme restoreTablesForSession)
+    // ðŸ›¡ï¸ NIVEAU 3 - VÃ©rification flag global (comme restoreTablesForSession)
     if ((window as any).DISABLE_TABLE_RESTORATION === true) {
-      console.log(`🚫 [CHRONO] Global flag DISABLE_TABLE_RESTORATION detected, skipping chronological restoration`);
+      console.log(`ðŸš« [CHRONO] Global flag DISABLE_TABLE_RESTORATION detected, skipping chronological restoration`);
       return 0;
     }
     
     if (!this.currentSessionId) {
-      console.warn('⚠️ No active session, cannot restore tables chronologically');
+      console.warn('âš ï¸ No active session, cannot restore tables chronologically');
       return 0;
     }
 
     try {
       console.log(`\n${'='.repeat(80)}`);
-      console.log(`🔄 RESTAURATION CHRONOLOGIQUE - SESSION: ${this.currentSessionId}`);
+      console.log(`ðŸ”„ RESTAURATION CHRONOLOGIQUE - SESSION: ${this.currentSessionId}`);
       console.log(`${'='.repeat(80)}\n`);
 
       // Get the unified timeline
-      console.log(`📊 [1/7] Récupération timeline...`);
+      console.log(`ðŸ“Š [1/7] RÃ©cupÃ©ration timeline...`);
       const timeline = await flowiseTimelineService.getSessionTimeline(
         this.currentSessionId,
         messages
       );
 
-      console.log(`📊 [2/7] Timeline récupérée: ${timeline.length} items total`);
-      console.log(`   Détail items:`, timeline.map(t => ({ type: t.type, sessionId: t.sessionId?.substring(0, 8), keyword: (t as any).keyword })));
+      console.log(`ðŸ“Š [2/7] Timeline rÃ©cupÃ©rÃ©e: ${timeline.length} items total`);
+      console.log(`   DÃ©tail items:`, timeline.map(t => ({ type: t.type, sessionId: t.sessionId?.substring(0, 8), keyword: (t as any).keyword })));
 
-      // 🛡️ FILTRAGE DÉFENSIF STRICT - Isolation sessions (ROOT CAUSE FIX)
-      // Ne garder QUE les tables de la session actuelle pour éviter contamination
-      console.log(`📊 [3/7] Filtrage par session...`);
+      // ðŸ›¡ï¸ FILTRAGE DÃ‰FENSIF STRICT - Isolation sessions (ROOT CAUSE FIX)
+      // Ne garder QUE les tables de la session actuelle pour Ã©viter contamination
+      console.log(`ðŸ“Š [3/7] Filtrage par session...`);
       const filteredTimeline = timeline.filter(item => {
         const belongsToSession = item.sessionId === this.currentSessionId;
         if (!belongsToSession && item.type === 'table') {
-          console.warn(`   🚫 Table autre session filtrée: "${(item as any).keyword}" (session: ${item.sessionId?.substring(0, 8)}...)`);
+          console.warn(`   ðŸš« Table autre session filtrÃ©e: "${(item as any).keyword}" (session: ${item.sessionId?.substring(0, 8)}...)`);
         }
         return belongsToSession;
       });
 
-      console.log(`📊 [4/7] Après filtrage: ${filteredTimeline.length} items pour cette session`);
+      console.log(`ðŸ“Š [4/7] AprÃ¨s filtrage: ${filteredTimeline.length} items pour cette session`);
 
       if (filteredTimeline.length === 0) {
-        console.warn(`\n⚠️ [5/7] AUCUN ITEM DANS TIMELINE pour session ${this.currentSessionId?.substring(0, 8)}...`);
-        console.warn(`   → Causes possibles:`);
-        console.warn(`      1. Aucune table générée dans ce chat`);
-        console.warn(`      2. Tables sauvegardées avec sessionId différent`);
+        console.warn(`\nâš ï¸ [5/7] AUCUN ITEM DANS TIMELINE pour session ${this.currentSessionId?.substring(0, 8)}...`);
+        console.warn(`   â†’ Causes possibles:`);
+        console.warn(`      1. Aucune table gÃ©nÃ©rÃ©e dans ce chat`);
+        console.warn(`      2. Tables sauvegardÃ©es avec sessionId diffÃ©rent`);
         console.warn(`      3. getSessionTimeline() ne retourne rien\n`);
         return 0;
       }
@@ -2428,35 +2428,35 @@ export class FlowiseTableBridge {
       // Validate timeline ordering
       const isValid = flowiseTimelineService.validateTimelineOrdering(filteredTimeline);
       if (!isValid) {
-        console.error('❌ Timeline ordering validation failed');
+        console.error('âŒ Timeline ordering validation failed');
       }
 
       // Filter only table items
-      console.log(`📊 [5/7] Extraction des tables...`);
+      console.log(`ðŸ“Š [5/7] Extraction des tables...`);
       const tableItems = filteredTimeline.filter(item => item.type === 'table') as TableTimelineItem[];
 
-      console.log(`📊 [6/7] Tables à restaurer: ${tableItems.length}`);
+      console.log(`ðŸ“Š [6/7] Tables Ã  restaurer: ${tableItems.length}`);
       
       if (tableItems.length === 0) {
-        console.warn(`\n⚠️ AUCUNE TABLE À RESTAURER`);
+        console.warn(`\nâš ï¸ AUCUNE TABLE Ã€ RESTAURER`);
         console.warn(`   Timeline contient ${filteredTimeline.length} items mais 0 de type 'table'`);
-        console.warn(`   Types présents:`, filteredTimeline.map(t => t.type));
+        console.warn(`   Types prÃ©sents:`, filteredTimeline.map(t => t.type));
         console.warn(``);
         return 0;
       }
 
-      console.log(`\n✅ ${tableItems.length} table(s) identifiée(s) pour session ${this.currentSessionId?.substring(0, 8)}...`);
-      console.log(`📋 Liste des tables:`);
+      console.log(`\nâœ… ${tableItems.length} table(s) identifiÃ©e(s) pour session ${this.currentSessionId?.substring(0, 8)}...`);
+      console.log(`ðŸ“‹ Liste des tables:`);
       tableItems.forEach((item, index) => {
         console.log(`   ${index + 1}. "${item.keyword}" (position: ${item.position})`);
       });
 
       // Restore each table in chronological order
-      console.log(`\n📊 [7/7] INJECTION DOM (${tableItems.length} tables)...\n`);
+      console.log(`\nðŸ“Š [7/7] INJECTION DOM (${tableItems.length} tables)...\n`);
       
       let restoredCount = 0;
       for (const tableItem of tableItems) {
-        console.log(`   🔄 Restauration "${tableItem.keyword}"...`);
+        console.log(`   ðŸ”„ Restauration "${tableItem.keyword}"...`);
         // Convert timeline item back to table record for injection
         const tableRecord: FlowiseGeneratedTableRecord = {
           id: tableItem.tableId,
@@ -2480,20 +2480,20 @@ export class FlowiseTableBridge {
         try {
           this.injectTableIntoDOM(tableRecord);
           restoredCount++;
-          console.log(`   ✅ "${tableItem.keyword}" injectée dans DOM`);
+          console.log(`   âœ… "${tableItem.keyword}" injectÃ©e dans DOM`);
         } catch (injectError) {
-          console.error(`   ❌ Erreur injection "${tableItem.keyword}":`, injectError);
+          console.error(`   âŒ Erreur injection "${tableItem.keyword}":`, injectError);
         }
       }
 
       console.log(`\n${'='.repeat(80)}`);
-      console.log(`✅ RESTAURATION TERMINÉE: ${restoredCount}/${tableItems.length} table(s) restaurée(s)`);
+      console.log(`âœ… RESTAURATION TERMINÃ‰E: ${restoredCount}/${tableItems.length} table(s) restaurÃ©e(s)`);
       console.log(`${'='.repeat(80)}\n`);
 
       return restoredCount;
 
     } catch (error) {
-      console.error('\n❌ ERREUR CRITIQUE RESTAURATION:', error);
+      console.error('\nâŒ ERREUR CRITIQUE RESTAURATION:', error);
       console.error('Stack:', error);
       return 0;
     }
@@ -2517,7 +2517,7 @@ export class FlowiseTableBridge {
     tablesWithoutMessages: number;
   }> {
     if (!this.currentSessionId) {
-      console.warn('⚠️ No active session, cannot get timeline stats');
+      console.warn('âš ï¸ No active session, cannot get timeline stats');
       return {
         totalItems: 0,
         messageCount: 0,
@@ -2539,7 +2539,7 @@ export class FlowiseTableBridge {
       return flowiseTimelineService.getTimelineStats(timeline);
 
     } catch (error) {
-      console.error('❌ Error getting timeline stats:', error);
+      console.error('âŒ Error getting timeline stats:', error);
       return {
         totalItems: 0,
         messageCount: 0,
@@ -2562,7 +2562,7 @@ export class FlowiseTableBridge {
    */
   public async exportTimeline(messages: any[]): Promise<any> {
     if (!this.currentSessionId) {
-      console.warn('⚠️ No active session, cannot export timeline');
+      console.warn('âš ï¸ No active session, cannot export timeline');
       return null;
     }
 
@@ -2575,58 +2575,50 @@ export class FlowiseTableBridge {
       return flowiseTimelineService.exportTimeline(timeline);
 
     } catch (error) {
-      console.error('❌ Error exporting timeline:', error);
+      console.error('âŒ Error exporting timeline:', error);
       return null;
     }
   }
-}
-
-// Export singleton instance
-// The bridge initializes immediately and handles DOMContentLoaded internally
-// Requirements: 1.2, 4.1, 4.2
-export const flowiseTableBridge = new FlowiseTableBridge();
-
-console.log('✅ FlowiseTableBridge singleton created and initialized');
 
   // ========================================================================
-  // 🆕 AUTO-SAVE SYSTEM: Sauvegarde automatique modifications utilisateur
+  // ðŸ†• AUTO-SAVE SYSTEM: Sauvegarde automatique modifications utilisateur
   // ========================================================================
 
   /**
-   * Démarrer le système d'auto-sauvegarde
-   * Surveillance modifications + sauvegarde périodique
+   * DÃ©marrer le systÃ¨me d'auto-sauvegarde
+   * Surveillance modifications + sauvegarde pÃ©riodique
    */
   private startAutoSaveSystem(): void {
-    console.log('🔄 [AUTO-SAVE] Démarrage système auto-sauvegarde...');
+    console.log('ðŸ”„ [AUTO-SAVE] DÃ©marrage systÃ¨me auto-sauvegarde...');
     
-    // 1. Créer MutationObserver pour détecter modifications tables
+    // 1. CrÃ©er MutationObserver pour dÃ©tecter modifications tables
     this.mutationObserver = new MutationObserver((mutations) => {
       this.handleTableMutations(mutations);
     });
 
     // 2. Observer le conteneur principal (body pour capturer toutes tables)
     this.mutationObserver.observe(document.body, {
-      childList: true,      // Ajout/suppression éléments (colonnes, lignes)
+      childList: true,      // Ajout/suppression Ã©lÃ©ments (colonnes, lignes)
       subtree: true,        // Observer tous descendants
       characterData: true,  // Modifications texte cellules
       attributes: true,     // Changements attributs
       attributeFilter: ['data-keyword', 'data-table-id', 'contenteditable']
     });
 
-    // 3. Interval sauvegarde périodique (10 secondes)
+    // 3. Interval sauvegarde pÃ©riodique (10 secondes)
     this.autoSaveInterval = setInterval(() => {
       this.performAutoSave();
     }, this.AUTO_SAVE_INTERVAL_MS);
 
-    console.log(`✅ [AUTO-SAVE] Système démarré (interval: ${this.AUTO_SAVE_INTERVAL_MS}ms)`);
+    console.log(`âœ… [AUTO-SAVE] SystÃ¨me dÃ©marrÃ© (interval: ${this.AUTO_SAVE_INTERVAL_MS}ms)`);
   }
 
   /**
-   * Gérer les mutations détectées par MutationObserver
+   * GÃ©rer les mutations dÃ©tectÃ©es par MutationObserver
    */
   private handleTableMutations(mutations: MutationRecord[]): void {
     for (const mutation of mutations) {
-      // Trouver la table parent du nœud modifié
+      // Trouver la table parent du nÅ“ud modifiÃ©
       let node: Node | null = mutation.target;
       
       while (node && node !== document.body) {
@@ -2635,10 +2627,10 @@ console.log('✅ FlowiseTableBridge singleton created and initialized');
           const keyword = node.getAttribute('data-keyword');
           
           if (tableId || keyword) {
-            // Marquer table comme "dirty" (modifiée)
+            // Marquer table comme "dirty" (modifiÃ©e)
             const identifier = tableId || keyword || '';
             this.dirtyTables.add(identifier);
-            console.log(`🔄 [AUTO-SAVE] Table modifiée détectée: "${identifier}"`);
+            console.log(`ðŸ”„ [AUTO-SAVE] Table modifiÃ©e dÃ©tectÃ©e: "${identifier}"`);
           }
           break;
         }
@@ -2648,7 +2640,7 @@ console.log('✅ FlowiseTableBridge singleton created and initialized');
   }
 
   /**
-   * Effectuer sauvegarde automatique des tables modifiées
+   * Effectuer sauvegarde automatique des tables modifiÃ©es
    */
   private async performAutoSave(): Promise<void> {
     if (this.dirtyTables.size === 0) {
@@ -2656,7 +2648,7 @@ console.log('✅ FlowiseTableBridge singleton created and initialized');
       return;
     }
 
-    console.log(`💾 [AUTO-SAVE] Sauvegarde de ${this.dirtyTables.size} table(s) modifiée(s)...`);
+    console.log(`ðŸ’¾ [AUTO-SAVE] Sauvegarde de ${this.dirtyTables.size} table(s) modifiÃ©e(s)...`);
 
     const savedTables: string[] = [];
     const failedTables: string[] = [];
@@ -2670,12 +2662,12 @@ console.log('✅ FlowiseTableBridge singleton created and initialized');
         );
 
         if (!table) {
-          console.warn(`⚠️ [AUTO-SAVE] Table "${identifier}" introuvable dans DOM, skip`);
+          console.warn(`âš ï¸ [AUTO-SAVE] Table "${identifier}" introuvable dans DOM, skip`);
           this.dirtyTables.delete(identifier);
           continue;
         }
 
-        // Extraire les données de la table
+        // Extraire les donnÃ©es de la table
         const keyword = table.getAttribute('data-keyword') || identifier;
         const tableId = table.getAttribute('data-table-id') || this.generateTableId();
         const html = table.outerHTML;
@@ -2695,28 +2687,28 @@ console.log('✅ FlowiseTableBridge singleton created and initialized');
 
         savedTables.push(keyword);
         this.dirtyTables.delete(identifier);
-        console.log(`✅ [AUTO-SAVE] Table "${keyword}" sauvegardée`);
+        console.log(`âœ… [AUTO-SAVE] Table "${keyword}" sauvegardÃ©e`);
 
       } catch (error) {
-        console.error(`❌ [AUTO-SAVE] Erreur sauvegarde table "${identifier}":`, error);
+        console.error(`âŒ [AUTO-SAVE] Erreur sauvegarde table "${identifier}":`, error);
         failedTables.push(identifier);
       }
     }
 
-    // Résumé sauvegarde
+    // RÃ©sumÃ© sauvegarde
     if (savedTables.length > 0) {
-      console.log(`✅ [AUTO-SAVE] ${savedTables.length} table(s) sauvegardée(s): ${savedTables.join(', ')}`);
+      console.log(`âœ… [AUTO-SAVE] ${savedTables.length} table(s) sauvegardÃ©e(s): ${savedTables.join(', ')}`);
     }
     if (failedTables.length > 0) {
-      console.warn(`⚠️ [AUTO-SAVE] ${failedTables.length} échec(s): ${failedTables.join(', ')}`);
+      console.warn(`âš ï¸ [AUTO-SAVE] ${failedTables.length} Ã©chec(s): ${failedTables.join(', ')}`);
     }
   }
 
   /**
-   * Générer un fingerprint unique pour détecter changements
+   * GÃ©nÃ©rer un fingerprint unique pour dÃ©tecter changements
    */
   private generateFingerprint(html: string): string {
-    // Hash simple basé sur contenu HTML (sans timestamp)
+    // Hash simple basÃ© sur contenu HTML (sans timestamp)
     let hash = 0;
     for (let i = 0; i < html.length; i++) {
       const char = html.charCodeAt(i);
@@ -2727,17 +2719,17 @@ console.log('✅ FlowiseTableBridge singleton created and initialized');
   }
 
   /**
-   * Générer un ID unique pour nouvelle table
+   * GÃ©nÃ©rer un ID unique pour nouvelle table
    */
   private generateTableId(): string {
     return `table_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   }
 
   /**
-   * Arrêter le système d'auto-sauvegarde (cleanup)
+   * ArrÃªter le systÃ¨me d'auto-sauvegarde (cleanup)
    */
   public stopAutoSaveSystem(): void {
-    console.log('🛑 [AUTO-SAVE] Arrêt système auto-sauvegarde...');
+    console.log('ðŸ›‘ [AUTO-SAVE] ArrÃªt systÃ¨me auto-sauvegarde...');
     
     if (this.mutationObserver) {
       this.mutationObserver.disconnect();
@@ -2750,6 +2742,14 @@ console.log('✅ FlowiseTableBridge singleton created and initialized');
     }
 
     this.dirtyTables.clear();
-    console.log('✅ [AUTO-SAVE] Système arrêté');
+    console.log('âœ… [AUTO-SAVE] SystÃ¨me arrÃªtÃ©');
   }
 }
+
+// Export singleton instance
+// The bridge initializes immediately and handles DOMContentLoaded internally
+// Requirements: 1.2, 4.1, 4.2
+export const flowiseTableBridge = new FlowiseTableBridge();
+
+console.log('âœ… FlowiseTableBridge singleton created and initialized');
+
