@@ -1526,12 +1526,12 @@ export class FlowiseTableBridge {
         console.log(`ðŸ†• Creating new table for keyword "${tableData.keyword}" (no existing table in DOM)`);
         
         // Trouver le conteneur principal des messages Clara
-        const messagesContainer = document.querySelector('.messages-container') 
-                                || document.querySelector('.markdown-content')
+        let messagesContainer = document.querySelector('.flex-1.overflow-y-auto')
+                                || document.querySelector('.max-w-4xl.mx-auto')
                                 || document.querySelector('#chat-messages')
                                 || document.body;
         
-        console.log(`ðŸ“ [Conteneur] TrouvÃ©: ${messagesContainer.className || messagesContainer.tagName}`);
+        console.log('📍 [Conteneur]:', messagesContainer?.className || messagesContainer?.tagName || 'body');
         
         if (!messagesContainer) {
           console.error(`âŒ Impossible de trouver conteneur pour restauration`);
@@ -2752,5 +2752,6 @@ export class FlowiseTableBridge {
 export const flowiseTableBridge = new FlowiseTableBridge();
 
 console.log('âœ… FlowiseTableBridge singleton created and initialized');
+
 
 
