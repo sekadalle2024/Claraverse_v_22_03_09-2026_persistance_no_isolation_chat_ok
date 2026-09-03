@@ -1463,11 +1463,8 @@ export class FlowiseTableBridge {
    * 🚨 DÉSACTIVÉ TEMPORAIREMENT - Cause doublons et contamination
    */
   private injectTableIntoDOM(tableData: FlowiseGeneratedTableRecord): void {
-    // 🚨 DÉSACTIVATION COMPLÈTE RESTAURATION
-    console.log(`🚫 [DISABLED] Skipping restoration of "${tableData.keyword}" - restoration temporarily disabled to prevent contamination`);
-    return;
+    // ✅ RESTAURATION RÉACTIVÉE - 29 août 2026
     
-    /* CODE ORIGINAL DÉSACTIVÉ
     try {
       // ✅ EXCEPTION: Ne pas restaurer Table_Consolidation et Table_Resultat
       // Ces tables sont gérées par conso.js avec des event listeners dynamiques
@@ -1547,9 +1544,8 @@ export class FlowiseTableBridge {
       console.log(`✅ Restored table "${tableData.keyword}" (${tableData.id}) by updating existing table`);
 
     } catch (error) {
-      console.error(`❌ Error restoring table ${tableData.id}:`, error);
+      console.log(`❌ Error restoring table ${tableData.id}:`, error);
     }
-    */ // FIN CODE DÉSACTIVÉ
   }
 
   /**
