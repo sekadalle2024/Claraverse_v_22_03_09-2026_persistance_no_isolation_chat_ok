@@ -43,6 +43,7 @@ interface FlowiseTableIntegratedDetail {
   error?: string;
   timestamp: number;
   messageId?: string; // Optional messageId for linking to specific messages
+  forceUpdate?: boolean; // ✅ PHASE 2: Flag pour forcer mise à jour (bypass fingerprint)
 }
 
 /**
@@ -594,6 +595,7 @@ export class FlowiseTableBridge {
       sessionId: string;
       keyword: string;
       source: string;
+      forceUpdate?: boolean; // ✅ PHASE 2: Nouveau paramètre
     }>;
     const detail = customEvent.detail;
 
@@ -605,6 +607,11 @@ export class FlowiseTableBridge {
     // 🚨 LOG DIAGNOSTIC: Confirmer bypass via conso.js (Hypothèse Gemini)
     console.log(`🚨 [DIAGNOSTIC] Événement save:request reçu via conso.js pour: "${detail.keyword}"`);
     console.log(`💾 [Bridge] Handling save request for: ${detail.keyword}`);
+    
+    // ✅ PHASE 2: Logger forceUpdate
+    if (detail.forceUpdate) {
+      console.log(`🔄 [Bridge] forceUpdate=true détecté pour "${detail.keyword}"`);
+    }
 
     // Convert to FlowiseTableIntegratedDetail format
     const integratedDetail: FlowiseTableIntegratedDetail = {
@@ -612,7 +619,8 @@ export class FlowiseTableBridge {
       keyword: detail.keyword,
       source: (detail.source as FlowiseTableSource) || 'n8n',
       messageId: undefined, // Will be detected automatically
-      timestamp: Date.now()
+      timestamp: Date.now(),
+      forceUpdate: detail.forceUpdate // ✅ PHASE 2: Passer le flag
     };
 
     this.handleTableIntegrated(integratedDetail);
@@ -705,6 +713,25 @@ export class FlowiseTableBridge {
       );
 
       if (existingByKeyword) {
+        // ✅ PHASE 2: Si forceUpdate, toujours mettre à jour sans vérifier fingerprint
+        if (detail.forceUpdate) {
+          console.log(`🔄 [Bridge] ForceUpdate actif, mise à jour forcée: "${keyword}"`);
+          const updated = await flowiseTableService.updateGeneratedTable(
+            existingByKeyword.id,
+            tableElement,
+            keyword,
+            source,
+            messageId
+          );
+          
+          if (updated) {
+            console.log(`✅ [Bridge] Table forcée à jour: ${existingByKeyword.id}${messageId ? ` (linked to message: ${messageId})` : ''}`);
+            this.emitTableSaved(existingByKeyword.id, this.currentSessionId, keyword, fingerprint);
+          }
+          return;
+        }
+        
+        // Sinon, comportement normal: vérifier fingerprint
         // Table avec même keyword existe déjà dans cette session
         const shouldUpdate = await this.shouldUpdateExistingTable(
           existingByKeyword,
@@ -736,11 +763,16 @@ export class FlowiseTableBridge {
       }
 
       // Check if table already exists by fingerprint (fallback)
-      const exists = await flowiseTableService.tableExists(this.currentSessionId, fingerprint);
+      // ✅ PHASE 2: Skip fingerprint check si forceUpdate
+      if (!detail.forceUpdate) {
+        const exists = await flowiseTableService.tableExists(this.currentSessionId, fingerprint);
 
-      if (exists) {
-        console.log(`ℹ️ Table already saved (fingerprint: ${fingerprint.substring(0, 8)}...), skipping duplicate`);
-        return;
+        if (exists) {
+          console.log(`ℹ️ Table already saved (fingerprint: ${fingerprint.substring(0, 8)}...), skipping duplicate`);
+          return;
+        }
+      } else {
+        console.log(`🔄 [Bridge] ForceUpdate actif, skip vérification fingerprint pour nouvelle table`);
       }
 
       // Save the table with messageId link

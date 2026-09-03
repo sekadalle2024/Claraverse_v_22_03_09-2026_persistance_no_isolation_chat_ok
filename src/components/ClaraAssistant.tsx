@@ -38,8 +38,11 @@ import useAutonomousAgentStatus from '../hooks/useAutonomousAgentStatus';
 // Import TTS service
 import { claraTTSService } from '../services/claraTTSService';
 
-  // Import artifact detection service
+// Import artifact detection service
 import ArtifactDetectionService, { DetectionContext } from '../services/artifactDetectionService';
+
+// Import Flowise Table Bridge for table persistence
+import { flowiseTableBridge } from '../services/flowiseTableBridge';
 
 // Import clipboard test functions for development
 if (process.env.NODE_ENV === 'development') {
@@ -446,6 +449,57 @@ const ClaraAssistant: React.FC<ClaraAssistantProps> = ({ onPageChange }) => {
   
   const [messages, setMessages] = useState<ClaraMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  
+  // ==========================================
+  // 🔧 RESTAURATION TABLES APRÈS F5
+  // ==========================================
+  // Restaure les tables sauvées dans IndexedDB après actualisation page
+  useEffect(() => {
+    console.log('🔄 [React Restore] useEffect triggered', {
+      sessionId: currentSession?.id?.substring(0, 20),
+      messagesLength: messages?.length || 0,
+      timestamp: Date.now()
+    });
+    
+    // Guard 1 : Pas de session active
+    if (!currentSession?.id) {
+      console.log('⏸️ [React Restore] No active session, skipping restoration');
+      return;
+    }
+    
+    // Guard 2 : Pas de messages chargés (attendre que messages soient disponibles)
+    if (!messages || messages.length === 0) {
+      console.log('⏸️ [React Restore] No messages loaded yet, skipping restoration');
+      return;
+    }
+    
+    // Guard 3 : Vérifier bridge initialisé
+    if (!flowiseTableBridge) {
+      console.error('❌ [React Restore] flowiseTableBridge not available');
+      return;
+    }
+    
+    console.log('🔄 [React Restore] Déclenchement restauration tables...', {
+      sessionId: currentSession.id.substring(0, 30) + '...',
+      messagesCount: messages.length,
+      timestamp: Date.now()
+    });
+    
+    // Déclencher restauration chronologique
+    flowiseTableBridge.restoreTablesChronologically(messages)
+      .then(count => {
+        if (count > 0) {
+          console.log(`✅ [React Restore] Restauration réussie: ${count} table(s)`);
+        } else {
+          console.log('ℹ️ [React Restore] Aucune table à restaurer pour cette session');
+        }
+      })
+      .catch(error => {
+        console.error('❌ [React Restore] Erreur restauration tables:', error);
+      });
+    
+  }, [currentSession?.id, messages]); // Déclencher au changement session OU messages
+
   
   // Auto TTS state - track latest AI response for voice synthesis
   const [latestAIResponse, setLatestAIResponse] = useState<string>('');
@@ -1336,6 +1390,9 @@ Please provide your refined response for following user question:
     if (!currentSession || !sessionConfig.aiConfig) return;
 
     // **NEW**: Check if models are available before sending
+    // **DISABLED 02/09/2026**: Validation désactivée - permet envoi sans modèle local
+    // (Utile pour providers externes comme N8N, OpenRouter, etc.)
+    /*
     if (models.length === 0) {
       addErrorNotification(
         'No Models Available',
@@ -1359,6 +1416,7 @@ Please provide your refined response for following user question:
       );
       return;
     }
+    */
 
     // **CRITICAL ENFORCEMENT**: Check streaming vs autonomous mode before sending
     // When streaming mode is enabled, ALWAYS disable autonomous agent and tools
@@ -1478,6 +1536,12 @@ Please provide your refined response for following user question:
 
     // Add user message to state and get current conversation
     const currentMessages = [...messages, userMessage];
+    console.log('🔵 [SEND] Adding user message to state:', {
+      userMessageId: userMessage.id,
+      userMessageContent: userMessage.content.substring(0, 50),
+      currentMessagesLength: messages.length,
+      newMessagesLength: currentMessages.length
+    });
     setMessages(currentMessages);
     setIsLoading(true);
 
@@ -1519,7 +1583,17 @@ Please provide your refined response for following user question:
     };
 
     // Add the streaming message to state
-    setMessages(prev => [...prev, streamingMessage]);
+    console.log('🔵 [SEND] Adding streaming message to state:', {
+      streamingMessageId,
+      currentMessagesCount: currentMessages.length,
+      messagesStateBeforeAdd: messages.length
+    });
+    setMessages(prev => {
+      console.log('🔵 [SEND] setMessages callback - prev.length:', prev.length);
+      const newState = [...prev, streamingMessage];
+      console.log('🔵 [SEND] setMessages callback - new.length:', newState.length);
+      return newState;
+    });
 
     try {
       // Get conversation context (configurable context window, default 50 messages)

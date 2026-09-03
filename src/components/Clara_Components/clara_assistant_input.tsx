@@ -3206,11 +3206,21 @@ const ClaraAssistantInput: React.FC<ClaraInputProps> = ({
 
   // Send message
   const handleSend = useCallback(async () => {
-    if (!input.trim() && files.length === 0) return;
+    console.log('🟢 [INPUT] handleSend called', {
+      inputLength: input?.length || 0,
+      filesCount: files?.length || 0,
+      onSendMessageExists: !!onSendMessage
+    });
+    
+    if (!input.trim() && files.length === 0) {
+      console.log('🟡 [INPUT] handleSend aborted: empty input and no files');
+      return;
+    }
 
     // Check provider health before sending
     const isProviderHealthy = await checkProviderHealth();
     if (!isProviderHealthy) {
+      console.log('🟡 [INPUT] handleSend aborted: provider not healthy');
       return; // Don't send message if provider is not healthy
     }
     
@@ -3309,6 +3319,10 @@ const ClaraAssistantInput: React.FC<ClaraInputProps> = ({
       enhancedPrompt = `${displayInfo}\n\n${enhancedPrompt}`;
     }
     
+    console.log('🟢 [INPUT] Calling onSendMessage with:', {
+      promptLength: enhancedPrompt.length,
+      attachmentsCount: attachments?.length || 0
+    });
     onSendMessage(enhancedPrompt, attachments);
     
     // Reset state
