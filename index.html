@@ -30,7 +30,7 @@
             style="padding: 12px 20px; background: #06b6d4; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
       🧪 Test Phase 2
     </button>
-    <button onclick="window.diagnosticComplet && window.diagnosticComplet()"
+    <button onclick="if (window.diagnosticComplet) { window.diagnosticComplet(); } else { alert('❌ ERREUR\\n\\nFonction diagnosticComplet non chargée\\n\\nVérifier console F12 pour:\\n✅ [Diagnostic] Fonction window.diagnosticComplet chargée'); }"
             style="padding: 12px 20px; background: #8b5cf6; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
       🔍 Diagnostic
     </button>
