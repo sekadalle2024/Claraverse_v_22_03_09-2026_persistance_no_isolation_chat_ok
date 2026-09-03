@@ -1,0 +1,174 @@
+═══════════════════════════════════════════════════════════════════════════════
+🔧 CORRECTIONS APPLIQUÉES - ISOLATION DES SESSIONS (29 AOÛT 2026)
+═══════════════════════════════════════════════════════════════════════════════
+
+📋 PROBLÈME IDENTIFIÉ
+─────────────────────
+Lorsqu'un utilisateur ouvre plusieurs chats différents, les tableaux d'une session 
+écrasent les tableaux d'une autre session, créant une confusion visuelle.
+
+🎯 HYPOTHÈSES PRINCIPALES
+──────────────────────────
+✅ H1: Les tableaux restaurés n'ont pas d'attribut `data-session-id`
+   → Solution: Ajouter l'attribut lors de la restauration
+
+✅ H2: Le nettoyage du DOM ne filtre pas par sessionId
+   → Solution: Filtrer strictement par sessionId dans clearAllTablesFromDOM()
+
+✅ H3: Pas de vérification après restauration
+   → Solution: Logger le nombre de tableaux avec le bon sessionId
+
+✅ H4: Difficile de tracer les sauvegardes
+   → Solution: Logger toutes les sauvegardes avec sessionId/keyword
+
+═══════════════════════════════════════════════════════════════════════════════
+📝 CORRECTIONS DÉTAILLÉES
+═══════════════════════════════════════════════════════════════════════════════
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ CORRECTION 1 : Ajout de data-session-id aux wrappers                       │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+Fichier : src/services/flowiseTableBridge.ts
+Ligne   : ~1745
+
+AVANT:
+    wrapper.setAttribute('data-n8n-keyword', tableData.keyword);
+    wrapper.setAttribute('data-table-id', tableData.id);
+    wrapper.setAttribute('data-restored', 'true');
+    wrapper.setAttribute('data-source', tableData.source);
+    wrapper.setAttribute('data-timestamp', tableData.timestamp);
+
+APRÈS:
+    wrapper.setAttribute('data-n8n-keyword', tableData.keyword);
+    wrapper.setAttribute('data-table-id', tableData.id);
+    wrapper.setAttribute('data-restored', 'true');
+    wrapper.setAttribute('data-source', tableData.source);
+    wrapper.setAttribute('data-timestamp', tableData.timestamp);
+    wrapper.setAttribute('data-session-id', tableData.sessionId); // ✅ CRITIQUE
+
+Impact: Permet d'identifier visuellement à quelle session appartient chaque tableau.
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ CORRECTION 2 : Filtre strict par sessionId dans clearAllTablesFromDOM()    │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+Fichier : src/services/flowiseTableBridge.ts
+Ligne   : ~1020
+
+AVANT:
+  private async clearAllTablesFromDOM(): Promise<number> {
+    // Supprime TOUTES les tables sans distinction de session
+
+APRÈS:
+  private async clearAllTablesFromDOM(sessionId?: string): Promise<number> {
+    // Ajoute un filtre par sessionId
+    tables.forEach(table => {
+      if (sessionId) {
+        const tableSessionId = table.getAttribute('data-session-id');
+        if (tableSessionId && tableSessionId !== sessionId) {
+          // Ne pas supprimer les tables d'une autre session
+          return;
+        }
+      }
+      table.remove();
+      totalCleared++;
+    });
+
+Impact: Ne supprime que les tableaux de la session courante, préservant les autres.
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ CORRECTION 3 : Log de vérification après restauration                      │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+Fichier : src/services/flowiseTableBridge.ts
+Ligne   : ~1140
+
+AJOUT:
+    if (successCount > 0) {
+      console.log(`✅ Restored ${successCount} table(s) for session ${sessionId}`);
+      
+      // ✅ VÉRIFICATION CRITIQUE
+      const restoredTablesInDOM = document.querySelectorAll(`[data-session-id="${sessionId}"]`);
+      console.log(`🔍 VÉRIFICATION: ${restoredTablesInDOM.length} table(s) avec data-session-id="${sessionId}" dans le DOM`);
+    }
+
+Impact: Permet de vérifier immédiatement si les tableaux sont bien restaurés avec le bon sessionId.
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ CORRECTION 4 : Traçabilité des sauvegardes                                 │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+Fichier : src/services/flowiseTableService.ts
+Ligne   : ~190
+
+AJOUT:
+  async saveGeneratedTable(...) {
+    try {
+      // ✅ LOG CRITIQUE: Tracer toutes les sauvegardes
+      console.log(`💾 SAUVEGARDE TABLE: sessionId="${sessionId}", keyword="${keyword}", source="${source}", forceUpdate=${forceUpdate}`);
+
+Impact: Permet de tracer chaque sauvegarde et identifier les problèmes de sessionId incorrect.
+
+═══════════════════════════════════════════════════════════════════════════════
+🧪 TESTS À EFFECTUER
+═══════════════════════════════════════════════════════════════════════════════
+
+1️⃣ TEST SESSION UNIQUE
+   - Ouvrir un chat
+   - Générer 2-3 tableaux
+   - Vérifier : console.log doit montrer data-session-id correct
+   - Vérifier : Les tableaux ont l'attribut data-session-id dans l'inspecteur
+
+2️⃣ TEST MULTI-SESSIONS (CRITIQUE)
+   - Ouvrir Chat A → Générer Tableau 1
+   - Ouvrir Chat B → Générer Tableau 2
+   - Revenir à Chat A
+   - Vérifier : Seulement Tableau 1 est visible
+   - Vérifier : Console logs montrent filtrage correct
+
+3️⃣ TEST RESTAURATION APRÈS RECHARGEMENT
+   - Générer tableaux dans Chat A
+   - Recharger la page
+   - Ouvrir Chat A
+   - Vérifier : Tableaux restaurés avec bon sessionId
+
+═══════════════════════════════════════════════════════════════════════════════
+🎯 CRITÈRES DE SUCCÈS
+═══════════════════════════════════════════════════════════════════════════════
+
+✅ Chaque tableau a un attribut data-session-id dans le DOM
+✅ clearAllTablesFromDOM() ne supprime que les tableaux de la session courante
+✅ Les logs de vérification confirment le bon nombre de tableaux restaurés
+✅ Les logs de sauvegarde permettent de tracer l'origine des problèmes
+
+✅ RÉSULTAT FINAL ATTENDU:
+   Lorsqu'un utilisateur navigue entre différents chats, seuls les tableaux
+   du chat courant sont visibles, sans mélange avec les autres sessions.
+
+═══════════════════════════════════════════════════════════════════════════════
+📦 FICHIERS MODIFIÉS
+═══════════════════════════════════════════════════════════════════════════════
+
+1. src/services/flowiseTableBridge.ts
+   - Ajout data-session-id aux wrappers (ligne ~1745)
+   - Modification clearAllTablesFromDOM() avec filtre sessionId (ligne ~1020)
+   - Ajout log de vérification après restauration (ligne ~1140)
+
+2. src/services/flowiseTableService.ts
+   - Ajout log de traçabilité dans saveGeneratedTable() (ligne ~190)
+
+═══════════════════════════════════════════════════════════════════════════════
+⚠️ NOTES IMPORTANTES
+═══════════════════════════════════════════════════════════════════════════════
+
+1. IndexedDB est DÉJÀ correctement filtré par sessionId (vérifié)
+2. Ces corrections sont CIBLÉES et MINIMALES
+3. Aucune modification de l'architecture existante
+4. Les corrections sont RÉVERSIBLES en cas de problème
+
+═══════════════════════════════════════════════════════════════════════════════
+📅 Date : 29 août 2026
+👤 Auteur : Kiro AI
+🔧 Type : Correction de bug - Isolation des sessions
+═══════════════════════════════════════════════════════════════════════════════

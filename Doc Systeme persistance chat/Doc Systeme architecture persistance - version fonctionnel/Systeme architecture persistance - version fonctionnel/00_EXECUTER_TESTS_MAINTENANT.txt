@@ -1,0 +1,130 @@
+╔══════════════════════════════════════════════════════════════════╗
+║                                                                  ║
+║   🧪  EXÉCUTER LES TESTS - SYSTÈME DE PERSISTANCE TABLES       ║
+║                                                                  ║
+╚══════════════════════════════════════════════════════════════════╝
+
+📍 VOUS ÊTES ICI
+──────────────
+Tous les fichiers sont implémentés et prêts pour les tests.
+
+
+🚀 OPTION 1: Tests Automatisés (Recommandé)
+════════════════════════════════════════════
+
+1. Ouvrir PowerShell dans h:\ClaraVerse
+
+2. Copier-coller cette commande:
+
+   .\Doc` Systeme` persistance` chat\executer-tests.ps1
+
+3. La page HTML de test s'ouvrira automatiquement
+
+4. Cliquer sur "▶️ Lancer tous les tests"
+
+
+🖱️ OPTION 2: Tests Manuels dans le Navigateur
+═══════════════════════════════════════════════
+
+1. Double-cliquer sur:
+   Doc Systeme persistance chat\test-persistence-tables.html
+
+2. Cliquer sur chaque bouton de test
+
+3. Observer les résultats (vert = réussi, rouge = échoué)
+
+
+🌐 OPTION 3: Tests dans ClaraVerse Réel
+════════════════════════════════════════
+
+1. Démarrer ClaraVerse:
+   npm run dev
+
+2. Ouvrir http://localhost:5173
+
+3. Ouvrir la console (F12)
+
+4. Suivre les 4 scénarios de test:
+
+   TEST 1 - Ordre des Tables:
+   ─────────────────────────
+   • Créer une table Modelised
+   • Faire une consolidation
+   • Vérifier l'ordre: Conso → Résultat → Modelised
+   
+   TEST 2 - Persistance:
+   ─────────────────────
+   • Modifier des cellules dans les tables
+   • Recharger (F5)
+   • Vérifier que tout est restauré
+   
+   TEST 3 - Isolation:
+   ───────────────────
+   • Chat A: Créer tables avec données "A"
+   • Chat B: Créer tables avec données "B"
+   • Retour Chat A: Vérifier qu'on voit uniquement données "A"
+   
+   TEST 4 - Protection:
+   ────────────────────
+   • Créer une nouvelle table
+   • Observer les logs: "🛡️ Table protégée"
+   • Confirmer que la table n'est pas supprimée < 5s
+
+
+📊 COMMANDES DE DIAGNOSTIC (Console)
+═════════════════════════════════════
+
+Dans la console du navigateur (F12), taper:
+
+// Vérifier les attributs
+verifyTableAttributes()
+
+// Vérifier IndexedDB
+verifyIndexedDB()
+
+// Tester restauration
+window.restoreCurrentSession()
+
+// Détecter le chat actif
+window.detectChatId()
+
+
+✅ CRITÈRES DE SUCCÈS
+═══════════════════════
+
+□ Test 1: Tables dans l'ordre Conso → Résultat → Modelised
+□ Test 2: Tables restaurées après F5 avec données intactes
+□ Test 3: Aucune contamination entre Chat A et Chat B
+□ Test 4: Logs de protection visible, tables < 5s non supprimées
+
+
+📖 DOCUMENTATION COMPLÈTE
+══════════════════════════
+
+• RESULTATS_TESTS.md - Procédures détaillées
+• RAPPORT_FINAL_IMPLEMENTATION.md - Résumé technique complet
+• TEST_VERIFICATION_GUIDE.md - Guide de vérification
+• TIMESTAMP_PROTECTION_STATUS.md - État de la protection
+
+
+🆘 DÉPANNAGE
+═════════════
+
+Si un test échoue:
+1. Vérifier la console (F12) pour les erreurs
+2. Consulter RESULTATS_TESTS.md section "Dépannage"
+3. Relancer le test après correction
+
+
+🎉 PRÊT À TESTER!
+═════════════════
+
+Choisissez une option ci-dessus et commencez les tests.
+Tous les fichiers sont en place et le système est opérationnel!
+
+
+════════════════════════════════════════════════════════════════════
+Créé par: Kiro
+Date: 28 août 2026
+Statut: ✅ IMPLÉMENTATION COMPLÈTE - PRÊT POUR TESTS
+════════════════════════════════════════════════════════════════════

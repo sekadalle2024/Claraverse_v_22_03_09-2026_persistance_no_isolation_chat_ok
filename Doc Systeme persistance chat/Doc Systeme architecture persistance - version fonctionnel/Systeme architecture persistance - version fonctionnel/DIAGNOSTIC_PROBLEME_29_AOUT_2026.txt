@@ -1,0 +1,227 @@
+╔════════════════════════════════════════════════════════════════════╗
+║                                                                    ║
+║        🔧 DIAGNOSTIC DU PROBLÈME - 29 AOÛT 2026                    ║
+║                                                                    ║
+╚════════════════════════════════════════════════════════════════════╝
+
+
+┌─────────────────────────────────────────────────────────────────┐
+│  📊 QUESTIONS DE DIAGNOSTIC                                     │
+└─────────────────────────────────────────────────────────────────┘
+
+🔍 Aidez-moi à comprendre EXACTEMENT ce qui se passe :
+
+
+1️⃣  SERVEUR VITE
+    ─────────────────────────────────────────────────────────────
+    
+    Après avoir relancé "npm run dev", que voyez-vous ?
+    
+    [ ] Le terminal affiche "Local: http://127.0.0.1:5173/"
+    [ ] Le terminal affiche "Local: http://localhost:5173/"
+    [ ] Le terminal affiche un message d'erreur
+    [ ] Le terminal ne montre rien
+    
+    → Copiez-collez TOUT le contenu du terminal ici :
+    
+    ___________________________________________________________
+
+
+2️⃣  NAVIGATEUR
+    ─────────────────────────────────────────────────────────────
+    
+    Quand vous ouvrez http://127.0.0.1:5173/ que se passe-t-il ?
+    
+    [ ] Page blanche
+    [ ] Message d'erreur (quel message ?)
+    [ ] La page s'affiche mais...
+    [ ] Le navigateur charge indéfiniment
+    [ ] Connexion refusée
+    
+    → Décrivez précisément ce que vous voyez :
+    
+    ___________________________________________________________
+
+
+3️⃣  CONSOLE DU NAVIGATEUR
+    ─────────────────────────────────────────────────────────────
+    
+    Ouvrez la console (F12) et regardez les erreurs :
+    
+    → Y a-t-il des messages en rouge ?
+    → Copiez-collez les messages d'erreur ici :
+    
+    ___________________________________________________________
+
+
+4️⃣  ONGLET RÉSEAU (Network)
+    ─────────────────────────────────────────────────────────────
+    
+    Dans F12 → Network :
+    
+    → Y a-t-il des requêtes en rouge ?
+    → Quel est le statut ? (404, 500, Failed, Pending ?)
+    
+    ___________________________________________________________
+
+
+┌─────────────────────────────────────────────────────────────────┐
+│  🔍 TESTS RAPIDES À FAIRE                                       │
+└─────────────────────────────────────────────────────────────────┘
+
+
+TEST 1 : Vérifier le port
+───────────────────────────────────────────────────────────────
+
+PowerShell :
+```powershell
+netstat -ano | findstr :5173
+```
+
+→ Est-ce que quelque chose s'affiche ?
+→ Copiez-collez le résultat :
+
+___________________________________________________________
+
+
+TEST 2 : Tester avec localhost
+───────────────────────────────────────────────────────────────
+
+Essayez ces 3 URLs dans le navigateur :
+
+1. http://127.0.0.1:5173/
+2. http://localhost:5173/
+3. http://[::1]:5173/
+
+→ Laquelle fonctionne (si aucune ne fonctionne, dites-le) ?
+
+___________________________________________________________
+
+
+TEST 3 : Vérifier les fichiers
+───────────────────────────────────────────────────────────────
+
+PowerShell :
+```powershell
+cd h:\ClaraVerse
+dir index.html
+```
+
+→ Le fichier index.html existe-t-il ?
+
+___________________________________________________________
+
+
+TEST 4 : Cache navigateur
+───────────────────────────────────────────────────────────────
+
+Avez-vous essayé :
+
+[ ] Ctrl + Shift + R (Hard Refresh)
+[ ] Ctrl + Shift + Delete (Effacer le cache)
+[ ] Mode navigation privée
+[ ] Un autre navigateur (Chrome, Firefox, Edge)
+
+→ Quel navigateur utilisez-vous ?
+
+___________________________________________________________
+
+
+┌─────────────────────────────────────────────────────────────────┐
+│  🎯 HYPOTHÈSES DE PROBLÈMES POSSIBLES                          │
+└─────────────────────────────────────────────────────────────────┘
+
+
+HYPOTHÈSE 1 : Problème de cache
+──────────────────────────────────────────────────────────────
+
+→ Le navigateur affiche une ancienne version
+
+Solution : Vider le cache complètement
+
+
+HYPOTHÈSE 2 : Problème de build
+──────────────────────────────────────────────────────────────
+
+→ Il y a peut-être des erreurs TypeScript/React
+
+Solution : Regarder les erreurs dans le terminal
+
+
+HYPOTHÈSE 3 : Problème de réseau local
+──────────────────────────────────────────────────────────────
+
+→ Pare-feu ou antivirus bloque la connexion
+
+Solution : Vérifier les paramètres de sécurité
+
+
+HYPOTHÈSE 4 : Problème de configuration
+──────────────────────────────────────────────────────────────
+
+→ Un autre fichier de config interfère
+
+Solution : Vérifier vite.config.ts
+
+
+HYPOTHÈSE 5 : localStorage corrompue
+──────────────────────────────────────────────────────────────
+
+→ Données locales en conflit
+
+Solution : Ouvrir F12 → Application → Storage → Clear
+
+
+┌─────────────────────────────────────────────────────────────────┐
+│  ⚡ ACTION IMMÉDIATE                                            │
+└─────────────────────────────────────────────────────────────────┘
+
+
+ÉTAPE 1 : Nettoyage complet
+───────────────────────────────────────────────────────────────
+
+PowerShell :
+```powershell
+cd h:\ClaraVerse
+
+# Arrêter tous les serveurs
+# (Ctrl + C dans tous les terminaux)
+
+# Supprimer le dossier node_modules/.vite
+Remove-Item -Recurse -Force node_modules\.vite -ErrorAction SilentlyContinue
+
+# Supprimer le dossier dist
+Remove-Item -Recurse -Force dist -ErrorAction SilentlyContinue
+```
+
+
+ÉTAPE 2 : Redémarrage propre
+───────────────────────────────────────────────────────────────
+
+```powershell
+npm run dev
+```
+
+
+ÉTAPE 3 : Tester immédiatement
+───────────────────────────────────────────────────────────────
+
+1. Ouvrir le navigateur en mode privé
+2. Aller sur http://127.0.0.1:5173/
+3. Ouvrir F12 → Console
+4. Regarder s'il y a des erreurs
+
+
+═══════════════════════════════════════════════════════════════════
+
+📝 RÉPONDEZ À CES QUESTIONS :
+
+1. Quel message exact voyez-vous dans le terminal après npm run dev ?
+   
+2. Que se passe-t-il dans le navigateur ?
+   
+3. Y a-t-il des erreurs dans la Console (F12) ?
+   
+4. Avez-vous essayé le nettoyage complet ci-dessus ?
+
+═══════════════════════════════════════════════════════════════════

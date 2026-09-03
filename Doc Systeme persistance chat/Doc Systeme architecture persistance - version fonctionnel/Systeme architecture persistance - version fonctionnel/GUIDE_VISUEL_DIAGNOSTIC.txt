@@ -1,0 +1,111 @@
+╔════════════════════════════════════════════════════════════════════╗
+║                                                                    ║
+║              GUIDE VISUEL - DIAGNOSTIC PERSISTANCE CHAT            ║
+║                                                                    ║
+╚════════════════════════════════════════════════════════════════════╝
+
+
+┌────────────────────────────────────────────────────────────────────┐
+│  TERMINAL 1 : SERVEUR DE DEVELOPPEMENT                             │
+└────────────────────────────────────────────────────────────────────┘
+
+PowerShell> cd h:\ClaraVerse
+PowerShell> npm run dev
+
+Attendez de voir :
+  ✓ Local:   http://localhost:5173/
+
+
+┌────────────────────────────────────────────────────────────────────┐
+│  NAVIGATEUR : OUVRIR L'APPLICATION                                 │
+└────────────────────────────────────────────────────────────────────┘
+
+1. Allez sur : http://localhost:5173/
+2. Appuyez sur F12 (Outils de développement)
+3. Onglet "Console"
+
+
+┌────────────────────────────────────────────────────────────────────┐
+│  TEST 1 : CREER UN CHAT                                            │
+└────────────────────────────────────────────────────────────────────┘
+
+Dans l'application :
+1. Cliquez sur "Nouveau Chat"
+2. Envoyez un message : "Test 123"
+3. Notez le nom/ID du chat
+
+Dans la Console (F12) :
+4. Tapez : localStorage
+5. COPIEZ tout ce qui s'affiche
+6. Cherchez les clés : "flowise_messages_*"
+
+
+┌────────────────────────────────────────────────────────────────────┐
+│  TEST 2 : RECHARGER LA PAGE                                        │
+└────────────────────────────────────────────────────────────────────┘
+
+1. Appuyez sur F5 (Recharger)
+2. Le chat "Test 123" est-il toujours là ?
+
+   [ ] OUI → Persistance fonctionne !
+   [ ] NON → Problème de persistance
+
+
+┌────────────────────────────────────────────────────────────────────┐
+│  TEST 3 : VERIFIER LES ERREURS                                     │
+└────────────────────────────────────────────────────────────────────┘
+
+Onglet "Console" (F12) :
+  → Voyez-vous des lignes ROUGES ?
+  → COPIEZ toutes les erreurs
+
+Onglet "Network" (F12) :
+  → Voyez-vous des requêtes en ROUGE ?
+  → Voyez-vous "404" ou "CORS" ?
+  → COPIEZ les erreurs
+
+
+┌────────────────────────────────────────────────────────────────────┐
+│  TERMINAL 2 : EXECUTER LE DIAGNOSTIC                               │
+└────────────────────────────────────────────────────────────────────┘
+
+PowerShell> cd "h:\ClaraVerse\Doc Systeme persistance chat"
+PowerShell> .\diagnostic-persistance-chat.ps1
+
+Suivez les instructions affichées
+
+
+╔════════════════════════════════════════════════════════════════════╗
+║                                                                    ║
+║  ENVOYEZ-MOI CES 4 INFORMATIONS :                                 ║
+║                                                                    ║
+║  1. Contenu de localStorage                                        ║
+║  2. Erreurs de la Console                                          ║
+║  3. Erreurs du Network                                             ║
+║  4. Réponse aux questions du diagnostic                            ║
+║                                                                    ║
+╚════════════════════════════════════════════════════════════════════╝
+
+
+═══════════════════════════════════════════════════════════════════
+   PROBLEMES FREQUENTS ET SOLUTIONS
+═══════════════════════════════════════════════════════════════════
+
+❌ "localStorage is not defined"
+   → Le navigateur bloque localStorage
+   → Désactivez le mode navigation privée
+   → Vérifiez les paramètres du navigateur
+
+❌ "CORS error"
+   → Problème de configuration backend
+   → Vérifiez que Flowise est accessible
+
+❌ "Cannot read property 'messages'"
+   → Service flowiseTableBridge non initialisé
+   → Vérifiez les imports dans index.html
+
+❌ Chats disparaissent au rechargement
+   → Problème de sauvegarde dans localStorage
+   → Vérifiez que les clés "flowise_*" existent
+
+═══════════════════════════════════════════════════════════════════

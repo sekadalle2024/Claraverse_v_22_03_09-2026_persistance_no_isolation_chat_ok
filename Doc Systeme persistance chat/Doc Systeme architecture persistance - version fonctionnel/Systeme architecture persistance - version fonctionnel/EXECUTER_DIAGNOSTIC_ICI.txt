@@ -1,0 +1,50 @@
+================================================================
+   COMMENT EXECUTER LE DIAGNOSTIC CORRECTEMENT
+================================================================
+
+ETAPE 1 : Ouvrez PowerShell dans la RACINE du projet
+--------------------------------------------------------
+cd h:\ClaraVerse
+
+
+ETAPE 2 : Demarrez le serveur de developpement
+--------------------------------------------------------
+npm run dev
+
+
+ETAPE 3 : Dans un AUTRE terminal PowerShell, executez le diagnostic
+--------------------------------------------------------
+cd "h:\ClaraVerse\Doc Systeme persistance chat"
+.\diagnostic-persistance-chat.ps1
+
+
+ETAPE 4 : Suivez les instructions affichees
+--------------------------------------------------------
+- Ouvrez l'application dans le navigateur
+- Ouvrez la Console (F12)
+- Faites les tests demandes
+- Copiez les informations demandees
+
+
+ETAPE 5 : Envoyez-moi les resultats
+--------------------------------------------------------
+Copiez toutes les informations demandees :
+1. SYMPTOMES observes
+2. ERREURS de la Console
+3. CONTENU de localStorage
+4. ERREURS du Network
+
+
+================================================================
+   POURQUOI LA PERSISTANCE NE FONCTIONNE PAS ?
+================================================================
+
+CAUSES POSSIBLES :
+
+1. localStorage bloque (navigateur en mode prive)
+2. Erreurs JavaScript dans la Console
+3. Service flowiseTableBridge non initialise
+4. Probleme de synchronisation avec Flowise
+5. Erreurs CORS avec le backend
+
+================================================================

@@ -1,0 +1,186 @@
+╔════════════════════════════════════════════════════════════════════╗
+║                                                                    ║
+║               🚀 GUIDE SIMPLE : 2 OPTIONS                          ║
+║                     29 août 2026                                   ║
+║                                                                    ║
+╚════════════════════════════════════════════════════════════════════╝
+
+
+┌─────────────────────────────────────────────────────────────────┐
+│  🎯 OPTION 1 : MODE DÉVELOPPEMENT (Recommandé pour tester)     │
+└─────────────────────────────────────────────────────────────────┘
+
+1️⃣  Commande :
+    npm run dev
+
+2️⃣  Attendez le message :
+    ➜ Local: http://localhost:5173/
+
+3️⃣  Ouvrez le navigateur :
+    - Allez sur : http://localhost:5173
+    - Ou cliquez sur le lien dans le terminal
+
+4️⃣  Hard Refresh :
+    Ctrl + Shift + R  (ou Ctrl + F5)
+
+✅ Avantages :
+   • Hot reload (changements en direct)
+   • Pas besoin de rebuild
+   • Idéal pour tester vos corrections
+
+
+┌─────────────────────────────────────────────────────────────────┐
+│  📦 OPTION 2 : MODE PRODUCTION (Après build)                   │
+└─────────────────────────────────────────────────────────────────┘
+
+Si vous avez déjà fait npm run build :
+
+1️⃣  Installer un serveur local :
+    npm install -g serve
+
+2️⃣  Lancer le serveur :
+    serve -s dist
+
+3️⃣  Ouvrez le navigateur :
+    http://localhost:3000
+
+✅ Avantages :
+   • Teste la version optimisée
+   • Comme en production
+   • Vérifie que tout fonctionne après build
+
+
+┌─────────────────────────────────────────────────────────────────┐
+│  🔴 PROBLÈME "PAGE NE S'OUVRE PAS"                             │
+└─────────────────────────────────────────────────────────────────┘
+
+Diagnostic :
+
+1. npm run dev ne fait rien ?
+   → Vérifiez les ports utilisés
+   → Commande : netstat -ano | findstr :5173
+
+2. Port 5173 déjà utilisé ?
+   → Fermez l'ancien serveur
+   → Ou changez de port dans vite.config.ts
+
+3. Erreur dans le terminal ?
+   → Copiez-collez le message d'erreur complet
+
+
+┌─────────────────────────────────────────────────────────────────┐
+│  💡 SOLUTION RAPIDE                                            │
+└─────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────┐
+│  Copier-coller ces commandes :          │
+│                                         │
+│  npm run dev                            │
+│                                         │
+│  # Attendez "Local: http://..."        │
+│  # Puis ouvrez le navigateur           │
+└─────────────────────────────────────────┘
+
+
+┌─────────────────────────────────────────────────────────────────┐
+│  📊 RÉCAPITULATIF                                               │
+└─────────────────────────────────────────────────────────────────┘
+
+┌───────────────────┬────────────────┬──────────────────────┐
+│ Commande          │ Crée /dist ?   │ Lance serveur ?      │
+├───────────────────┼────────────────┼──────────────────────┤
+│ npm run dev       │ ❌ Non         │ ✅ Oui (port 5173)   │
+│ npm run build     │ ✅ Oui         │ ❌ Non               │
+│ serve -s dist     │ ❌ Non         │ ✅ Oui (port 3000)   │
+└───────────────────┴────────────────┴──────────────────────┘
+
+
+┌─────────────────────────────────────────────────────────────────┐
+│  🎬 ACTION IMMÉDIATE                                           │
+└─────────────────────────────────────────────────────────────────┘
+
+1. Fermez tous les terminaux actuels
+
+2. Ouvrez un nouveau terminal PowerShell
+
+3. Tapez :
+   cd h:\ClaraVerse
+   npm run dev
+
+4. Attendez "Local: http://localhost:5173/"
+
+5. Ctrl + Clic sur le lien dans le terminal
+   (ou copiez-collez dans le navigateur)
+
+6. Faites un Hard Refresh :
+   Ctrl + Shift + R
+
+
+═══════════════════════════════════════════════════════════════════
+
+Si le problème persiste, envoyez-moi :
+1. Le message exact dans le terminal
+2. Une capture d'écran si possible
+
+═══════════════════════════════════════════════════════════════════
+
+
+═══════════════════════════════════════════════════════════════════
+
+🎯 LES TABLES DISPARAISSENT APRÈS GÉNÉRATION ?
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+OPTION 1 : DIAGNOSTIC AUTOMATIQUE (RECOMMANDÉ)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+ÉTAPE 1 : Lancez le serveur
+cd h:\ClaraVerse
+npm run dev
+
+ÉTAPE 2 : Ouvrez la page de test
+http://localhost:5173/Doc%20Systeme%20persistance%20chat/test-persistance-tables.html
+
+ÉTAPE 3 : Cliquez sur "Lancer Audit Complet"
+
+ÉTAPE 4 : Envoyez-moi le RAPPORT D'AUDIT complet
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+OPTION 2 : DIAGNOSTIC MANUEL DÉTAILLÉ
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Lisez : DIAGNOSTIC_TABLES_DISPARAISSENT.txt
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+OPTION 3 : DIAGNOSTIC RAPIDE (Console Chrome)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+ÉTAPE 1 : Lancez le serveur
+cd h:\ClaraVerse
+npm run dev
+
+ÉTAPE 2 : Ouvrez http://localhost:5173/
+
+ÉTAPE 3 : Ouvrez la Console (F12)
+
+ÉTAPE 4 : Collez ce code et ENVOYEZ-MOI le résultat :
+
+// Vérifier le service
+console.log('Service:', typeof window.flowiseTableBridge);
+
+// Vérifier localStorage
+const keys = Object.keys(localStorage).filter(k => k.includes('flowise'));
+console.log('Clés Flowise:', keys);
+
+// Vérifier les tables
+keys.forEach(k => {
+  const msgs = JSON.parse(localStorage.getItem(k));
+  msgs.forEach((m, i) => {
+    if (m.message && m.message.includes('<table')) {
+      console.log(`Table trouvée dans ${k} message ${i}`);
+    }
+  });
+});
+
+═══════════════════════════════════════════════════════════════════

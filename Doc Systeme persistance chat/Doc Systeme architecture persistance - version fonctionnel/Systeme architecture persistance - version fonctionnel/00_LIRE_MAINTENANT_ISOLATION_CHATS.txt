@@ -1,0 +1,91 @@
+╔══════════════════════════════════════════════════════════════════════╗
+║                                                                      ║
+║  🔒 ISOLATION DES CHATS - CORRECTION URGENTE                        ║
+║                                                                      ║
+║  Problème Résolu : Tables de l'ancien chat écrasent le nouveau      ║
+║                                                                      ║
+╚══════════════════════════════════════════════════════════════════════╝
+
+📍 PROBLÈME IDENTIFIÉ
+━━━━━━━━━━━━━━━━━━━━
+▸ Les tables [Modelised_table] du chat précédent apparaissent dans le nouveau chat
+▸ Les données du nouveau chat disparaissent pour laisser place à l'ancien
+▸ Cause : sessionId stable ne change pas entre les chats
+
+✅ SOLUTION
+━━━━━━━━━━
+▸ Système de double identifiant :
+  • chatId  : Unique par conversation (isole les chats)
+  • sessionId : Stable (pour restauration unique)
+  • Clé composite : chatId_sessionId
+
+📁 FICHIERS À CRÉER
+━━━━━━━━━━━━━━━━━━
+1. public/chat-id-detector.js       (Nouveau)
+2. public/chat-change-handler.js    (Nouveau)
+
+📝 FICHIERS À MODIFIER
+━━━━━━━━━━━━━━━━━━━━
+1. public/conso-indexeddb-bridge.js
+2. public/single-restore-on-load.js
+3. index.html (ordre de chargement)
+
+🚀 DÉMARRAGE RAPIDE
+━━━━━━━━━━━━━━━━━━━
+
+Étape 1 : Lire la solution complète
+   📄 SOLUTION_ISOLATION_CHATS.md
+
+Étape 2 : Créer les nouveaux fichiers
+   • chat-id-detector.js
+   • chat-change-handler.js
+
+Étape 3 : Modifier les fichiers existants
+   • Ajouter getCurrentChatId()
+   • Utiliser clé composite chatId_sessionId
+
+Étape 4 : Tester
+   • Vérifier chatId unique par conversation
+   • Tester changement de chat
+   • Vérifier isolation dans IndexedDB
+
+📖 DOCUMENTATION COMPLÈTE
+━━━━━━━━━━━━━━━━━━━━━━
+▸ SOLUTION_ISOLATION_CHATS.md      : Architecture complète
+▸ PLAN_IMPLEMENTATION_CHAT_PERSISTANCE.md : Vue d'ensemble
+▸ INDEX_RESTAURATION_UNIQUE.md     : Référence système antérieur
+
+🧪 TESTS ESSENTIELS
+━━━━━━━━━━━━━━━━━
+1. window.chatIdDetector.getCurrentChatId()
+   → Devrait retourner un ID unique : chat_1735390000000_abc1234
+
+2. Créer tables dans chat A, puis nouveau chat B
+   → Les tables de A ne doivent PAS apparaître dans B
+
+3. Vérifier IndexedDB
+   → Les tables doivent avoir des sessionId différents : 
+     chat_A_session_1, chat_B_session_1
+
+⚠️  RÉFÉRENCE IMPORTANTE
+━━━━━━━━━━━━━━━━━━━━━━
+Ce problème a déjà été résolu partiellement :
+▸ Voir : Memo systeme de sauvegarde/INDEX_RESTAURATION_UNIQUE.md
+▸ Système de session stable = Bon pour restauration unique
+▸ Mais = Mauvais pour isolation inter-chats
+
+La solution actuelle COMBINE les deux :
+▸ Session stable (restauration unique) ✅
+▸ ChatId unique (isolation chats) ✅
+
+🎯 RÉSULTAT ATTENDU
+━━━━━━━━━━━━━━━━━━
+✅ Chaque chat a son propre espace de stockage
+✅ Les tables de l'ancien chat ne contaminent pas le nouveau
+✅ Le système de restauration unique continue de fonctionner
+✅ Changement de chat = Nettoyage automatique + Restauration propre
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Date : 28 août 2026
+Priorité : 🔴 CRITIQUE - Impact sur toutes les conversations

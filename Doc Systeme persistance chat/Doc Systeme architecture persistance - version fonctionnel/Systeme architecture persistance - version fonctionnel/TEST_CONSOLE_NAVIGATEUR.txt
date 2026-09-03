@@ -1,0 +1,99 @@
+═══════════════════════════════════════════════════════════════
+  🔍 TESTS À FAIRE DANS LA CONSOLE DU NAVIGATEUR
+═══════════════════════════════════════════════════════════════
+
+1️⃣ FAIRE D'ABORD UN HARD REFRESH
+   Windows : Ctrl + Shift + R  ou  Ctrl + F5
+
+2️⃣ OUVRIR LA CONSOLE
+   Appuyez sur F12, puis onglet "Console"
+
+3️⃣ COPIER-COLLER LES TESTS CI-DESSOUS UN PAR UN
+
+═══════════════════════════════════════════════════════════════
+
+📌 TEST 1 : Vérifier le sessionId actuel
+────────────────────────────────────────────────────────────────
+window.currentSessionId
+
+RÉSULTAT ATTENDU : "session_XXXXXXXX" ou similaire
+RÉSULTAT SI PROBLÈME : undefined
+
+
+📌 TEST 2 : Compter les tables avec data-session-id
+────────────────────────────────────────────────────────────────
+document.querySelectorAll('[data-session-id]').length
+
+RÉSULTAT ATTENDU : Un nombre > 0
+RÉSULTAT SI PROBLÈME : 0
+
+
+📌 TEST 3 : Voir toutes les tables et leurs sessions
+────────────────────────────────────────────────────────────────
+document.querySelectorAll('[data-session-id]').forEach(el => {
+    console.log("Table:", el.id, "→ Session:", el.getAttribute('data-session-id'));
+});
+
+RÉSULTAT ATTENDU : Liste des tables avec leur session
+RÉSULTAT SI PROBLÈME : Rien ne s'affiche
+
+
+📌 TEST 4 : Vérifier le localStorage
+────────────────────────────────────────────────────────────────
+Object.keys(localStorage).filter(k => k.startsWith('flowise_tables_'))
+
+RÉSULTAT ATTENDU : ["flowise_tables_session_XXXXX", ...]
+RÉSULTAT SI PROBLÈME : []
+
+
+📌 TEST 5 : Debug complet de l'état
+────────────────────────────────────────────────────────────────
+debugFlowiseTableState(window.currentSessionId)
+
+RÉSULTAT ATTENDU : Affiche l'état complet dans la console
+RÉSULTAT SI PROBLÈME : Erreur ou undefined
+
+
+📌 TEST 6 : Vérifier la version du code
+────────────────────────────────────────────────────────────────
+// Cherchez ce message au démarrage de la page
+// Si vous ne le voyez pas, le code n'est pas à jour
+
+RÉSULTAT ATTENDU : Message de version dans les logs au démarrage
+
+
+═══════════════════════════════════════════════════════════════
+  🚨 SI LES TESTS ÉCHOUENT (undefined, 0, ou [])
+═══════════════════════════════════════════════════════════════
+
+1. Videz complètement le cache :
+   - F12 → Clic droit sur refresh → "Vider le cache et actualiser"
+
+2. Fermez et rouvrez le navigateur
+
+3. Relancez npm run dev
+
+4. Refaites un Hard Refresh (Ctrl+Shift+R)
+
+5. Retestez
+
+
+═══════════════════════════════════════════════════════════════
+  ✅ SI LES TESTS RÉUSSISSENT
+═══════════════════════════════════════════════════════════════
+
+Le code fonctionne ! Le problème venait du cache.
+
+Pour tester l'isolation :
+1. Créez des tables dans une session
+2. Changez de session (si vous avez un bouton)
+3. Vérifiez que les anciennes tables ont disparu
+4. Les nouvelles tables doivent avoir le nouveau sessionId
+
+
+═══════════════════════════════════════════════════════════════
+  📸 COPIEZ ET ENVOYEZ LES RÉSULTATS
+═══════════════════════════════════════════════════════════════
+
+Faites une capture d'écran de la console avec les résultats
+des tests, ça m'aidera à diagnostiquer si le problème persiste.

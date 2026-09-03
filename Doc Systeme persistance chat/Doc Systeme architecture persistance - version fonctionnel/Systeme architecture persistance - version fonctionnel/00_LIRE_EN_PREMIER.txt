@@ -1,0 +1,204 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                                                                              ║
+║   🚀 CORRECTION PERSISTANCE TABLES CLARAVERSE                                ║
+║                                                                              ║
+║   Problèmes actuels :                                                       ║
+║   ❌ Table Résultat positionnée SOUS la Modelised_table (mauvais ordre)     ║
+║   ❌ Tables d'un ancien chat contaminent le nouveau chat                    ║
+║   ❌ Ordre perturbé après rechargement                                      ║
+║                                                                              ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ 📋 DOCUMENTS DISPONIBLES                                                    │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+1. 🎯 QUICK_START_RESOLUTION_PROBLEMES.md
+   ► Démarrage rapide en 5 étapes
+   ► Temps de lecture : 5 minutes
+   ► Niveau : Développeur React/TypeScript
+
+2. 📖 00_COMMENCER_ICI_IMPLEMENTATION.md
+   ► Guide détaillé pas-à-pas avec code
+   ► Temps de lecture : 30 minutes
+   ► 4 fichiers à modifier + tests
+
+3. 📊 PLAN_IMPLEMENTATION_CHAT_PERSISTANCE.md
+   ► Analyse complète des causes racines
+   ► Architecture détaillée du système
+   ► Questions ouvertes à résoudre
+
+4. 📝 MEMO_MISE_EN_OEUVRE_PERSISTANCE.md
+   ► Architecture globale du système
+   ► Flux de données de sauvegarde
+   ► Guide de maintenance
+
+5. 🧪 test-persistence-tables.html
+   ► Page de test interactive
+   ► 4 scénarios de test avec checkboxes
+   ► Inspection IndexedDB intégrée
+
+6. ⚙️ verifier-implementation.ps1
+   ► Script PowerShell de vérification
+   ► Détecte les modifications manquantes
+   ► Lance avec : .\verifier-implementation.ps1
+
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ 🚀 DÉMARRAGE ULTRA-RAPIDE (POUR LES PRESSÉS)                               │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+1. Ouvrir : QUICK_START_RESOLUTION_PROBLEMES.md
+2. Suivre les 5 étapes
+3. Lancer : .\verifier-implementation.ps1
+4. Tester avec : test-persistence-tables.html
+
+Temps total estimé : 1h30
+
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ 🎓 PARCOURS DÉTAILLÉ (POUR COMPRENDRE)                                      │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+Étape 1 : ANALYSE
+   📖 Lire : PLAN_IMPLEMENTATION_CHAT_PERSISTANCE.md
+   ⏱️  Durée : 15 minutes
+   🎯 Comprendre les causes racines
+
+Étape 2 : ARCHITECTURE
+   📖 Lire : MEMO_MISE_EN_OEUVRE_PERSISTANCE.md
+   ⏱️  Durée : 15 minutes
+   🎯 Comprendre le flux de données
+
+Étape 3 : IMPLÉMENTATION
+   📖 Lire : 00_COMMENCER_ICI_IMPLEMENTATION.md
+   ⏱️  Durée : 45 minutes
+   🎯 Appliquer les modifications
+   
+   Fichiers à modifier :
+   ├── public/auto-restore-chat-change.js   (Section 1)
+   ├── public/conso.js                      (Section 2)
+   ├── src/services/flowiseTableBridge.ts   (Section 3)
+   └── public/conso-indexeddb-bridge.js     (Section 4)
+
+Étape 4 : COMPILATION
+   💻 Commande : npm run build
+   ⏱️  Durée : 2 minutes
+
+Étape 5 : VÉRIFICATION
+   ⚙️  Script : .\verifier-implementation.ps1
+   ⏱️  Durée : 1 minute
+
+Étape 6 : TESTS
+   🧪 Ouvrir : test-persistence-tables.html
+   ⏱️  Durée : 30 minutes
+   
+   Tests à effectuer :
+   ✓ Test 1 : Ordre des tables
+   ✓ Test 2 : Persistance simple
+   ✓ Test 3 : Isolation inter-chats
+   ✓ Test 4 : Vérification IndexedDB
+
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ 🎯 OBJECTIF FINAL                                                           │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+Garantir que l'ordre des tables soit TOUJOURS :
+
+   📊 Table de Consolidation    (EN HAUT)
+   ↓
+   📋 Table Résultat             (AU MILIEU)
+   ↓
+   📑 Table Modélisée            (EN BAS)
+
+ET que chaque chat ait ses propres tables (pas de contamination).
+
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ ✅ CRITÈRES DE SUCCÈS                                                       │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+Vous avez réussi si :
+
+   ✓ Les 3 tables sont dans le bon ordre après génération
+   ✓ Les modifications persistent après rechargement (F5)
+   ✓ Chaque chat a ses propres tables (pas de contamination)
+   ✓ IndexedDB contient les tables avec sessionIds différents
+   ✓ Aucune erreur dans la console navigateur
+
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ 🛠️ OUTILS DE DÉPANNAGE                                                     │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+Console Navigateur (F12) :
+   🔍 Rechercher : [ConsoIndexedDB]  → Logs du pont de sauvegarde
+   🔍 Rechercher : [Claraverse]      → Logs de conso.js
+   🔍 Rechercher : AUTO RESTORE      → Logs de restauration
+
+DevTools → Application :
+   🗄️ IndexedDB → clara_db → clara_generated_tables
+   📦 SessionStorage → claraverse_stable_session
+
+Console JavaScript :
+   window.restoreCurrentSession()         → Force restauration
+   window.consoIndexedDBBridge            → API du pont
+   sessionStorage.getItem('claraverse_stable_session')  → SessionId actif
+
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ ⚠️ PRÉCAUTIONS                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+AVANT de commencer :
+   ✓ Sauvegarder les fichiers actuels (git commit)
+   ✓ Lire au moins le QUICK_START_RESOLUTION_PROBLEMES.md
+   ✓ Préparer 1h30 de temps disponible
+
+PENDANT les modifications :
+   ✓ Suivre l'ordre des sections (1 → 2 → 3 → 4)
+   ✓ Tester chaque modification individuellement si possible
+   ✓ Compiler TypeScript après chaque modif de .ts
+
+APRÈS les modifications :
+   ✓ Lancer verifier-implementation.ps1
+   ✓ Tester avec test-persistence-tables.html
+   ✓ Vérifier IndexedDB dans DevTools
+
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ 📞 AIDE                                                                      │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+En cas de problème :
+   1. Consulter la section "🐛 DÉPANNAGE" dans :
+      - 00_COMMENCER_ICI_IMPLEMENTATION.md
+      - QUICK_START_RESOLUTION_PROBLEMES.md
+   
+   2. Vérifier les logs console avec F12
+   
+   3. Inspecter IndexedDB :
+      DevTools → Application → IndexedDB → clara_db
+
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ 📅 INFORMATIONS                                                             │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+Date de création : 28 août 2026
+Version          : 1.0
+Statut           : 🔴 EN ATTENTE D'IMPLÉMENTATION
+Niveau requis    : Développeur React/TypeScript expérimenté
+Temps estimé     : 1h30 (lecture + implémentation + tests)
+
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                                                                              ║
+║   🎯 PAR OÙ COMMENCER ?                                                     ║
+║                                                                              ║
+║   Option A (Rapide) : QUICK_START_RESOLUTION_PROBLEMES.md                  ║
+║   Option B (Détaillé) : PLAN_IMPLEMENTATION_CHAT_PERSISTANCE.md            ║
+║                                                                              ║
+╚══════════════════════════════════════════════════════════════════════════════╝

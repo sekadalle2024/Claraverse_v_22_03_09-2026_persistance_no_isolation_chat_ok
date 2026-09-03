@@ -1,0 +1,135 @@
+╔════════════════════════════════════════════════════════════════════╗
+║                                                                    ║
+║            🔴 PROBLÈME : TABLES QUI DISPARAISSENT                  ║
+║                    29 août 2026                                    ║
+║                                                                    ║
+╚════════════════════════════════════════════════════════════════════╝
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   📋 SITUATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ L'application se charge correctement
+✅ Les tables sont générées et affichées
+❌ MAIS : Les tables disparaissent après :
+   - Rechargement de page (F5)
+   - Changement de chat
+   - Fermeture/réouverture du navigateur
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   🎯 3 MÉTHODES DE DIAGNOSTIC
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+┌────────────────────────────────────────────────────────────────┐
+│  MÉTHODE 1 : AUTOMATIQUE (⭐ Recommandé - Plus rapide)         │
+└────────────────────────────────────────────────────────────────┘
+
+1️⃣  Lancez le serveur :
+    npm run dev
+
+2️⃣  Ouvrez cette URL dans votre navigateur :
+    http://localhost:5173/Doc%20Systeme%20persistance%20chat/test-persistance-tables.html
+
+3️⃣  Cliquez sur le bouton :
+    "Lancer Audit Complet"
+
+4️⃣  Copiez TOUT le texte qui s'affiche
+
+5️⃣  Envoyez-le moi
+
+⏱️ Temps estimé : 2 minutes
+
+
+┌────────────────────────────────────────────────────────────────┐
+│  MÉTHODE 2 : CONSOLE CHROME (⚡ Rapide si vous savez faire)    │
+└────────────────────────────────────────────────────────────────┘
+
+1️⃣  Lancez le serveur et ouvrez l'app
+
+2️⃣  F12 → Console
+
+3️⃣  Collez ce code :
+
+// === COPIER TOUT CE CODE ===
+console.log('=== DIAGNOSTIC PERSISTANCE TABLES ===');
+console.log('1. Service:', typeof window.flowiseTableBridge);
+const keys = Object.keys(localStorage).filter(k => k.includes('flowise'));
+console.log('2. Clés Flowise:', keys.length);
+let tableCount = 0;
+keys.forEach(k => {
+  const msgs = JSON.parse(localStorage.getItem(k));
+  msgs.forEach((m, i) => {
+    if (m.message && m.message.includes('<table')) {
+      tableCount++;
+      console.log(`✅ Table dans ${k} message ${i}`);
+    }
+  });
+});
+console.log('3. Total tables:', tableCount);
+// === FIN DU CODE ===
+
+4️⃣  Envoyez-moi TOUT ce qui s'affiche
+
+⏱️ Temps estimé : 1 minute
+
+
+┌────────────────────────────────────────────────────────────────┐
+│  MÉTHODE 3 : MANUEL (📋 Détaillé mais plus long)              │
+└────────────────────────────────────────────────────────────────┘
+
+Lisez le fichier :
+DIAGNOSTIC_TABLES_DISPARAISSENT.txt
+
+⏱️ Temps estimé : 5-10 minutes
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   💡 QUE SE PASSE-T-IL ENSUITE ?
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Avec les résultats du diagnostic, je pourrai identifier :
+
+🔍 Cas 1 : Service non chargé
+→ Je vais corriger index.html
+
+🔍 Cas 2 : Sauvegarde non effectuée
+→ Je vais corriger le système de persistance
+
+🔍 Cas 3 : Format de sauvegarde incorrect
+→ Je vais corriger la sérialisation
+
+🔍 Cas 4 : Restauration défaillante
+→ Je vais corriger le chargement des données
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   ⚡ ACTION IMMÉDIATE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Ouvrez PowerShell
+
+2. Tapez :
+   cd h:\ClaraVerse
+   npm run dev
+
+3. Allez sur :
+   http://localhost:5173/Doc%20Systeme%20persistance%20chat/test-persistance-tables.html
+
+4. Cliquez "Lancer Audit Complet"
+
+5. Envoyez-moi le résultat
+
+
+═══════════════════════════════════════════════════════════════════
+
+📞 Besoin d'aide ? Envoyez-moi :
+   • Le résultat de l'audit
+   • OU une capture d'écran de la Console (F12)
+   • OU le message d'erreur complet
+
+Je vous donnerai la solution exacte ! 🚀
+
+═══════════════════════════════════════════════════════════════════

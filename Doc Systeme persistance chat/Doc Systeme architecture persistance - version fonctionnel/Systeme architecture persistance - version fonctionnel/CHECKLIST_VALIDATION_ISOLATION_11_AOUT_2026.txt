@@ -1,0 +1,311 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                                                                              ║
+║                ✅ CHECKLIST DE VALIDATION - ISOLATION CHATS                 ║
+║                                                                              ║
+║                          ClaraVerse - 11 Août 2026                          ║
+║                                                                              ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃                     🎯 TESTS RAPIDES (15 MINUTES)                          ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+TEST 1 : Interface de Test (5 min)
+═══════════════════════════════════
+[ ] Ouvrir test-isolation-rapide.html
+[ ] Cliquer "Ajouter Table" dans Chat A
+[ ] Cliquer "Ajouter Table" dans Chat B
+[ ] Cliquer "Afficher Tables" dans les deux chats
+[ ] Vérifier : Chat A voit uniquement sa table
+[ ] Vérifier : Chat B voit uniquement sa table
+[ ] Cliquer "Tester Isolation Complète"
+[ ] Résultat attendu : "SUCCÈS: Aucune contamination"
+
+✅ TEST 1 RÉUSSI si :
+   - Chaque chat voit uniquement ses propres tables
+   - Le message de succès s'affiche
+   - Aucune erreur dans la console de log
+
+
+TEST 2 : Application Réelle (5 min)
+════════════════════════════════════
+[ ] Ouvrir ClaraVerse dans le navigateur
+[ ] Créer un nouveau chat (Chat A)
+[ ] Ajouter ou modifier une table
+[ ] Noter le nom de la table : ___________________
+[ ] Créer un NOUVEAU chat (Chat B)
+[ ] Vérifier : La table de Chat A n'apparaît PAS
+[ ] Retourner au Chat A
+[ ] Vérifier : La table est toujours présente
+
+✅ TEST 2 RÉUSSI si :
+   - La table du Chat A n'apparaît pas dans le Chat B
+   - La table reste dans le Chat A après changement
+
+
+TEST 3 : Persistence (5 min)
+═════════════════════════════
+[ ] Dans Chat A : Créer 2 tables
+[ ] Dans Chat B : Créer 3 tables
+[ ] Actualiser la page (F5 ou Ctrl+R)
+[ ] Vérifier Chat A : 2 tables présentes
+[ ] Vérifier Chat B : 3 tables présentes
+[ ] Fermer le navigateur
+[ ] Rouvrir ClaraVerse
+[ ] Vérifier Chat A : toujours 2 tables
+[ ] Vérifier Chat B : toujours 3 tables
+
+✅ TEST 3 RÉUSSI si :
+   - Les tables restent après actualisation
+   - Les tables restent après fermeture/réouverture
+   - Pas de mélange entre les chats
+
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃                   🔬 TESTS APPROFONDIS (30 MINUTES)                        ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+TEST 4 : Multi-Chat (10 min)
+═════════════════════════════
+[ ] Créer Chat A : Ajouter 2 tables
+[ ] Créer Chat B : Ajouter 3 tables
+[ ] Créer Chat C : Ajouter 1 table
+[ ] Créer Chat D : Ajouter 4 tables
+[ ] Vérifier Chat A : 2 tables uniquement
+[ ] Vérifier Chat B : 3 tables uniquement
+[ ] Vérifier Chat C : 1 table uniquement
+[ ] Vérifier Chat D : 4 tables uniquement
+[ ] Actualiser la page
+[ ] Revérifier tous les chats
+
+✅ TEST 4 RÉUSSI si :
+   - Chaque chat conserve exactement ses tables
+   - Aucune table n'apparaît dans un autre chat
+   - L'isolation fonctionne avec 4+ chats
+
+
+TEST 5 : Modifications (10 min)
+════════════════════════════════
+[ ] Dans Chat A : Créer "Table Alpha"
+[ ] Dans Chat B : Créer "Table Beta"
+[ ] Dans Chat A : Modifier "Table Alpha" → "Table Alpha Modifiée"
+[ ] Vérifier Chat B : "Table Beta" inchangée
+[ ] Dans Chat B : Modifier "Table Beta" → "Table Beta Modifiée"
+[ ] Vérifier Chat A : "Table Alpha Modifiée" inchangée
+[ ] Actualiser la page
+[ ] Vérifier : Toutes les modifications conservées
+[ ] Vérifier : Pas de contamination croisée
+
+✅ TEST 5 RÉUSSI si :
+   - Les modifications restent dans le bon chat
+   - Aucune modification n'affecte un autre chat
+   - Persistence après actualisation
+
+
+TEST 6 : Suppression (10 min)
+══════════════════════════════
+[ ] Créer Chat A avec 3 tables
+[ ] Créer Chat B avec 2 tables
+[ ] Créer Chat C avec 4 tables
+[ ] Supprimer toutes les tables du Chat A
+[ ] Vérifier Chat B : toujours 2 tables
+[ ] Vérifier Chat C : toujours 4 tables
+[ ] Supprimer 1 table du Chat B
+[ ] Vérifier Chat B : 1 table restante
+[ ] Vérifier Chat C : toujours 4 tables
+[ ] Actualiser la page
+[ ] Vérifier : État correct conservé
+
+✅ TEST 6 RÉUSSI si :
+   - La suppression n'affecte que le chat concerné
+   - Les autres chats restent intacts
+   - L'état est conservé après actualisation
+
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃                    🧪 TESTS TECHNIQUES (30 MINUTES)                        ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+TEST 7 : Console du Navigateur (10 min)
+════════════════════════════════════════
+[ ] Ouvrir la console (F12)
+[ ] Exécuter : window.ClaraVerseSyncCorrection.testSync()
+[ ] Vérifier : Résultat montre "API présente"
+[ ] Vérifier : Pas d'erreur JavaScript
+[ ] Exécuter : corrigerSynchronisation()
+[ ] Vérifier : Message de succès
+[ ] Vérifier : Statistiques affichées correctement
+
+✅ TEST 7 RÉUSSI si :
+   - Aucune erreur dans la console
+   - L'API est détectée et fonctionne
+   - La correction se lance sans problème
+
+
+TEST 8 : Inspection IndexedDB (10 min)
+═══════════════════════════════════════
+[ ] Ouvrir DevTools (F12) → Application → IndexedDB
+[ ] Vérifier : Base "clara_db" existe
+[ ] Vérifier : Store "clara_generated_tables" existe
+[ ] Vérifier : Index "sessionId" existe
+[ ] Créer une table dans Chat A
+[ ] Inspecter : Voir la table avec sessionId de Chat A
+[ ] Créer une table dans Chat B
+[ ] Inspecter : Voir la table avec sessionId de Chat B
+[ ] Vérifier : Les deux ont des sessionId différents
+
+✅ TEST 8 RÉUSSI si :
+   - La base clara_db est correctement structurée
+   - Chaque table a un sessionId
+   - Les sessionId sont différents entre chats
+
+
+TEST 9 : Test Manuel d'Isolation (10 min)
+══════════════════════════════════════════
+[ ] Console : const session1 = 'test_' + Date.now();
+[ ] Console : const session2 = 'test_' + (Date.now() + 1000);
+[ ] Console : Exécuter le code suivant
+
+    window.ClaraVerse.TablePersistence.db.set({
+      id: 'table1',
+      sessionId: session1,
+      data: 'Test 1'
+    });
+
+    window.ClaraVerse.TablePersistence.db.set({
+      id: 'table2',
+      sessionId: session2,
+      data: 'Test 2'
+    });
+
+[ ] Console : window.ClaraVerse.TablePersistence.db.getAll(session1)
+              .then(t => console.log('Session 1:', t.length));
+[ ] Résultat attendu : "Session 1: 1"
+[ ] Console : window.ClaraVerse.TablePersistence.db.getAll(session2)
+              .then(t => console.log('Session 2:', t.length));
+[ ] Résultat attendu : "Session 2: 1"
+
+✅ TEST 9 RÉUSSI si :
+   - Chaque session retourne exactement 1 table
+   - Pas de fuite entre les sessions
+   - L'isolation programmatique fonctionne
+
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃                     🔄 TESTS DE COMPATIBILITÉ (20 MIN)                     ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+TEST 10 : Compatibilité Conso.js (10 min)
+══════════════════════════════════════════
+[ ] Créer une table [Modelised_table] avec conso.js
+[ ] Vérifier : Table sauvegardée correctement
+[ ] Créer un nouveau chat
+[ ] Vérifier : Table précédente n'apparaît PAS
+[ ] Revenir au premier chat
+[ ] Vérifier : Table toujours présente
+[ ] Lancer la consolidation dans conso.js
+[ ] Vérifier : Tables [Table_conso] et [Resultat] créées
+[ ] Vérifier : Isolation maintenue
+
+✅ TEST 10 RÉUSSI si :
+   - Conso.js fonctionne normalement
+   - L'isolation est maintenue
+   - Aucune régression
+
+
+TEST 11 : Compatibilité Menu.js (10 min)
+═════════════════════════════════════════
+[ ] Créer une table dans Chat A
+[ ] Clic droit → Insérer ligne
+[ ] Vérifier : Ligne ajoutée correctement
+[ ] Clic droit → Dupliquer ligne
+[ ] Vérifier : Ligne dupliquée correctement
+[ ] Créer Chat B
+[ ] Vérifier : Table de Chat A n'apparaît pas
+[ ] Créer une table dans Chat B
+[ ] Utiliser les fonctions du menu contextuel
+[ ] Vérifier : Pas d'interférence avec Chat A
+
+✅ TEST 11 RÉUSSI si :
+   - Menu.js fonctionne normalement
+   - Aucune régression sur les fonctionnalités
+   - L'isolation est respectée
+
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃                     ✅ VALIDATION FINALE                                   ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+CRITÈRES OBLIGATOIRES
+═════════════════════
+[ ] Tous les tests rapides (1-3) réussis
+[ ] Au moins 3 tests approfondis (4-6) réussis
+[ ] Au moins 2 tests techniques (7-9) réussis
+[ ] Les 2 tests de compatibilité (10-11) réussis
+[ ] Aucune erreur critique dans la console
+[ ] Aucune perte de données constatée
+
+CRITÈRES OPTIONNELS
+═══════════════════
+[ ] Performance : Chargement < 200ms
+[ ] Stabilité : 0 erreur sur 100 opérations
+[ ] Facilité d'utilisation : Transparente pour l'utilisateur
+[ ] Documentation : Complète et à jour
+
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃                     📝 RAPPORT DE VALIDATION                               ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+Date de validation : _________________________
+
+Tests effectués :
+────────────────
+Tests rapides (1-3)        : [ ] Réussis  [ ] Échoués
+Tests approfondis (4-6)    : [ ] Réussis  [ ] Échoués
+Tests techniques (7-9)     : [ ] Réussis  [ ] Échoués
+Tests compatibilité (10-11): [ ] Réussis  [ ] Échoués
+
+Nombre de tests réussis  : _____ / 11
+Nombre de tests échoués  : _____ / 11
+Taux de réussite        : _____ %
+
+Problèmes identifiés :
+─────────────────────
+1. _________________________________________________________________
+2. _________________________________________________________________
+3. _________________________________________________________________
+
+Actions correctives :
+────────────────────
+1. _________________________________________________________________
+2. _________________________________________________________________
+3. _________________________________________________________________
+
+DÉCISION FINALE :
+════════════════
+[ ] ✅ VALIDATION APPROUVÉE - Déploiement autorisé
+[ ] ⚠️ VALIDATION CONDITIONNELLE - Corrections mineures requises
+[ ] ❌ VALIDATION REFUSÉE - Corrections majeures requises
+
+Commentaires additionnels :
+───────────────────────────
+_____________________________________________________________________
+_____________________________________________________________________
+_____________________________________________________________________
+_____________________________________________________________________
+
+
+Validé par : _________________________
+Signature  : _________________________
+Date       : _________________________
+
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                                                                              ║
+║           🎯 CHECKLIST DE VALIDATION COMPLÈTE ET PRÊTE À L'EMPLOI           ║
+║                                                                              ║
+║                Suivez cette checklist pour garantir la qualité               ║
+║                                                                              ║
+╚══════════════════════════════════════════════════════════════════════════════╝

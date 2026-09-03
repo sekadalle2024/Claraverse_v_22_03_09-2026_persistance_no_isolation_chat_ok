@@ -1,0 +1,165 @@
+╔════════════════════════════════════════════════════════════════════╗
+║                                                                    ║
+║          🔴 DIAGNOSTIC : PROBLÈME D'ISOLATION PERSISTANT          ║
+║                     29 août 2026                                   ║
+║                                                                    ║
+╚════════════════════════════════════════════════════════════════════╝
+
+
+┌─────────────────────────────────────────────────────────────────┐
+│  📊 STATUT ACTUEL                                               │
+└─────────────────────────────────────────────────────────────────┘
+
+✅ Code source : CORRECT
+   └─ Isolation par data-session-id implémentée
+   └─ Fonctions de nettoyage présentes
+   └─ Tests unitaires passent
+
+❌ Navigateur : ANCIEN CODE EN CACHE
+   └─ npm run dev utilisé (pas de build)
+   └─ Aucun hard refresh effectué
+   └─ Navigateur charge l'ancien JavaScript
+
+
+┌─────────────────────────────────────────────────────────────────┐
+│  🎯 SOLUTION IMMÉDIATE                                          │
+└─────────────────────────────────────────────────────────────────┘
+
+    1️⃣  HARD REFRESH
+    ╔═══════════════════════════════╗
+    ║  Windows : Ctrl + Shift + R  ║
+    ║     ou     Ctrl + F5          ║
+    ╚═══════════════════════════════╝
+
+    2️⃣  Tester à nouveau
+    
+    3️⃣  Si problème persiste →
+         Suivre TEST_CONSOLE_NAVIGATEUR.txt
+
+
+┌─────────────────────────────────────────────────────────────────┐
+│  🔍 POURQUOI CE PROBLÈME ?                                      │
+└─────────────────────────────────────────────────────────────────┘
+
+    Source Code (TypeScript)
+         ↓
+    Vite Compile
+         ↓
+    JavaScript Généré  ✅ Avec corrections
+         ↓
+    Navigateur
+         ↓
+    ⚠️ UTILISE LE CACHE → Ancien JavaScript ❌
+    
+    
+    Hard Refresh
+         ↓
+    Force le rechargement
+         ↓
+    Nouveau JavaScript  ✅ Problème résolu
+
+
+┌─────────────────────────────────────────────────────────────────┐
+│  🧪 TESTS DE VÉRIFICATION                                       │
+└─────────────────────────────────────────────────────────────────┘
+
+Après le hard refresh, dans la console (F12) :
+
+┌─────────────────────────────────────────┐
+│ Test 1 : SessionId défini ?             │
+│ window.currentSessionId                 │
+│                                         │
+│ ✅ "session_XXXXX"                      │
+│ ❌ undefined                            │
+└─────────────────────────────────────────┘
+
+┌─────────────────────────────────────────┐
+│ Test 2 : Tables isolées ?               │
+│ document.querySelectorAll(              │
+│   '[data-session-id]'                   │
+│ ).length                                │
+│                                         │
+│ ✅ Nombre > 0                           │
+│ ❌ 0                                    │
+└─────────────────────────────────────────┘
+
+┌─────────────────────────────────────────┐
+│ Test 3 : LocalStorage séparé ?          │
+│ Object.keys(localStorage)               │
+│   .filter(k =>                          │
+│     k.startsWith('flowise_tables_')     │
+│   )                                     │
+│                                         │
+│ ✅ Array avec sessions                  │
+│ ❌ []                                   │
+└─────────────────────────────────────────┘
+
+
+┌─────────────────────────────────────────────────────────────────┐
+│  📁 FICHIERS CRÉÉS (29 août 2026)                               │
+└─────────────────────────────────────────────────────────────────┘
+
+1. 00_LIRE_MAINTENANT_29_AOUT_2026.txt ⚡
+   └─ Instructions urgentes (30 secondes)
+
+2. DIAGNOSTIC_CACHE_NAVIGATEUR_29_AOUT_2026.md 🔍
+   └─ Analyse complète + Checklist
+
+3. TEST_CONSOLE_NAVIGATEUR.txt 🧪
+   └─ Tests à copier-coller dans la console
+
+4. SYNTHESE_VISUELLE_29_AOUT_2026.txt 📊
+   └─ Ce fichier (vue d'ensemble)
+
+
+┌─────────────────────────────────────────────────────────────────┐
+│  ⏭️  PROCHAINES ÉTAPES                                          │
+└─────────────────────────────────────────────────────────────────┘
+
+🟢 Étape 1 : Hard Refresh (Ctrl+Shift+R)
+        ↓
+        ├─ ✅ Problème résolu → FIN
+        │
+        └─ ❌ Problème persiste
+              ↓
+🟡 Étape 2 : Tests console (TEST_CONSOLE_NAVIGATEUR.txt)
+        ↓
+        Copier-coller les résultats
+        ↓
+🔵 Étape 3 : Diagnostic approfondi selon résultats
+        ↓
+        Solution spécifique au problème identifié
+
+
+┌─────────────────────────────────────────────────────────────────┐
+│  💡 EXPLICATIONS TECHNIQUES                                     │
+└─────────────────────────────────────────────────────────────────┘
+
+Différence npm run dev vs npm run build :
+
+┌─────────────────────────────────────┐
+│  npm run dev                        │
+│  ────────────────                   │
+│  • Compile à la volée              │
+│  • Fichiers servis par Vite        │
+│  • MÊME nom de fichier JS           │
+│  • ⚠️ Cache possible               │
+│  • ✅ Hot reload (parfois)         │
+└─────────────────────────────────────┘
+
+┌─────────────────────────────────────┐
+│  npm run build                      │
+│  ──────────────                     │
+│  • Génère /dist/                   │
+│  • Fichiers avec hash (abc123.js)  │
+│  • Nom change à chaque build       │
+│  • ✅ Pas de cache                 │
+│  • Optimisé pour production        │
+└─────────────────────────────────────┘
+
+
+═══════════════════════════════════════════════════════════════════
+
+            🎯 ACTION IMMÉDIATE : Ctrl + Shift + R
+
+═══════════════════════════════════════════════════════════════════

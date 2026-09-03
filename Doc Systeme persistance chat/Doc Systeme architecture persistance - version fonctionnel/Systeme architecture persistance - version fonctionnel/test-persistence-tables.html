@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Persistance Tables ClaraVerse</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-card h2 {
+            margin-top: 0;
+            color: #333;
+            border-bottom: 2px solid #4CAF50;
+            padding-bottom: 10px;
+        }
+        .test-step {
+            margin: 15px 0;
+            padding: 15px;
+            background: #f9f9f9;
+            border-left: 4px solid #2196F3;
+            border-radius: 4px;
+        }
+        .test-step h3 {
+            margin-top: 0;
+            color: #2196F3;
+            font-size: 16px;
+        }
+        .checkbox-item {
+            margin: 10px 0;
+            padding: 10px;
+            background: white;
+            border-radius: 4px;
+        }
+        .checkbox-item label {
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+        .checkbox-item input[type="checkbox"] {
+            margin-right: 10px;
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+        .status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        .status.pending {
+            background: #ff9800;
+            color: white;
+        }
+        .status.done {
+            background: #4CAF50;
+            color: white;
+        }
+        .status.failed {
+            background: #f44336;
+            color: white;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 5px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        button.secondary {
+            background: #2196F3;
+        }
+        button.secondary:hover {
+            background: #1976D2;
+        }
+        button.danger {
+            background: #f44336;
+        }
+        button.danger:hover {
+            background: #da190b;
+        }
+        .code-block {
+            background: #263238;
+            color: #aed581;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            overflow-x: auto;
+        }
+        .result-box {
+            margin: 15px 0;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 13px;
+        }
+        .result-box.success {
+            background: #e8f5e9;
+            border: 1px solid #4CAF50;
+            color: #2e7d32;
+        }
+        .result-box.error {
+            background: #ffebee;
+            border: 1px solid #f44336;
+            color: #c62828;
+        }
+        .result-box.info {
+            background: #e3f2fd;
+            border: 1px solid #2196F3;
+            color: #1565c0;
+        }
+        #progressBar {
+            width: 100%;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        #progressFill {
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50, #8BC34A);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            color: #856404;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Tests de Persistance - ClaraVerse Tables</h1>
+    
+    <div class="warning">
+        ⚠️ <strong>ATTENTION :</strong> Ces tests doivent être effectués APRÈS avoir appliqué les modifications du plan d'implémentation.
+    </div>
+
+    <div id="progressBar">
+        <div id="progressFill"></div>
+    </div>
+
+    <!-- TEST 1 : ORDRE DES TABLES -->
+    <div class="test-card">
+        <h2>📋 Test 1 : Ordre des Tables <span class="status pending" id="test1-status">En attente</span></h2>
+        
+        <div class="test-step">
+            <h3>Objectif</h3>
+            <p>Vérifier que les tables sont toujours dans le bon ordre : <code>Table_conso → Résultat → Modelised</code></p>
+        </div>
+
+        <div class="test-step">
+            <h3>Instructions</h3>
+            <ol>
+                <li>Ouvrir ClaraVerse dans un navigateur</li>
+                <li>Créer ou ouvrir un chat</li>
+                <li>Générer une table avec colonnes Assertion/Conclusion/Ctr (Modelised_table)</li>
+                <li>Attendre la génération automatique de la Table_conso et Table Résultat</li>
+                <li>Ouvrir les DevTools (F12) → Elements</li>
+                <li>Inspecter l'ordre des tables dans le DOM</li>
+            </ol>
+        </div>
+
+        <div class="checkbox-item">
+            <label>
+                <input type="checkbox" data-test="test1" data-check="1">
+                La Table de Consolidation (📊) est en PREMIER
+            </label>
+        </div>
+        <div class="checkbox-item">
+            <label>
+                <input type="checkbox" data-test="test1" data-check="2">
+                La Table Résultat (📋) est en DEUXIÈME (entre Conso et Modelised)
+            </label>
+        </div>
+        <div class="checkbox-item">
+            <label>
+                <input type="checkbox" data-test="test1" data-check="3">
+                La Table Modélisée (📑) est en TROISIÈME
+            </label>
+        </div>
+
+        <button onclick="runDOMOrderTest()">🔍 Tester l'ordre dans le DOM</button>
+        <div id="test1-result"></div>
+    </div>
+
+    <!-- TEST 2 : PERSISTANCE SIMPLE -->
+    <div class="test-card">
+        <h2>💾 Test 2 : Persistance Simple <span class="status pending" id="test2-status">En attente</span></h2>
+        
+        <div class="test-step">
+            <h3>Objectif</h3>
+            <p>Vérifier que les modifications sont sauvegardées et restaurées après rechargement</p>
+        </div>
+
+        <div class="test-step">
+            <h3>Instructions</h3>
+            <ol>
+                <li>Modifier des cellules dans chacune des 3 tables</li>
+                <li>Attendre 2 secondes (debounce de sauvegarde)</li>
+                <li>Recharger la page (F5 ou Ctrl+R)</li>
+                <li>Vérifier que toutes les modifications sont restaurées</li>
+            </ol>
+        </div>
+
+        <div class="checkbox-item">
+            <label>
+                <input type="checkbox" data-test="test2" data-check="1">
+                Les modifications de la Table_conso sont restaurées
+            </label>
+        </div>
+        <div class="checkbox-item">
+            <label>
+                <input type="checkbox" data-test="test2" data-check="2">
+                Les modifications de la Table Résultat sont restaurées
+            </label>
+        </div>
+        <div class="checkbox-item">
+            <label>
+                <input type="checkbox" data-test="test2" data-check="3">
+                Les modifications de la Table Modélisée sont restaurées
+            </label>
+        </div>
+        <div class="checkbox-item">
+            <label>
+                <input type="checkbox" data-test="test2" data-check="4">
+                L'ordre des tables est respecté après restauration
+            </label>
+        </div>
+
+        <button onclick="checkIndexedDB()">🗄️ Vérifier IndexedDB</button>
+        <div id="test2-result"></div>
+    </div>
+
+    <!-- TEST 3 : ISOLATION INTER-CHATS -->
+    <div class="test-card">
+        <h2>🔒 Test 3 : Isolation Inter-Chats <span class="status pending" id="test3-status">En attente</span></h2>
+        
+        <div class="test-step">
+            <h3>Objectif</h3>
+            <p>Vérifier que les tables d'un chat ne contaminent pas un autre chat</p>
+        </div>
+
+        <div class="test-step">
+            <h3>Instructions</h3>
+            <ol>
+                <li><strong>Chat A :</strong> Générer des tables et modifier des cellules</li>
+                <li><strong>Chat A :</strong> Noter les valeurs modifiées</li>
+                <li>Ouvrir un nouveau chat (Chat B)</li>
+                <li><strong>Chat B :</strong> Générer des tables différentes</li>
+                <li><strong>Chat B :</strong> Vérifier que les valeurs du Chat A n'apparaissent PAS</li>
+                <li>Retourner au Chat A</li>
+                <li><strong>Chat A :</strong> Vérifier que les valeurs du Chat A sont toujours là</li>
+            </ol>
+        </div>
+
+        <div class="checkbox-item">
+            <label>
+                <input type="checkbox" data-test="test3" data-check="1">
+                Chat B n'affiche PAS les données du Chat A
+            </label>
+        </div>
+        <div class="checkbox-item">
+            <label>
+                <input type="checkbox" data-test="test3" data-check="2">
+                Retour au Chat A : les données sont intactes
+            </label>
+        </div>
+        <div class="checkbox-item">
+            <label>
+                <input type="checkbox" data-test="test3" data-check="3">
+                Chaque chat a un sessionId différent dans IndexedDB
+            </label>
+        </div>
+
+        <button onclick="checkSessionIsolation()">🔍 Vérifier l'isolation des sessions</button>
+        <div id="test3-result"></div>
+    </div>
+
+    <!-- TEST 4 : INDEXEDDB -->
+    <div class="test-card">
+        <h2>🗄️ Test 4 : Vérification IndexedDB <span class="status pending" id="test4-status">En attente</span></h2>
+        
+        <div class="test-step">
+            <h3>Objectif</h3>
+            <p>Vérifier que les tables sont correctement enregistrées dans IndexedDB</p>
+        </div>
+
+        <div class="test-step">
+            <h3>Instructions</h3>
+            <ol>
+                <li>Ouvrir DevTools (F12) → Application → Storage → IndexedDB</li>
+                <li>Ouvrir la base <code>clara_db</code></li>
+                <li>Ouvrir le store <code>clara_generated_tables</code></li>
+                <li>Vérifier que les tables y sont enregistrées</li>
+            </ol>
+        </div>
+
+        <div class="checkbox-item">
+            <label>
+                <input type="checkbox" data-test="test4" data-check="1">
+                La base <code>clara_db</code> existe
+            </label>
+        </div>
+        <div class="checkbox-item">
+            <label>
+                <input type="checkbox" data-test="test4" data-check="2">
+                Le store <code>clara_generated_tables</code> contient des tables
+            </label>
+        </div>
+        <div class="checkbox-item">
+            <label>
+                <input type="checkbox" data-test="test4" data-check="3">
+                Chaque table a un <code>sessionId</code> correct
+            </label>
+        </div>
+        <div class="checkbox-item">
+            <label>
+                <input type="checkbox" data-test="test4" data-check="4">
+                Les keywords sont corrects : "📊 Table de Consolidation", "📋 Table Résultat"
+            </label>
+        </div>
+
+        <button onclick="inspectIndexedDB()">🔎 Inspecter IndexedDB</button>
+        <button onclick="clearIndexedDB()" class="danger">🗑️ Effacer IndexedDB (ATTENTION)</button>
+        <div id="test4-result"></div>
+    </div>
+
+    <script>
+        // Mise à jour de la barre de progression
+        function updateProgress() {
+            const allCheckboxes = document.querySelectorAll('input[type="checkbox"]');
+            const checkedBoxes = document.querySelectorAll('input[type="checkbox"]:checked');
+            const progress = (checkedBoxes.length / allCheckboxes.length) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+            
+            // Mise à jour des statuts de test
+            for (let i = 1; i <= 4; i++) {
+                const testCheckboxes = document.querySelectorAll(`input[data-test="test${i}"]`);
+                const testChecked = document.querySelectorAll(`input[data-test="test${i}"]:checked`);
+                const statusEl = document.getElementById(`test${i}-status`);
+                
+                if (testChecked.length === 0) {
+                    statusEl.className = 'status pending';
+                    statusEl.textContent = 'En attente';
+                } else if (testChecked.length === testCheckboxes.length) {
+                    statusEl.className = 'status done';
+                    statusEl.textContent = '✓ Réussi';
+                } else {
+                    statusEl.className = 'status pending';
+                    statusEl.textContent = `${testChecked.length}/${testCheckboxes.length}`;
+                }
+            }
+        }
+
+        document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+            cb.addEventListener('change', updateProgress);
+        });
+
+        // Test 1 : Ordre DOM
+        function runDOMOrderTest() {
+            const resultDiv = document.getElementById('test1-result');
+            resultDiv.innerHTML = '<div class="result-box info">🔍 Recherche des tables dans le DOM...</div>';
+            
+            setTimeout(() => {
+                const tables = document.querySelectorAll('table');
+                let html = '<div class="result-box info"><strong>Tables trouvées :</strong><br>';
+                
+                tables.forEach((table, index) => {
+                    const firstHeader = table.querySelector('th')?.textContent?.trim() || 'Sans nom';
+                    const position = index + 1;
+                    html += `${position}. ${firstHeader}<br>`;
+                });
+                
+                html += '</div>';
+                
+                // Vérifier l'ordre
+                if (tables.length >= 3) {
+                    const headers = Array.from(tables).slice(0, 3).map(t => 
+                        t.querySelector('th')?.textContent?.trim() || ''
+                    );
+                    
+                    const expectedOrder = ['Table de Consolidation', 'Résultat', 'Modélisée'];
+                    const isCorrect = headers.some((h, i) => h.includes(expectedOrder[i]));
+                    
+                    if (isCorrect) {
+                        html += '<div class="result-box success">✅ L\'ordre des tables semble correct !</div>';
+                    } else {
+                        html += '<div class="result-box error">❌ L\'ordre des tables n\'est pas correct.<br>Attendu : Conso → Résultat → Modélisée</div>';
+                    }
+                }
+                
+                resultDiv.innerHTML = html;
+            }, 500);
+        }
+
+        // Test 2 : IndexedDB
+        function checkIndexedDB() {
+            const resultDiv = document.getElementById('test2-result');
+            resultDiv.innerHTML = '<div class="result-box info">🔍 Connexion à IndexedDB...</div>';
+            
+            const request = indexedDB.open('clara_db');
+            
+            request.onsuccess = function(event) {
+                const db = event.target.result;
+                
+                if (!db.objectStoreNames.contains('clara_generated_tables')) {
+                    resultDiv.innerHTML = '<div class="result-box error">❌ Store "clara_generated_tables" non trouvé</div>';
+                    return;
+                }
+                
+                const transaction = db.transaction(['clara_generated_tables'], 'readonly');
+                const store = transaction.objectStore('clara_generated_tables');
+                const getAllRequest = store.getAll();
+                
+                getAllRequest.onsuccess = function() {
+                    const tables = getAllRequest.result;
+                    let html = `<div class="result-box success">✅ ${tables.length} table(s) trouvée(s) dans IndexedDB<br><br>`;
+                    
+                    tables.forEach(table => {
+                        html += `<strong>${table.keyword || 'Sans keyword'}</strong><br>`;
+                        html += `Session: ${table.sessionId || 'Non définie'}<br>`;
+                        html += `Timestamp: ${new Date(table.timestamp).toLocaleString()}<br><br>`;
+                    });
+                    
+                    html += '</div>';
+                    resultDiv.innerHTML = html;
+                };
+                
+                getAllRequest.onerror = function() {
+                    resultDiv.innerHTML = '<div class="result-box error">❌ Erreur de lecture IndexedDB</div>';
+                };
+            };
+            
+            request.onerror = function() {
+                resultDiv.innerHTML = '<div class="result-box error">❌ Impossible d\'ouvrir IndexedDB</div>';
+            };
+        }
+
+        // Test 3 : Isolation sessions
+        function checkSessionIsolation() {
+            const resultDiv = document.getElementById('test3-result');
+            const currentSession = sessionStorage.getItem('claraverse_stable_session');
+            
+            let html = '<div class="result-box info">';
+            html += `<strong>Session actuelle :</strong> ${currentSession || 'Non définie'}<br>`;
+            html += '</div>';
+            
+            // Vérifier IndexedDB
+            const request = indexedDB.open('clara_db');
+            
+            request.onsuccess = function(event) {
+                const db = event.target.result;
+                const transaction = db.transaction(['clara_generated_tables'], 'readonly');
+                const store = transaction.objectStore('clara_generated_tables');
+                const getAllRequest = store.getAll();
+                
+                getAllRequest.onsuccess = function() {
+                    const tables = getAllRequest.result;
+                    const sessions = new Set(tables.map(t => t.sessionId));
+                    
+                    html += `<div class="result-box success">✅ ${sessions.size} session(s) différente(s) trouvée(s)<br><br>`;
+                    sessions.forEach(s => {
+                        const count = tables.filter(t => t.sessionId === s).length;
+                        html += `${s}: ${count} table(s)<br>`;
+                    });
+                    html += '</div>';
+                    
+                    resultDiv.innerHTML = html;
+                };
+            };
+        }
+
+        // Test 4 : Inspection détaillée
+        function inspectIndexedDB() {
+            const resultDiv = document.getElementById('test4-result');
+            resultDiv.innerHTML = '<div class="result-box info">🔍 Inspection complète d\'IndexedDB...</div>';
+            
+            const request = indexedDB.open('clara_db');
+            
+            request.onsuccess = function(event) {
+                const db = event.target.result;
+                const transaction = db.transaction(['clara_generated_tables'], 'readonly');
+                const store = transaction.objectStore('clara_generated_tables');
+                const getAllRequest = store.getAll();
+                
+                getAllRequest.onsuccess = function() {
+                    const tables = getAllRequest.result;
+                    
+                    let html = '<div class="code-block">';
+                    html += JSON.stringify(tables, null, 2);
+                    html += '</div>';
+                    
+                    resultDiv.innerHTML = html;
+                };
+            };
+        }
+
+        function clearIndexedDB() {
+            if (!confirm('⚠️ ATTENTION : Cette action va effacer TOUTES les tables sauvegardées. Continuer ?')) {
+                return;
+            }
+            
+            const resultDiv = document.getElementById('test4-result');
+            const request = indexedDB.deleteDatabase('clara_db');
+            
+            request.onsuccess = function() {
+                resultDiv.innerHTML = '<div class="result-box success">✅ IndexedDB effacée. Rechargez la page.</div>';
+            };
+            
+            request.onerror = function() {
+                resultDiv.innerHTML = '<div class="result-box error">❌ Erreur lors de la suppression</div>';
+            };
+        }
+    </script>
+</body>
+</html>

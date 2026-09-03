@@ -249,3 +249,54 @@ Après nettoyage, vérifier que ces fichiers existent :
 ---
 
 *Liste créée le 15 novembre 2025*
+
+
+---
+
+## 📂 Doc Probleme message envoye/
+
+**Ajouté:** 02 Septembre 2026  
+**Problème résolu:** Messages envoyés n'apparaissent pas dans le chat
+
+### Fichiers
+
+1. **00_INDEX_COMPLET.md**
+   - Vue d'ensemble de la documentation
+   - Navigation vers tous les fichiers
+   - Historique du problème
+
+2. **00_DIAGNOSTIC_EN_COURS.md**
+   - Processus complet de diagnostic étape par étape
+   - Logs ajoutés pour tracer le flux
+   - Tests effectués
+   - Hypothèses initiales
+
+3. **01_SOLUTION_MESSAGES_N_APPARAISSENT_PAS.md**
+   - Root cause identifié (validation modèle IA)
+   - Code exact modifié
+   - Logs de validation
+   - Fichiers modifiés
+
+4. **02_HYPOTHESES_SOURCES_PROBLEME.md**
+   - 8 hypothèses explorées en détail
+   - Probabilités et tests pour chaque hypothèse
+   - Méthode de diagnostic utilisée
+   - Leçons apprises
+
+5. **03_SOLUTION_FINALE_RESUME.md**
+   - Résumé 1 page pour référence rapide
+   - Root cause + solution appliquée
+   - Guide diagnostic si le problème revient
+   - Statistiques de résolution
+
+### Root Cause du Problème
+
+**Validation obligatoire de modèle IA** dans `handleSendMessage()` (ClaraAssistant.tsx lignes 1393-1415) bloquait l'envoi avec un `return` précoce avant d'ajouter le message à l'état `messages`.
+
+### Solution Appliquée
+
+Commenté les validations de modèle pour permettre l'envoi sans modèle local (utile pour providers externes comme N8N, OpenRouter, etc.).
+
+### Lien avec la Persistance
+
+Ce problème n'était **pas directement lié** à la persistance des tables, mais il **bloquait tous les tests** de persistance car aucun message ne pouvait être envoyé. La résolution de ce problème était un **prérequis** pour tester la persistance des tables générées par conso.js.

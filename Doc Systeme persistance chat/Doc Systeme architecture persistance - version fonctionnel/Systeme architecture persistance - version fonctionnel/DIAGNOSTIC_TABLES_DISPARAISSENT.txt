@@ -1,0 +1,173 @@
+╔════════════════════════════════════════════════════════════════════╗
+║                                                                    ║
+║         🔍 DIAGNOSTIC : TABLES QUI DISPARAISSENT APRÈS GÉNÉRATION  ║
+║                                                                    ║
+╚════════════════════════════════════════════════════════════════════╝
+
+
+┌────────────────────────────────────────────────────────────────────┐
+│  SYMPTÔMES OBSERVÉS                                                │
+└────────────────────────────────────────────────────────────────────┘
+
+❌ Les tables sont générées et affichées CORRECTEMENT
+❌ MAIS elles disparaissent après :
+   - Un rechargement de page (F5)
+   - Un changement de chat
+   - Une fermeture/réouverture du navigateur
+
+
+┌────────────────────────────────────────────────────────────────────┐
+│  CAUSES POSSIBLES                                                  │
+└────────────────────────────────────────────────────────────────────┘
+
+🔴 PROBLÈME 1 : Tables non sauvegardées dans localStorage
+   → Les tables sont générées en mémoire mais jamais persistées
+
+🔴 PROBLÈME 2 : Format de sauvegarde incorrect
+   → Les tables sont sauvegardées mais dans un format non récupérable
+
+🔴 PROBLÈME 3 : Écrasement lors de la restauration
+   → Les tables sont sauvegardées mais perdues au rechargement
+
+🔴 PROBLÈME 4 : Problème de timing
+   → Les tables disparaissent avant d'être sauvegardées
+
+
+═══════════════════════════════════════════════════════════════════
+   ÉTAPES DE DIAGNOSTIC DÉTAILLÉ
+═══════════════════════════════════════════════════════════════════
+
+
+ÉTAPE 1 : VÉRIFIER LA SAUVEGARDE DES TABLES
+──────────────────────────────────────────────────────────────────
+
+1. Ouvrez l'application : http://localhost:5173/
+
+2. Créez un nouveau chat avec une table :
+   Prompt : "Génère une table de 3 produits avec nom et prix"
+
+3. Attendez que la table s'affiche
+
+4. Ouvrez la Console (F12 → Console)
+
+5. TAPEZ EXACTEMENT CECI dans la console :
+
+   // Vérifier les clés localStorage
+   Object.keys(localStorage).filter(k => k.includes('flowise'))
+
+6. COPIEZ le résultat ici : _______________________________
+
+7. Pour CHAQUE clé trouvée, tapez :
+
+   JSON.parse(localStorage.getItem('NOM_DE_LA_CLÉ'))
+
+8. COPIEZ le contenu complet ici : _______________________________
+
+
+ÉTAPE 2 : VÉRIFIER LE SERVICE flowiseTableBridge
+──────────────────────────────────────────────────────────────────
+
+1. Dans la Console, tapez :
+
+   window.flowiseTableBridge
+
+2. Le résultat devrait afficher un objet avec les méthodes
+   
+3. Si vous voyez "undefined" → ❌ LE SERVICE N'EST PAS CHARGÉ
+
+4. Tapez ensuite :
+
+   window.flowiseTableBridge.getAllMessages('VOTRE_CHAT_ID')
+
+5. COPIEZ le résultat : _______________________________
+
+
+ÉTAPE 3 : TEST DE PERSISTANCE EN TEMPS RÉEL
+──────────────────────────────────────────────────────────────────
+
+1. Gardez la Console ouverte (F12)
+
+2. Créez un nouveau chat avec une table
+
+3. Immédiatement après que la table apparaisse, tapez :
+
+   // Vérifier si le message avec table est sauvegardé
+   const chatId = 'VOTRE_CHAT_ID'; // Remplacez par l'ID réel
+   const messages = JSON.parse(localStorage.getItem(`flowise_messages_${chatId}`));
+   console.log('Messages sauvegardés:', messages);
+   
+   // Chercher les tables dans les messages
+   messages.forEach((msg, idx) => {
+     if (msg.message && msg.message.includes('<table')) {
+       console.log(`Message ${idx} contient une table`);
+     }
+   });
+
+4. COPIEZ TOUT le résultat : _______________________________
+
+
+ÉTAPE 4 : TEST DE RECHARGEMENT
+──────────────────────────────────────────────────────────────────
+
+1. Après avoir créé une table, notez :
+   - Le Chat ID : _______________________________
+   - Le nombre de messages : _______________________________
+
+2. Appuyez sur F5 (Recharger)
+
+3. Dans la Console, tapez immédiatement :
+
+   const chatId = 'VOTRE_CHAT_ID';
+   const messages = JSON.parse(localStorage.getItem(`flowise_messages_${chatId}`));
+   console.log('Après rechargement:', messages);
+
+4. COPIEZ le résultat : _______________________________
+
+5. Comparez :
+   - Nombre de messages AVANT : _______
+   - Nombre de messages APRÈS : _______
+   - Les tables sont-elles toujours présentes ? OUI / NON
+
+
+═══════════════════════════════════════════════════════════════════
+   INFORMATIONS À ME FOURNIR
+═══════════════════════════════════════════════════════════════════
+
+📋 CHECKLIST DES INFORMATIONS REQUISES :
+
+[ ] Résultat de l'ÉTAPE 1 (Clés localStorage)
+[ ] Résultat de l'ÉTAPE 2 (Service flowiseTableBridge)
+[ ] Résultat de l'ÉTAPE 3 (Test temps réel)
+[ ] Résultat de l'ÉTAPE 4 (Test rechargement)
+
+[ ] Screenshot de la table AVANT rechargement
+[ ] Screenshot APRÈS rechargement (table disparue)
+
+[ ] Toutes les erreurs en ROUGE dans la Console
+
+
+═══════════════════════════════════════════════════════════════════
+   SOLUTIONS SELON LE DIAGNOSTIC
+═══════════════════════════════════════════════════════════════════
+
+SI flowiseTableBridge est undefined :
+→ Problème d'import du service dans index.html
+
+SI les clés localStorage sont vides :
+→ Problème de sauvegarde initiale
+
+SI les messages existent mais sans tables :
+→ Problème de sérialisation HTML
+
+SI les messages disparaissent au rechargement :
+→ Problème de restauration
+
+SI les tables sont là mais non affichées :
+→ Problème de rendu frontend
+
+
+═══════════════════════════════════════════════════════════════════
+
+❗ IMPORTANT : Exécutez ces tests dans l'ORDRE et envoyez-moi 
+             TOUS les résultats, même ceux qui semblent vides !
+

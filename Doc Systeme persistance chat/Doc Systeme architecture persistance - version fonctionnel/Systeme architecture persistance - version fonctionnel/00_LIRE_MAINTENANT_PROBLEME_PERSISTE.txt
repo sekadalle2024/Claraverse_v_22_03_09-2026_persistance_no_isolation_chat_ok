@@ -1,0 +1,228 @@
+╔════════════════════════════════════════════════════════════════════╗
+║                                                                    ║
+║        🚨 PROBLÈME PERSISTE ? LISEZ CECI                           ║
+║                   29 AOÛT 2026                                     ║
+║                                                                    ║
+╚════════════════════════════════════════════════════════════════════╝
+
+
+┌─────────────────────────────────────────────────────────────────┐
+│  🎯 ACTION IMMÉDIATE : DIAGNOSTIC AUTOMATIQUE                   │
+└─────────────────────────────────────────────────────────────────┘
+
+J'ai créé un script de diagnostic automatique.
+
+1️⃣  Ouvrez PowerShell dans h:\ClaraVerse
+
+2️⃣  Exécutez :
+
+    .\diagnostic-rapide.ps1
+
+3️⃣  Copiez-collez TOUT le résultat et envoyez-le moi
+
+
+┌─────────────────────────────────────────────────────────────────┐
+│  🔍 CE QUE JE DOIS SAVOIR                                       │
+└─────────────────────────────────────────────────────────────────┘
+
+Pour vous aider efficacement, j'ai besoin de comprendre :
+
+
+1. QUE VOYEZ-VOUS EXACTEMENT ?
+   ────────────────────────────────────────────────────────────
+   
+   [ ] Page blanche
+   [ ] Message d'erreur (lequel ?)
+   [ ] La page charge indéfiniment
+   [ ] Connexion refusée
+   [ ] Autre : _______________________________________
+
+
+2. DANS LE TERMINAL (après npm run dev)
+   ────────────────────────────────────────────────────────────
+   
+   Copiez-collez TOUT le message, par exemple :
+   
+   VITE v5.x.x ready in xxx ms
+   ➜ Local: http://???  ← C'EST IMPORTANT !
+   
+   → Quelle URL est affichée exactement ?
+
+
+3. DANS LE NAVIGATEUR (F12 → Console)
+   ────────────────────────────────────────────────────────────
+   
+   Y a-t-il des messages en rouge ?
+   
+   → Copiez-collez les erreurs ici
+
+
+4. AVEZ-VOUS FAIT UN REDÉMARRAGE COMPLET ?
+   ────────────────────────────────────────────────────────────
+   
+   [ ] Fermé tous les terminaux
+   [ ] Relancé npm run dev
+   [ ] Essayé en mode navigation privée
+   [ ] Fait Ctrl + Shift + R (Hard Refresh)
+
+
+┌─────────────────────────────────────────────────────────────────┐
+│  🛠️ SOLUTION ÉTAPE PAR ÉTAPE                                   │
+└─────────────────────────────────────────────────────────────────┘
+
+
+ÉTAPE 1 : Arrêter tout
+───────────────────────────────────────────────────────────────
+
+→ Fermez TOUS les terminaux PowerShell
+
+
+ÉTAPE 2 : Nettoyer le cache
+───────────────────────────────────────────────────────────────
+
+Nouveau terminal PowerShell :
+
+cd h:\ClaraVerse
+Remove-Item -Recurse -Force node_modules\.vite -ErrorAction SilentlyContinue
+
+
+ÉTAPE 3 : Redémarrer proprement
+───────────────────────────────────────────────────────────────
+
+npm run dev
+
+
+ÉTAPE 4 : Attendre le message complet
+───────────────────────────────────────────────────────────────
+
+Attendez 10-15 secondes que le message s'affiche :
+
+  VITE v5.x.x  ready in xxx ms
+  
+  ➜  Local:   http://127.0.0.1:5173/  ← IMPORTANT
+  ➜  Network: use --host to expose
+
+
+ÉTAPE 5 : Ouvrir en mode navigation privée
+───────────────────────────────────────────────────────────────
+
+→ Ctrl + Shift + N (Chrome)
+→ Ctrl + Shift + P (Firefox)
+→ Ctrl + Shift + N (Edge)
+
+→ Tapez : http://127.0.0.1:5173/
+
+
+ÉTAPE 6 : Ouvrir la console
+───────────────────────────────────────────────────────────────
+
+→ F12
+→ Onglet "Console"
+→ Regardez s'il y a des erreurs en rouge
+
+
+┌─────────────────────────────────────────────────────────────────┐
+│  💡 PROBLÈMES COURANTS ET SOLUTIONS                            │
+└─────────────────────────────────────────────────────────────────┘
+
+
+PROBLÈME 1 : "This site can't be reached"
+──────────────────────────────────────────────────────────────
+
+→ Le serveur ne tourne pas
+
+Solution :
+  • Vérifiez que npm run dev est bien lancé
+  • Regardez le message dans le terminal
+  • Vérifiez qu'il n'y a pas d'erreur
+
+
+PROBLÈME 2 : Page blanche
+──────────────────────────────────────────────────────────────
+
+→ Erreur JavaScript ou cache
+
+Solution :
+  1. F12 → Console → Regardez les erreurs
+  2. Ctrl + Shift + Delete → Effacer le cache
+  3. Recharger : Ctrl + Shift + R
+
+
+PROBLÈME 3 : ERR_CONNECTION_REFUSED
+──────────────────────────────────────────────────────────────
+
+→ Le port est bloqué ou le serveur n'a pas démarré
+
+Solution :
+  1. Vérifiez : netstat -ano | findstr :5173
+  2. Si rien n'apparaît, le serveur ne tourne pas
+  3. Relancez : npm run dev
+
+
+PROBLÈME 4 : "Cannot GET /"
+──────────────────────────────────────────────────────────────
+
+→ Problème de routing
+
+Solution :
+  • Le serveur tourne mais il y a un problème de config
+  • Vérifiez que index.html existe
+  • Essayez : http://127.0.0.1:5173/index.html
+
+
+┌─────────────────────────────────────────────────────────────────┐
+│  📸 CAPTURES D'ÉCRAN UTILES                                    │
+└─────────────────────────────────────────────────────────────────┘
+
+Si possible, envoyez-moi des captures de :
+
+1. Le terminal après "npm run dev"
+2. La fenêtre du navigateur
+3. La console (F12) avec les erreurs
+4. L'onglet Network (F12) si des requêtes échouent
+
+
+┌─────────────────────────────────────────────────────────────────┐
+│  🆘 SOLUTION D'URGENCE                                         │
+└─────────────────────────────────────────────────────────────────┘
+
+Si VRAIMENT rien ne fonctionne :
+
+
+PowerShell (une seule commande) :
+
+cd h:\ClaraVerse ; Remove-Item -Recurse -Force node_modules\.vite -ErrorAction SilentlyContinue ; npm run dev
+
+
+Attendez 15 secondes, puis :
+
+→ Ctrl + Clic sur le lien dans le terminal
+→ Ou tapez : http://127.0.0.1:5173/
+
+
+═══════════════════════════════════════════════════════════════════
+
+🎯 LA PAGE S'AFFICHE MAIS LA PERSISTANCE NE FONCTIONNE PAS ?
+
+ETAPE 1 : Lancez le serveur
+──────────────────────────────────────────────────────────────────
+cd h:\ClaraVerse
+npm run dev
+
+
+ETAPE 2 : Dans un AUTRE terminal, executez le diagnostic
+──────────────────────────────────────────────────────────────────
+cd "h:\ClaraVerse\Doc Systeme persistance chat"
+.\diagnostic-persistance-chat.ps1
+
+
+ETAPE 3 : Suivez les instructions et envoyez-moi :
+──────────────────────────────────────────────────────────────────
+1. ✅ Les symptômes exacts (chats qui disparaissent, etc.)
+2. ✅ Le contenu de localStorage (Console → localStorage)
+3. ✅ Les erreurs dans la Console (F12 → Console)
+4. ✅ Les erreurs réseau (F12 → Network)
+
+Je vais identifier le problème précis et vous donner la solution !
+
+═══════════════════════════════════════════════════════════════════

@@ -1,0 +1,103 @@
+🧪 GUIDE DE TEST RAPIDE - ISOLATION DES SESSIONS
+═════════════════════════════════════════════════════════════════════
+
+⚡ TEST EN 5 MINUTES
+───────────────────
+
+1️⃣ PRÉPARER L'ENVIRONNEMENT
+   □ Ouvrir la Console DevTools (F12)
+   □ Activer le filtre "💾" ou "🔍" pour voir les logs pertinents
+
+2️⃣ TEST BASIQUE (1 minute)
+   □ Ouvrir un chat → Générer un tableau
+   □ Dans la console, chercher : "💾 SAUVEGARDE TABLE"
+   □ Vérifier que le sessionId est affiché
+   
+   ✅ SUCCÈS si : Log "💾 SAUVEGARDE TABLE: sessionId=..." apparaît
+
+3️⃣ TEST CRITIQUE - MULTI-SESSIONS (3 minutes)
+   
+   A. Créer Session A
+      □ Ouvrir Chat A
+      □ Générer Tableau "Inventory" ou autre
+      □ Noter le sessionId dans la console
+   
+   B. Créer Session B
+      □ Ouvrir Chat B (nouveau chat)
+      □ Générer Tableau différent
+      □ Noter le sessionId (doit être différent)
+   
+   C. Revenir à Session A
+      □ Cliquer sur Chat A
+      □ Chercher dans console : "🔍 VÉRIFICATION"
+      □ Compter les tableaux visibles
+   
+   ✅ SUCCÈS si :
+      - Seulement 1 tableau visible (celui de Chat A)
+      - Log "🔍 VÉRIFICATION: 1 table(s) avec data-session-id=..."
+      - Pas de tableau de Chat B visible
+
+4️⃣ VÉRIFICATION VISUELLE (30 secondes)
+   □ Inspecter un tableau restauré (clic droit → Inspecter)
+   □ Chercher dans les attributs : data-session-id="..."
+   
+   ✅ SUCCÈS si : L'attribut data-session-id existe et contient un UUID
+
+5️⃣ TEST RECHARGEMENT (1 minute)
+   □ Générer un tableau
+   □ Recharger la page (F5)
+   □ Rouvrir le même chat
+   □ Vérifier dans la console : "🔍 VÉRIFICATION"
+   
+   ✅ SUCCÈS si : Le tableau est restauré avec le bon sessionId
+
+═════════════════════════════════════════════════════════════════════
+
+🔍 LOGS À SURVEILLER
+────────────────────
+
+✅ Sauvegarde :
+   "💾 SAUVEGARDE TABLE: sessionId="xxx", keyword="yyy""
+
+✅ Nettoyage :
+   "🧹 Nettoyage des tables existantes avant restauration (session: xxx)"
+
+✅ Restauration :
+   "📋 Found X table(s) to restore"
+   "🔍 VÉRIFICATION: X table(s) avec data-session-id="xxx" dans le DOM"
+
+═════════════════════════════════════════════════════════════════════
+
+❌ PROBLÈMES POSSIBLES
+──────────────────────
+
+PROBLÈME: Tableaux mélangés entre sessions
+→ Vérifier : data-session-id présent sur chaque wrapper ?
+→ Vérifier : clearAllTablesFromDOM() appelé avec sessionId ?
+
+PROBLÈME: Aucun log "💾 SAUVEGARDE TABLE"
+→ Vérifier : La correction est bien compilée ?
+→ Solution : Rebuild le projet (npm run build)
+
+PROBLÈME: Log "🔍 VÉRIFICATION" montre 0 tables
+→ Vérifier : IndexedDB contient bien des données ?
+→ Ouvrir : DevTools → Application → IndexedDB → clara_generated_tables
+
+═════════════════════════════════════════════════════════════════════
+
+📝 COMMANDES UTILES
+───────────────────
+
+// Dans la console du navigateur
+
+// Compter tableaux avec data-session-id
+document.querySelectorAll('[data-session-id]').length
+
+// Lister tous les sessionId présents
+Array.from(document.querySelectorAll('[data-session-id]'))
+  .map(el => el.getAttribute('data-session-id'))
+
+// Vérifier IndexedDB
+// DevTools → Application → Storage → IndexedDB → clara_generated_tables
+
+═════════════════════════════════════════════════════════════════════

@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Isolation Chat - ClaraVerse</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 32px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 16px;
+        }
+
+        .test-section {
+            background: white;
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .test-section h2 {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .chat-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .chat-box {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            border: 2px solid #e0e0e0;
+        }
+
+        .chat-box h3 {
+            font-size: 18px;
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .chat-id {
+            font-size: 12px;
+            color: #999;
+            font-family: monospace;
+            background: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+
+        button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            flex: 1;
+            min-width: 120px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+        }
+
+        .btn-info {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+        }
+
+        .btn-info:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+        }
+
+        .results {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            min-height: 100px;
+            font-family: monospace;
+            font-size: 13px;
+            overflow-y: auto;
+            max-height: 200px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .results-empty {
+            color: #999;
+            font-style: italic;
+        }
+
+        .table-item {
+            background: #f0f0f0;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .table-item.isolated {
+            border-left-color: #10b981;
+        }
+
+        .table-item.leaked {
+            border-left-color: #ef4444;
+            background: #fee;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+
+        .status-success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-error {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .status-info {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .global-actions {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .console-log {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 12px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+
+        .console-log div {
+            margin-bottom: 8px;
+            padding: 4px;
+        }
+
+        .log-success {
+            color: #10b981;
+        }
+
+        .log-error {
+            color: #ef4444;
+        }
+
+        .log-info {
+            color: #3b82f6;
+        }
+
+        .log-warning {
+            color: #f59e0b;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header fade-in">
+            <h1>🧪 Test d'Isolation des Chats</h1>
+            <p>Validez que les données de chaque chat restent complètement isolées</p>
+        </div>
+
+        <div class="test-section fade-in" style="animation-delay: 0.1s;">
+            <h2>🔬 Tests d'Isolation</h2>
+            
+            <div class="chat-container">
+                <!-- Chat A -->
+                <div class="chat-box">
+                    <h3>💬 Chat A</h3>
+                    <div class="chat-id" id="chatAId">Session: chat_a_<span id="chatATimestamp"></span></div>
+                    
+                    <div class="button-group">
+                        <button class="btn-primary" onclick="ajouterTable('A')">
+                            ➕ Ajouter Table
+                        </button>
+                        <button class="btn-info" onclick="afficherTables('A')">
+                            📊 Afficher Tables
+                        </button>
+                        <button class="btn-danger" onclick="viderChat('A')">
+                            🗑️ Vider Chat
+                        </button>
+                    </div>
+                    
+                    <div class="results" id="resultsA">
+                        <div class="results-empty">Aucune table pour l'instant</div>
+                    </div>
+                </div>
+
+                <!-- Chat B -->
+                <div class="chat-box">
+                    <h3>💬 Chat B</h3>
+                    <div class="chat-id" id="chatBId">Session: chat_b_<span id="chatBTimestamp"></span></div>
+                    
+                    <div class="button-group">
+                        <button class="btn-primary" onclick="ajouterTable('B')">
+                            ➕ Ajouter Table
+                        </button>
+                        <button class="btn-info" onclick="afficherTables('B')">
+                            📊 Afficher Tables
+                        </button>
+                        <button class="btn-danger" onclick="viderChat('B')">
+                            🗑️ Vider Chat
+                        </button>
+                    </div>
+                    
+                    <div class="results" id="resultsB">
+                        <div class="results-empty">Aucune table pour l'instant</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section fade-in" style="animation-delay: 0.2s;">
+            <h2>⚙️ Actions Globales</h2>
+            <div class="global-actions">
+                <button class="btn-success" onclick="testerIsolation()">
+                    ✅ Tester Isolation Complète
+                </button>
+                <button class="btn-info" onclick="afficherStatistiques()">
+                    📊 Statistiques Base de Données
+                </button>
+                <button class="btn-danger" onclick="reinitialiserTout()">
+                    🔄 Réinitialiser Tout
+                </button>
+            </div>
+        </div>
+
+        <div class="test-section fade-in" style="animation-delay: 0.3s;">
+            <h2>📋 Console de Log</h2>
+            <div class="console-log" id="console"></div>
+        </div>
+    </div>
+
+    <script>
+        // Sessions ID pour les chats
+        const sessions = {
+            A: `chat_a_${Date.now()}`,
+            B: `chat_b_${Date.now() + 1000}`
+        };
+
+        // Afficher les IDs de session
+        document.getElementById('chatATimestamp').textContent = sessions.A.split('_')[2];
+        document.getElementById('chatBTimestamp').textContent = sessions.B.split('_')[2];
+
+        // Compteurs de tables
+        let tableCounters = { A: 0, B: 0 };
+
+        // Logging
+        function log(message, type = 'info') {
+            const console_div = document.getElementById('console');
+            const timestamp = new Date().toLocaleTimeString();
+            const emoji = {
+                success: '✅',
+                error: '❌',
+                info: 'ℹ️',
+                warning: '⚠️'
+            };
+
+            const div = document.createElement('div');
+            div.className = `log-${type}`;
+            div.textContent = `[${timestamp}] ${emoji[type] || 'ℹ️'} ${message}`;
+            
+            console_div.insertBefore(div, console_div.firstChild);
+            
+            // Garder seulement les 50 derniers logs
+            while (console_div.children.length > 50) {
+                console_div.removeChild(console_div.lastChild);
+            }
+        }
+
+        // Ouvrir la base de données
+        async function openDB() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open('clara_db', 12);
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error);
+            });
+        }
+
+        // Ajouter une table
+        async function ajouterTable(chat) {
+            try {
+                const db = await openDB();
+                const sessionId = sessions[chat];
+                tableCounters[chat]++;
+                
+                const table = {
+                    id: `table_${chat}_${tableCounters[chat]}_${Date.now()}`,
+                    sessionId: sessionId,
+                    name: `Table ${chat}${tableCounters[chat]}`,
+                    data: {
+                        columns: ['Colonne 1', 'Colonne 2', 'Colonne 3'],
+                        rows: [
+                            ['Donnée 1', 'Donnée 2', 'Donnée 3'],
+                            ['Donnée 4', 'Donnée 5', 'Donnée 6']
+                        ]
+                    },
+                    timestamp: Date.now()
+                };
+
+                const transaction = db.transaction(['clara_generated_tables'], 'readwrite');
+                const store = transaction.objectStore('clara_generated_tables');
+                await store.put(table);
+
+                log(`Table ajoutée au Chat ${chat}: ${table.name}`, 'success');
+                await afficherTables(chat);
+                
+            } catch (error) {
+                log(`Erreur ajout table Chat ${chat}: ${error.message}`, 'error');
+                console.error(error);
+            }
+        }
+
+        // Afficher les tables d'un chat
+        async function afficherTables(chat) {
+            try {
+                const db = await openDB();
+                const sessionId = sessions[chat];
+                
+                const transaction = db.transaction(['clara_generated_tables'], 'readonly');
+                const store = transaction.objectStore('clara_generated_tables');
+                const index = store.index('sessionId');
+                
+                const request = index.getAll(sessionId);
+                
+                request.onsuccess = () => {
+                    const tables = request.result;
+                    const resultsDiv = document.getElementById(`results${chat}`);
+                    
+                    if (tables.length === 0) {
+                        resultsDiv.innerHTML = '<div class="results-empty">Aucune table</div>';
+                    } else {
+                        resultsDiv.innerHTML = tables.map(table => `
+                            <div class="table-item isolated">
+                                <strong>${table.name}</strong>
+                                <span class="status-badge status-success">✓ Isolée</span>
+                                <div style="font-size: 11px; color: #666; margin-top: 5px;">
+                                    ID: ${table.id}<br>
+                                    Session: ${table.sessionId}
+                                </div>
+                            </div>
+                        `).join('');
+                    }
+                    
+                    log(`Chat ${chat}: ${tables.length} table(s) affichée(s)`, 'info');
+                };
+                
+            } catch (error) {
+                log(`Erreur affichage Chat ${chat}: ${error.message}`, 'error');
+                console.error(error);
+            }
+        }
+
+        // Vider un chat
+        async function viderChat(chat) {
+            if (!confirm(`Voulez-vous vraiment supprimer toutes les tables du Chat ${chat} ?`)) {
+                return;
+            }
+
+            try {
+                const db = await openDB();
+                const sessionId = sessions[chat];
+                
+                const transaction = db.transaction(['clara_generated_tables'], 'readwrite');
+                const store = transaction.objectStore('clara_generated_tables');
+                const index = store.index('sessionId');
+                
+                const request = index.getAllKeys(sessionId);
+                
+                request.onsuccess = async () => {
+                    const keys = request.result;
+                    
+                    for (const key of keys) {
+                        await store.delete(key);
+                    }
+                    
+                    log(`Chat ${chat} vidé: ${keys.length} table(s) supprimée(s)`, 'success');
+                    await afficherTables(chat);
+                };
+                
+            } catch (error) {
+                log(`Erreur vidage Chat ${chat}: ${error.message}`, 'error');
+                console.error(error);
+            }
+        }
+
+        // Tester l'isolation complète
+        async function testerIsolation() {
+            log('🧪 Démarrage du test d\'isolation...', 'info');
+            
+            try {
+                // Ajouter une table dans chaque chat
+                await ajouterTable('A');
+                await ajouterTable('B');
+                
+                // Attendre un peu
+                await new Promise(resolve => setTimeout(resolve, 500));
+                
+                // Vérifier l'isolation
+                const db = await openDB();
+                const transaction = db.transaction(['clara_generated_tables'], 'readonly');
+                const store = transaction.objectStore('clara_generated_tables');
+                const index = store.index('sessionId');
+                
+                const requestA = index.getAll(sessions.A);
+                const requestB = index.getAll(sessions.B);
+                
+                requestA.onsuccess = () => {
+                    const tablesA = requestA.result;
+                    log(`Chat A: ${tablesA.length} table(s)`, 'info');
+                    
+                    // Vérifier qu'aucune table du Chat B n'est dans A
+                    const contamination = tablesA.filter(t => t.sessionId === sessions.B);
+                    if (contamination.length > 0) {
+                        log(`❌ ÉCHEC: ${contamination.length} table(s) du Chat B dans Chat A`, 'error');
+                    } else {
+                        log(`✅ SUCCÈS: Aucune contamination dans Chat A`, 'success');
+                    }
+                };
+                
+                requestB.onsuccess = () => {
+                    const tablesB = requestB.result;
+                    log(`Chat B: ${tablesB.length} table(s)`, 'info');
+                    
+                    // Vérifier qu'aucune table du Chat A n'est dans B
+                    const contamination = tablesB.filter(t => t.sessionId === sessions.A);
+                    if (contamination.length > 0) {
+                        log(`❌ ÉCHEC: ${contamination.length} table(s) du Chat A dans Chat B`, 'error');
+                    } else {
+                        log(`✅ SUCCÈS: Aucune contamination dans Chat B`, 'success');
+                    }
+                };
+                
+            } catch (error) {
+                log(`❌ Erreur test isolation: ${error.message}`, 'error');
+                console.error(error);
+            }
+        }
+
+        // Afficher les statistiques
+        async function afficherStatistiques() {
+            try {
+                const db = await openDB();
+                const transaction = db.transaction(['clara_generated_tables'], 'readonly');
+                const store = transaction.objectStore('clara_generated_tables');
+                
+                const request = store.getAll();
+                
+                request.onsuccess = () => {
+                    const allTables = request.result;
+                    
+                    log('📊 === STATISTIQUES ===', 'info');
+                    log(`Total tables: ${allTables.length}`, 'info');
+                    
+                    const bySession = {};
+                    allTables.forEach(table => {
+                        bySession[table.sessionId] = (bySession[table.sessionId] || 0) + 1;
+                    });
+                    
+                    Object.entries(bySession).forEach(([session, count]) => {
+                        log(`  ${session}: ${count} table(s)`, 'info');
+                    });
+                    
+                    log('======================', 'info');
+                };
+                
+            } catch (error) {
+                log(`Erreur statistiques: ${error.message}`, 'error');
+                console.error(error);
+            }
+        }
+
+        // Réinitialiser tout
+        async function reinitialiserTout() {
+            if (!confirm('Voulez-vous vraiment tout réinitialiser ?')) {
+                return;
+            }
+
+            try {
+                await viderChat('A');
+                await viderChat('B');
+                tableCounters = { A: 0, B: 0 };
+                log('🔄 Réinitialisation complète effectuée', 'success');
+                
+            } catch (error) {
+                log(`Erreur réinitialisation: ${error.message}`, 'error');
+                console.error(error);
+            }
+        }
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', () => {
+            log('✅ Test d\'isolation prêt', 'success');
+            log('📝 Utilisez les boutons pour tester l\'isolation des chats', 'info');
+        });
+    </script>
+</body>
+</html>

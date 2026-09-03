@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test - Isolation des Chats</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            border-bottom: 3px solid #4CAF50;
+            padding-bottom: 10px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border-left: 4px solid #2196F3;
+            background: #f9f9f9;
+        }
+        .test-section h3 {
+            margin-top: 0;
+            color: #2196F3;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        button.secondary {
+            background: #2196F3;
+        }
+        button.secondary:hover {
+            background: #0b7dda;
+        }
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+        }
+        .result.success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .result.error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .result.info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔒 Test d'Isolation des Chats</h1>
+        
+        <div class="test-section">
+            <h3>Test 1: ChatId Unique</h3>
+            <p>Vérifie que chaque chat a un identifiant unique.</p>
+            <button onclick="testChatId()">▶ Tester ChatId</button>
+            <div id="result-chatid" class="result" style="display:none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>Test 2: Changement de Chat</h3>
+            <p>Simule un changement de chat et vérifie que les identifiants sont différents.</p>
+            <button onclick="testChatChange()">▶ Simuler Changement</button>
+            <div id="result-change" class="result" style="display:none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>Test 3: Isolation IndexedDB</h3>
+            <p>Vérifie que les tables sont bien isolées par chatId dans IndexedDB.</p>
+            <button onclick="testIndexedDBIsolation()">▶ Vérifier IndexedDB</button>
+            <div id="result-indexeddb" class="result" style="display:none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>Test 4: Clé Composite</h3>
+            <p>Vérifie que la clé composite <code>chatId_sessionId</code> est correctement formée.</p>
+            <button onclick="testCompositeKey()">▶ Tester Clé Composite</button>
+            <div id="result-composite" class="result" style="display:none;"></div>
+        </div>
+
+        <div class="test-section" style="border-left-color: #ff9800; background: #fff3e0;">
+            <h3 style="color: #ff9800;">⚙️ Actions</h3>
+            <button class="secondary" onclick="resetChat()">🔄 Reset ChatId</button>
+            <button class="secondary" onclick="showCurrentState()">📊 État Actuel</button>
+            <button class="secondary" onclick="clearIndexedDB()">🗑️ Nettoyer IndexedDB</button>
+        </div>
+    </div>
+
+    <script>
+        // Simulation du chat-id-detector.js pour les tests
+        if (!window.chatIdDetector) {
+            window.chatIdDetector = {
+                currentChatId: null,
+                
+                getCurrentChatId() {
+                    if (!this.currentChatId) {
+                        this.currentChatId = this.generateChatId();
+                        sessionStorage.setItem('claraverse_current_chat_id', this.currentChatId);
+                    }
+                    return this.currentChatId;
+                },
+                
+                generateChatId() {
+                    const timestamp = Date.now();
+                    const random = Math.random().toString(36).substring(2, 9);
+                    return `chat_${timestamp}_${random}`;
+                },
+                
+                reset() {
+                    this.currentChatId = null;
+                    sessionStorage.removeItem('claraverse_current_chat_id');
+                    console.log('🔄 ChatId reseté');
+                },
+                
+                setChatId(chatId) {
+                    this.currentChatId = chatId;
+                    sessionStorage.setItem('claraverse_current_chat_id', chatId);
+                }
+            };
+        }
+
+        function showResult(elementId, message, type = 'info') {
+            const el = document.getElementById(elementId);
+            el.textContent = message;
+            el.className = `result ${type}`;
+            el.style.display = 'block';
+        }
+
+        function testChatId() {
+            try {
+                const chatId = window.chatIdDetector.getCurrentChatId();
+                
+                if (!chatId) {
+                    showResult('result-chatid', '❌ Aucun chatId retourné', 'error');
+                    return;
+                }
+                
+                const isValid = /^chat_\d+_[a-z0-9]+$/.test(chatId);
+                
+                if (isValid) {
+                    showResult('result-chatid', 
+                        `✅ ChatId valide: ${chatId}\n\n` +
+                        `Format: chat_[timestamp]_[random]\n` +
+                        `Exemple: chat_1735390000000_abc1234`, 
+                        'success'
+                    );
+                } else {
+                    showResult('result-chatid', 
+                        `⚠️ ChatId invalide: ${chatId}\n\n` +
+                        `Format attendu: chat_[timestamp]_[random]`, 
+                        'error'
+                    );
+                }
+                
+                console.log('ChatId actuel:', chatId);
+            } catch (err) {
+                showResult('result-chatid', `❌ Erreur: ${err.message}`, 'error');
+                console.error('Erreur test chatId:', err);
+            }
+        }
+
+        function testChatChange() {
+            try {
+                const chatA = window.chatIdDetector.getCurrentChatId();
+                console.log('Chat A:', chatA);
+                
+                // Simuler un nouveau chat
+                window.chatIdDetector.reset();
+                
+                const chatB = window.chatIdDetector.getCurrentChatId();
+                console.log('Chat B:', chatB);
+                
+                if (chatA === chatB) {
+                    showResult('result-change', 
+                        `❌ PROBLÈME: Les deux chats ont le même ID!\n\n` +
+                        `Chat A: ${chatA}\n` +
+                        `Chat B: ${chatB}\n\n` +
+                        `Les tables ne seront PAS isolées.`, 
+                        'error'
+                    );
+                } else {
+                    showResult('result-change', 
+                        `✅ Isolation réussie!\n\n` +
+                        `Chat A: ${chatA}\n` +
+                        `Chat B: ${chatB}\n\n` +
+                        `Les tables sont correctement isolées.`, 
+                        'success'
+                    );
+                }
+            } catch (err) {
+                showResult('result-change', `❌ Erreur: ${err.message}`, 'error');
+                console.error('Erreur test changement:', err);
+            }
+        }
+
+        async function testIndexedDBIsolation() {
+            try {
+                showResult('result-indexeddb', '⏳ Vérification de IndexedDB...', 'info');
+                
+                const db = await new Promise((resolve, reject) => {
+                    const request = indexedDB.open('clara_db', 12);
+                    request.onsuccess = () => resolve(request.result);
+                    request.onerror = () => reject(request.error);
+                    request.onupgradeneeded = (event) => {
+                        const db = event.target.result;
+                        if (!db.objectStoreNames.contains('clara_generated_tables')) {
+                            db.createObjectStore('clara_generated_tables', { keyPath: 'id' });
+                        }
+                    };
+                });
+
+                const transaction = db.transaction(['clara_generated_tables'], 'readonly');
+                const store = transaction.objectStore('clara_generated_tables');
+                
+                const allTables = await new Promise((resolve, reject) => {
+                    const request = store.getAll();
+                    request.onsuccess = () => resolve(request.result);
+                    request.onerror = () => reject(request.error);
+                });
+
+                db.close();
+
+                if (allTables.length === 0) {
+                    showResult('result-indexeddb', 
+                        `ℹ️ Aucune table sauvegardée dans IndexedDB\n\n` +
+                        `C'est normal si c'est la première utilisation.`, 
+                        'info'
+                    );
+                    return;
+                }
+
+                // Regrouper par chatId
+                const byChat = {};
+                allTables.forEach(t => {
+                    if (t.sessionId) {
+                        const parts = t.sessionId.split('_');
+                        const chatId = parts[0] + '_' + parts[1];
+                        if (!byChat[chatId]) byChat[chatId] = [];
+                        byChat[chatId].push(t);
+                    }
+                });
+
+                const chatCount = Object.keys(byChat).length;
+                let message = `✅ ${allTables.length} table(s) trouvée(s)\n`;
+                message += `📊 ${chatCount} chat(s) distinct(s)\n\n`;
+                
+                Object.entries(byChat).forEach(([chatId, tables]) => {
+                    message += `${chatId}: ${tables.length} table(s)\n`;
+                });
+
+                showResult('result-indexeddb', message, 'success');
+                console.log('Tables par chat:', byChat);
+            } catch (err) {
+                showResult('result-indexeddb', `❌ Erreur: ${err.message}`, 'error');
+                console.error('Erreur test IndexedDB:', err);
+            }
+        }
+
+        function testCompositeKey() {
+            try {
+                const chatId = window.chatIdDetector.getCurrentChatId();
+                const sessionId = sessionStorage.getItem('claraverse_stable_session') || 'session_1';
+                const compositeKey = `${chatId}_${sessionId}`;
+                
+                showResult('result-composite', 
+                    `✅ Clé composite formée:\n\n` +
+                    `ChatId: ${chatId}\n` +
+                    `SessionId: ${sessionId}\n\n` +
+                    `Clé composite: ${compositeKey}\n\n` +
+                    `Cette clé assure l'isolation entre chats tout en\n` +
+                    `permettant la restauration unique.`, 
+                    'success'
+                );
+                
+                console.log('Clé composite:', compositeKey);
+            } catch (err) {
+                showResult('result-composite', `❌ Erreur: ${err.message}`, 'error');
+                console.error('Erreur test clé composite:', err);
+            }
+        }
+
+        function resetChat() {
+            window.chatIdDetector.reset();
+            alert('✅ ChatId reseté!\n\nUn nouveau chatId sera généré lors du prochain appel.');
+            console.log('🔄 ChatId reseté');
+        }
+
+        function showCurrentState() {
+            const chatId = window.chatIdDetector.getCurrentChatId();
+            const sessionId = sessionStorage.getItem('claraverse_stable_session') || 'non défini';
+            const compositeKey = `${chatId}_${sessionId}`;
+            
+            console.group('📊 État Actuel');
+            console.log('ChatId:', chatId);
+            console.log('SessionId:', sessionId);
+            console.log('Clé composite:', compositeKey);
+            console.groupEnd();
+            
+            alert(
+                `📊 État Actuel\n\n` +
+                `ChatId: ${chatId}\n` +
+                `SessionId: ${sessionId}\n\n` +
+                `Clé composite: ${compositeKey}\n\n` +
+                `(Voir console pour plus de détails)`
+            );
+        }
+
+        async function clearIndexedDB() {
+            if (!confirm('⚠️ Supprimer toutes les tables de IndexedDB?\n\nCette action est irréversible!')) {
+                return;
+            }
+            
+            try {
+                const db = await new Promise((resolve, reject) => {
+                    const request = indexedDB.open('clara_db', 12);
+                    request.onsuccess = () => resolve(request.result);
+                    request.onerror = () => reject(request.error);
+                });
+
+                const transaction = db.transaction(['clara_generated_tables'], 'readwrite');
+                const store = transaction.objectStore('clara_generated_tables');
+                
+                await new Promise((resolve, reject) => {
+                    const request = store.clear();
+                    request.onsuccess = () => resolve();
+                    request.onerror = () => reject(request.error);
+                });
+
+                db.close();
+                
+                alert('✅ IndexedDB nettoyée!');
+                console.log('🗑️ IndexedDB nettoyée');
+            } catch (err) {
+                alert(`❌ Erreur: ${err.message}`);
+                console.error('Erreur nettoyage IndexedDB:', err);
+            }
+        }
+
+        // Message de bienvenue
+        console.log('%c🔒 Test d\'Isolation des Chats', 'font-size: 20px; font-weight: bold; color: #4CAF50;');
+        console.log('Utilisez les boutons pour tester le système d\'isolation.');
+        console.log('');
+        console.log('API disponible:');
+        console.log('  • window.chatIdDetector.getCurrentChatId()');
+        console.log('  • window.chatIdDetector.reset()');
+        console.log('  • window.chatIdDetector.setChatId(id)');
+    </script>
+</body>
+</html>

@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="favicon" href="/favicon.ico" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>E-audit</title>
+
+  <!-- ⚡ BACKEND CONFIGURATION - DOIT ÊTRE CHARGÉ EN PREMIER ⚡ -->
+  <script src="/backendConfig.js"></script>
+
+  <!-- Font Awesome for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <!-- Monaco Editor CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js" crossorigin="anonymous"
+    referrerpolicy="no-referrer"></script>
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/main.tsx"></script>
+
+  <!-- ========================================== -->
+  <!-- SYSTÈME DE RESTAURATION UNIQUE -->
+  <!-- ========================================== -->
+
+  <!-- 1. Gestionnaire de verrouillage - DOIT être chargé EN PREMIER -->
+  <script src="/restore-lock-manager.js"></script>
+
+  <!-- 2. Restauration unique au chargement -->
+  <script src="/single-restore-on-load.js"></script>
+
+  <!-- ========================================== -->
+  <!-- SCRIPTS PRINCIPAUX -->
+  <!-- ========================================== -->
+
+  <!-- Wrapper automatique de tables -->
+  <script src="/wrap-tables-auto.js"></script>
+
+  <!-- Fix pour charger Mammoth.js sans conflit AMD/RequireJS -->
+  <script src="/mammoth-loader-fix.js"></script>
+
+
+  <!-- Version 1 (désactivée) -->
+  <!-- <script src="/Modelisation_template.js"></script> --></script>
+
+  <!-- Diagnostic Modelisation (décommenter pour debug) -->
+  <!-- <script src="/diagnostic-modelisation.js"></script> -->
+
+  <script src="/Flowise.js"></script>
+  <script src="/Data.js"></script>
+
+  <!-- Diagnostic des tables Claraverse -->
+  <!-- Script d'alerte automatique DÉSACTIVÉ (28 Mars 2026) -->
+  <!-- Pour réactiver le diagnostic, décommenter le script ci-dessous -->
+  <!--
+  <script>
+    // Attendre le chargement complet du DOM + 1 minute
+    window.addEventListener('DOMContentLoaded', () => {
+      console.log("🔍 [Diagnostic Auto] DOM chargé, attente de 1 minute...");
+      
+      setTimeout(() => {
+        console.log("🔍 [Diagnostic Auto] Démarrage du diagnostic des tables...");
+        
+        // Sélecteurs à tester
+        const selectors = [
+          'table',
+          '.claraverse-table',
+          '[data-claraverse-table]',
+          'div[class*="table"] table',
+          'div[class*="chat"] table'
+        ];
+        
+        let diagnosticInfo = "📊 DIAGNOSTIC DES TABLES\n\n";
+        
+        // Test 1: Compter toutes les tables
+        const allTables = document.querySelectorAll('table');
+        diagnosticInfo += `✅ Nombre total de tables: ${allTables.length}\n\n`;
+        
+        if (allTables.length > 0) {
+          diagnosticInfo += "🎯 Classes CSS des 3 premières tables:\n";
+          for (let i = 0; i < Math.min(3, allTables.length); i++) {
+            const table = allTables[i];
+            const classes = table.className || '(aucune classe)';
+            const parent = table.parentElement;
+            const parentClasses = parent ? parent.className || '(aucune classe)' : 'N/A';
+            diagnosticInfo += `\nTable ${i + 1}:\n`;
+            diagnosticInfo += `  - Classes: ${classes}\n`;
+            diagnosticInfo += `  - Parent: ${parent ? parent.tagName : 'N/A'}\n`;
+            diagnosticInfo += `  - Classes parent: ${parentClasses}\n`;
+          }
+        }
+        
+        // Afficher la première alerte
+        alert(diagnosticInfo);
+        
+        // Test 2: Tester différents sélecteurs
+        let selectorResults = "🔍 RÉSULTATS DES SÉLECTEURS\n\n";
+        
+        selectors.forEach(selector => {
+          try {
+            const elements = document.querySelectorAll(selector);
+            selectorResults += `${selector}\n`;
+            selectorResults += `  → ${elements.length} élément(s) trouvé(s)\n\n`;
+          } catch (error) {
+            selectorResults += `${selector}\n`;
+            selectorResults += `  → ERREUR: ${error.message}\n\n`;
+          }
+        });
+        
+        // Afficher la deuxième alerte
+        alert(selectorResults);
+        
+        console.log("✅ [Diagnostic Auto] Diagnostic terminé");
+        console.log(diagnosticInfo);
+        console.log(selectorResults);
+        
+      }, 60000); // 60 secondes (1 minute) après le chargement du DOM
+    });
+  </script>
+  -->
+
+  <!-- LocalStorage Cleanup Manager - DOIT être chargé EN PREMIER -->
+  <script src="/localstorage-cleanup.js"></script>
+
+  <!-- Pont de persistance - DOIT être chargé AVANT menu.js et conso.js -->
+  <script src="/menu-persistence-bridge.js"></script>
+
+  <!-- Scripts utilisant le système de persistance -->
+  <script src="/menu.js"></script>
+  <script src="/conso.js"></script>
+  <!-- Pont conso.js <-> IndexedDB : sauvegarde automatique des tables conso/résultat -->
+  <script src="/conso-indexeddb-bridge.js"></script>
+  <script src="/papier-travail-schema-calcul.js"></script>
+
+  <script src="/papier-travail-cross-ref-horizontale.js"></script>
+  
+  <script src="/papier-travail-totalisation.js"></script>
+
+  <!-- Lead SYSCOHADA - Sections comptables pour audit -->
+  <script src="/lead-syscohada.js"></script>
+
+  <!-- Lead Balance Auto Trigger - Détection automatique et traitement -->
+  <script src="/LeadBalanceAutoTrigger.js"></script>
+
+  <!-- États Financiers SYSCOHADA Auto Trigger - Détection automatique et traitement -->
+  <script src="/EtatFinAutoTrigger.js"></script>
+
+  <!-- Notes Annexes SYSCOHADA Auto Trigger - Calcul automatique des 33 notes annexes -->
+  <script src="/NotesAnnexesAutoTrigger.js"></script>
+
+  <!-- Editeur Auto Trigger - Test de switch backend -->
+  <script src="/EditeurAutoTrigger.js"></script>
+
+  <!-- Échantillonnage Audit Auto Trigger - Data analyst Aléatoire simple -->
+  <script src="/EchantillonnageAutoTrigger.js"></script>
+
+  <!-- États de Contrôle Renderer - Affichage des états de contrôle en React -->
+  <script src="/EtatsControleRenderer.js"></script>
+
+  <!-- États de Contrôle Accordéon Handler - Gestion des clics sur les accordéons -->
+  <script src="/EtatsControleAccordeonHandler.js"></script>
+
+  <!-- Export Liasse Officielle Handler -->
+  <script src="/ExportLiasseHandler.js"></script>
+
+  <!-- Menu Dossier - Barre latérale accordéon pour les tables -->
+  <script src="/dossier-menu.js"></script>
+
+  <!-- Gestion Dossier Google Drive V3 - Chargement automatique -->
+  <script src="/gestion-dossier-v3.js"></script>
+
+  <!-- Gestion Dossier Google Drive via N8N - Menu coulissant avec téléchargement CORS -->
+  <script src="/gestion-dossier-n8n.js"></script>
+
+  <!-- Gestion Électronique - Menu coulissant dans la sidebar -->
+  <script src="/gestion-electro-menu.js"></script>
+
+  <!-- Script Examen CIA - Questionnaires avec persistance -->
+  <script src="/examen_cia.js"></script>
+
+  <!-- Script Auto-Fix Examen CIA - Force fusion et restauration -->
+  <script src="/examen-cia-auto-fix.js"></script>
+
+  <!-- Script de modélisation ULTRA COMPACT - Réduction 75% -->
+  <script src="/modelisation-ultra-compact.js"></script>
+
+  <!-- Diagnostic espacement (console: diagnosticEspacement()) -->
+  <script src="/diagnostic-espacement.js"></script>
+  <script src="/diagnostic-espacement-complet.js"></script>
+
+
+
+  <!-- Restauration automatique au changement de chat -->
+  <script type="module" src="/auto-restore-chat-change.js"></script>
+
+  <!-- ========================================== -->
+  <!-- SCRIPTS DE DIAGNOSTIC (TOUS DÉSACTIVÉS) -->
+  <!-- ========================================== -->
+
+  <!-- Debug restaurations multiples -->
+  <!-- <script src="/debug-restaurations-multiples.js"></script> -->
+
+  <!-- Autres diagnostics -->
+  <!-- <script src="/diagnostic-chat-change.js"></script> -->
+  <!-- <script src="/diagnostic-restauration-detaille.js"></script> -->
+  <!-- <script src="/test-restore-force.js"></script> -->
+
+  <!-- 2. Puis le Patch (nouveau) -->
+
+
+
+  <!-- ClaraVerse Synchronization System v3.0 -->
+  <!-- CRITICAL: Load scripts in this exact order for proper synchronization -->
+
+  <!-- 3. Conso.js - Consolidation and calculations -->
+
+
+
+  <!-- 2. Dev.js v3.0 - Enhanced persistence system -->
+
+  <!-- Initialization Script -->
+  <script>
+    // Wait for all scripts to load and initialize coordination
+    document.addEventListener("DOMContentLoaded", function () {
+      console.log("🚀 ClaraVerse v3.0 - Synchronization System Loading...");
+
+      // Monitor coordinator readiness
+      document.addEventListener(
+        "claraverse:coordinator:ready",
+        function (event) {
+          console.log("✅ ClaraVerse Coordination System Ready!");
+          console.log(
+            "📊 Registered Scripts:",
+            event.detail.registeredScripts,
+          );
+
+          // Optional: Display status notification
+          if (window.claraverseSyncAPI) {
+            const notification = document.createElement("div");
+            notification.style.cssText = `
+              position: fixed;
+              top: 20px;
+              right: 20px;
+              background: linear-gradient(45deg, #10b981, #059669);
+              color: white;
+              padding: 12px 20px;
+              border-radius: 8px;
+              font-family: system-ui;
+              font-size: 14px;
+              font-weight: 600;
+              box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+              z-index: 10000;
+              transition: transform 0.3s ease;
+            `;
+            notification.innerHTML = "🎯 ClaraVerse v3.0 Ready!";
+
+            document.body.appendChild(notification);
+
+            // Auto-hide after 3 seconds
+            setTimeout(() => {
+              notification.style.transform = "translateX(100%)";
+              setTimeout(() => notification.remove(), 300);
+            }, 3000);
+          }
+        },
+      );
+
+      // Error handling for script loading issues
+      window.addEventListener("error", function (event) {
+        if (event.filename && event.filename.includes("claraverse")) {
+          console.error("❌ ClaraVerse Script Error:", event.message);
+        }
+      });
+    });
+  </script>
+</body>
+
+</html>

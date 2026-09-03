@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Persistance Tables</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #1e1e1e;
+            color: #d4d4d4;
+        }
+        .test-section {
+            background: #252526;
+            border: 2px solid #3c3c3c;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .test-title {
+            color: #4ec9b0;
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .result {
+            background: #1e1e1e;
+            border-left: 4px solid #007acc;
+            padding: 15px;
+            margin: 10px 0;
+            white-space: pre-wrap;
+            font-size: 12px;
+        }
+        .success {
+            border-left-color: #4ec9b0;
+            color: #4ec9b0;
+        }
+        .error {
+            border-left-color: #f48771;
+            color: #f48771;
+        }
+        .warning {
+            border-left-color: #dcdcaa;
+            color: #dcdcaa;
+        }
+        button {
+            background: #0e639c;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 14px;
+        }
+        button:hover {
+            background: #1177bb;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+        }
+        th, td {
+            border: 1px solid #3c3c3c;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background: #3c3c3c;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 Diagnostic Persistance des Tables</h1>
+    
+    <div class="test-section">
+        <div class="test-title">📋 Test 1 : Créer une table</div>
+        <button onclick="createTestTable()">Créer Table de Test</button>
+        <div id="tableDisplay"></div>
+    </div>
+
+    <div class="test-section">
+        <div class="test-title">💾 Test 2 : Sauvegarder dans localStorage</div>
+        <button onclick="saveToLocalStorage()">Sauvegarder</button>
+        <div id="saveResult" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <div class="test-title">🔄 Test 3 : Charger depuis localStorage</div>
+        <button onclick="loadFromLocalStorage()">Charger</button>
+        <div id="loadResult" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <div class="test-title">🔍 Test 4 : Vérifier flowiseTableBridge</div>
+        <button onclick="checkFlowiseService()">Vérifier Service</button>
+        <div id="serviceResult" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <div class="test-title">📊 Test 5 : Audit Complet</div>
+        <button onclick="runFullAudit()">Lancer Audit Complet</button>
+        <div id="auditResult" class="result"></div>
+    </div>
+
+    <script>
+        let testChatId = 'test_chat_' + Date.now();
+        let testMessages = [];
+
+        function log(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            const className = type === 'success' ? 'success' : 
+                            type === 'error' ? 'error' : 
+                            type === 'warning' ? 'warning' : '';
+            element.innerHTML += `<div class="result ${className}">${message}</div>`;
+        }
+
+        function createTestTable() {
+            const tableHTML = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Produit</th>
+                            <th>Prix</th>
+                            <th>Stock</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Ordinateur</td>
+                            <td>999€</td>
+                            <td>15</td>
+                        </tr>
+                        <tr>
+                            <td>Souris</td>
+                            <td>25€</td>
+                            <td>150</td>
+                        </tr>
+                        <tr>
+                            <td>Clavier</td>
+                            <td>75€</td>
+                            <td>80</td>
+                        </tr>
+                    </tbody>
+                </table>
+            `;
+            
+            document.getElementById('tableDisplay').innerHTML = tableHTML;
+            
+            // Créer un message avec la table
+            testMessages.push({
+                role: 'assistant',
+                message: tableHTML,
+                timestamp: new Date().toISOString(),
+                messageId: 'msg_' + Date.now()
+            });
+            
+            log('saveResult', '✅ Table créée avec succès\n' + 
+                `Chat ID: ${testChatId}\n` +
+                `Messages: ${testMessages.length}`, 'success');
+        }
+
+        function saveToLocalStorage() {
+            try {
+                const key = `flowise_messages_${testChatId}`;
+                localStorage.setItem(key, JSON.stringify(testMessages));
+                
+                // Vérifier immédiatement
+                const saved = localStorage.getItem(key);
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    log('saveResult', 
+                        '✅ Sauvegarde réussie!\n' +
+                        `Clé: ${key}\n` +
+                        `Messages sauvegardés: ${parsed.length}\n` +
+                        `Taille: ${saved.length} caractères`, 'success');
+                } else {
+                    log('saveResult', '❌ Erreur: Rien n\'a été sauvegardé!', 'error');
+                }
+            } catch (error) {
+                log('saveResult', '❌ Erreur de sauvegarde:\n' + error.message, 'error');
+            }
+        }
+
+        function loadFromLocalStorage() {
+            try {
+                const key = `flowise_messages_${testChatId}`;
+                const saved = localStorage.getItem(key);
+                
+                if (!saved) {
+                    log('loadResult', '❌ Aucune donnée trouvée dans localStorage!', 'error');
+                    return;
+                }
+                
+                const messages = JSON.parse(saved);
+                let tableFound = false;
+                
+                messages.forEach((msg, idx) => {
+                    if (msg.message && msg.message.includes('<table')) {
+                        tableFound = true;
+                        log('loadResult', 
+                            `✅ Message ${idx} contient une table!\n` +
+                            `Longueur HTML: ${msg.message.length} caractères\n` +
+                            `Timestamp: ${msg.timestamp}`, 'success');
+                        
+                        // Afficher la table
+                        document.getElementById('tableDisplay').innerHTML = msg.message;
+                    }
+                });
+                
+                if (!tableFound) {
+                    log('loadResult', 
+                        '⚠️ Messages chargés mais aucune table trouvée!\n' +
+                        `Total messages: ${messages.length}`, 'warning');
+                }
+            } catch (error) {
+                log('loadResult', '❌ Erreur de chargement:\n' + error.message, 'error');
+            }
+        }
+
+        function checkFlowiseService() {
+            const result = [];
+            
+            // Vérifier si le service existe
+            if (typeof window.flowiseTableBridge !== 'undefined') {
+                result.push('✅ flowiseTableBridge est défini');
+                
+                // Vérifier les méthodes
+                const methods = ['saveMessage', 'getAllMessages', 'clearMessages'];
+                methods.forEach(method => {
+                    if (typeof window.flowiseTableBridge[method] === 'function') {
+                        result.push(`  ✅ Méthode ${method} disponible`);
+                    } else {
+                        result.push(`  ❌ Méthode ${method} MANQUANTE`);
+                    }
+                });
+            } else {
+                result.push('❌ flowiseTableBridge N\'EST PAS DÉFINI!');
+                result.push('   → Le service n\'est pas chargé dans index.html');
+            }
+            
+            log('serviceResult', result.join('\n'), 
+                result[0].includes('✅') ? 'success' : 'error');
+        }
+
+        function runFullAudit() {
+            const report = [];
+            report.push('═══════════════════════════════════════');
+            report.push('   RAPPORT D\'AUDIT COMPLET');
+            report.push('═══════════════════════════════════════\n');
+            
+            // 1. Vérifier localStorage
+            report.push('1️⃣ VÉRIFICATION LOCALSTORAGE:');
+            const allKeys = Object.keys(localStorage).filter(k => k.includes('flowise'));
+            if (allKeys.length === 0) {
+                report.push('   ❌ Aucune clé Flowise trouvée!');
+            } else {
+                report.push(`   ✅ ${allKeys.length} clé(s) Flowise trouvée(s):`);
+                allKeys.forEach(key => {
+                    const data = localStorage.getItem(key);
+                    report.push(`      - ${key}: ${data.length} caractères`);
+                });
+            }
+            
+            // 2. Vérifier le service
+            report.push('\n2️⃣ VÉRIFICATION SERVICE:');
+            if (typeof window.flowiseTableBridge !== 'undefined') {
+                report.push('   ✅ flowiseTableBridge disponible');
+            } else {
+                report.push('   ❌ flowiseTableBridge MANQUANT');
+            }
+            
+            // 3. Vérifier les tables
+            report.push('\n3️⃣ VÉRIFICATION TABLES:');
+            let tablesFound = 0;
+            allKeys.forEach(key => {
+                try {
+                    const messages = JSON.parse(localStorage.getItem(key));
+                    messages.forEach(msg => {
+                        if (msg.message && msg.message.includes('<table')) {
+                            tablesFound++;
+                        }
+                    });
+                } catch (e) {
+                    // Ignorer les erreurs de parsing
+                }
+            });
+            report.push(`   ${tablesFound > 0 ? '✅' : '❌'} ${tablesFound} table(s) trouvée(s) dans localStorage`);
+            
+            // 4. Capacité localStorage
+            report.push('\n4️⃣ CAPACITÉ LOCALSTORAGE:');
+            let totalSize = 0;
+            for (let key in localStorage) {
+                if (localStorage.hasOwnProperty(key)) {
+                    totalSize += localStorage[key].length + key.length;
+                }
+            }
+            const maxSize = 5 * 1024 * 1024; // 5MB
+            const percentage = ((totalSize / maxSize) * 100).toFixed(2);
+            report.push(`   Utilisé: ${(totalSize / 1024).toFixed(2)} KB / 5 MB (${percentage}%)`);
+            
+            // DIAGNOSTIC
+            report.push('\n═══════════════════════════════════════');
+            report.push('   DIAGNOSTIC:');
+            report.push('═══════════════════════════════════════');
+            
+            if (typeof window.flowiseTableBridge === 'undefined') {
+                report.push('🔴 PROBLÈME: Service flowiseTableBridge non chargé');
+                report.push('   → Vérifier index.html');
+            } else if (allKeys.length === 0) {
+                report.push('🔴 PROBLÈME: Aucune sauvegarde dans localStorage');
+                report.push('   → Les messages ne sont pas sauvegardés');
+            } else if (tablesFound === 0) {
+                report.push('🔴 PROBLÈME: Messages sauvegardés mais sans tables');
+                report.push('   → Problème de sérialisation HTML');
+            } else {
+                report.push('🟢 SYSTÈME FONCTIONNEL');
+                report.push('   → Les tables sont correctement persistées');
+            }
+            
+            log('auditResult', report.join('\n'), 
+                report[report.length - 1].includes('🟢') ? 'success' : 'error');
+        }
+
+        // Exécuter un audit au chargement
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                checkFlowiseService();
+            }, 500);
+        });
+    </script>
+</body>
+</html>
