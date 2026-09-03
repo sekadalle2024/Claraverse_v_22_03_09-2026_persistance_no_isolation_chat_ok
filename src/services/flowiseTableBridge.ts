@@ -2344,31 +2344,39 @@ export class FlowiseTableBridge {
     }
 
     try {
-      console.log(`🔄 Restoring tables chronologically for session: ${this.currentSessionId}`);
+      console.log(`\n${'='.repeat(80)}`);
+      console.log(`🔄 RESTAURATION CHRONOLOGIQUE - SESSION: ${this.currentSessionId}`);
+      console.log(`${'='.repeat(80)}\n`);
 
       // Get the unified timeline
+      console.log(`📊 [1/7] Récupération timeline...`);
       const timeline = await flowiseTimelineService.getSessionTimeline(
         this.currentSessionId,
         messages
       );
 
-      console.log(`📊 [DEBUG] Timeline récupérée: ${timeline.length} items total`);
-      console.log(`📊 [DEBUG] Timeline détail:`, timeline.map(t => ({ type: t.type, sessionId: t.sessionId?.substring(0, 8), keyword: (t as any).keyword })));
+      console.log(`📊 [2/7] Timeline récupérée: ${timeline.length} items total`);
+      console.log(`   Détail items:`, timeline.map(t => ({ type: t.type, sessionId: t.sessionId?.substring(0, 8), keyword: (t as any).keyword })));
 
       // 🛡️ FILTRAGE DÉFENSIF STRICT - Isolation sessions (ROOT CAUSE FIX)
       // Ne garder QUE les tables de la session actuelle pour éviter contamination
+      console.log(`📊 [3/7] Filtrage par session...`);
       const filteredTimeline = timeline.filter(item => {
         const belongsToSession = item.sessionId === this.currentSessionId;
         if (!belongsToSession && item.type === 'table') {
-          console.warn(`🚫 [ISOLATION] Table autre session filtrée: "${(item as any).keyword}" (session: ${item.sessionId})`);
+          console.warn(`   🚫 Table autre session filtrée: "${(item as any).keyword}" (session: ${item.sessionId?.substring(0, 8)}...)`);
         }
         return belongsToSession;
       });
 
-      console.log(`📊 [DEBUG] Après filtrage session: ${filteredTimeline.length} items`);
+      console.log(`📊 [4/7] Après filtrage: ${filteredTimeline.length} items pour cette session`);
 
       if (filteredTimeline.length === 0) {
-        console.log(`ℹ️ No timeline items for session ${this.currentSessionId}`);
+        console.warn(`\n⚠️ [5/7] AUCUN ITEM DANS TIMELINE pour session ${this.currentSessionId?.substring(0, 8)}...`);
+        console.warn(`   → Causes possibles:`);
+        console.warn(`      1. Aucune table générée dans ce chat`);
+        console.warn(`      2. Tables sauvegardées avec sessionId différent`);
+        console.warn(`      3. getSessionTimeline() ne retourne rien\n`);
         return 0;
       }
 
@@ -2379,19 +2387,31 @@ export class FlowiseTableBridge {
       }
 
       // Filter only table items
+      console.log(`📊 [5/7] Extraction des tables...`);
       const tableItems = filteredTimeline.filter(item => item.type === 'table') as TableTimelineItem[];
 
-      console.log(`📊 [DEBUG] Tables à restaurer: ${tableItems.length}`);
-
+      console.log(`📊 [6/7] Tables à restaurer: ${tableItems.length}`);
+      
       if (tableItems.length === 0) {
-        console.log(`ℹ️ No tables to restore for session ${this.currentSessionId}`);
+        console.warn(`\n⚠️ AUCUNE TABLE À RESTAURER`);
+        console.warn(`   Timeline contient ${filteredTimeline.length} items mais 0 de type 'table'`);
+        console.warn(`   Types présents:`, filteredTimeline.map(t => t.type));
+        console.warn(``);
         return 0;
       }
 
-      console.log(`✅ Filtered timeline: ${tableItems.length} table(s) for session ${this.currentSessionId}`);
+      console.log(`\n✅ ${tableItems.length} table(s) identifiée(s) pour session ${this.currentSessionId?.substring(0, 8)}...`);
+      console.log(`📋 Liste des tables:`);
+      tableItems.forEach((item, index) => {
+        console.log(`   ${index + 1}. "${item.keyword}" (position: ${item.position})`);
+      });
 
       // Restore each table in chronological order
+      console.log(`\n📊 [7/7] INJECTION DOM (${tableItems.length} tables)...\n`);
+      
+      let restoredCount = 0;
       for (const tableItem of tableItems) {
+        console.log(`   🔄 Restauration "${tableItem.keyword}"...`);
         // Convert timeline item back to table record for injection
         const tableRecord: FlowiseGeneratedTableRecord = {
           id: tableItem.tableId,
@@ -2412,15 +2432,24 @@ export class FlowiseTableBridge {
           }
         };
 
-        this.injectTableIntoDOM(tableRecord);
+        try {
+          this.injectTableIntoDOM(tableRecord);
+          restoredCount++;
+          console.log(`   ✅ "${tableItem.keyword}" injectée dans DOM`);
+        } catch (injectError) {
+          console.error(`   ❌ Erreur injection "${tableItem.keyword}":`, injectError);
+        }
       }
 
-      console.log(`✅ Restored ${tableItems.length} table(s) chronologically for session ${this.currentSessionId}`);
+      console.log(`\n${'='.repeat(80)}`);
+      console.log(`✅ RESTAURATION TERMINÉE: ${restoredCount}/${tableItems.length} table(s) restaurée(s)`);
+      console.log(`${'='.repeat(80)}\n`);
 
-      return tableItems.length;
+      return restoredCount;
 
     } catch (error) {
-      console.error('❌ Error restoring tables chronologically:', error);
+      console.error('\n❌ ERREUR CRITIQUE RESTAURATION:', error);
+      console.error('Stack:', error);
       return 0;
     }
   }
