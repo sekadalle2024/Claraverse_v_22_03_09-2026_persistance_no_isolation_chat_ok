@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Vérification IndexedDB ClaraVerse</title>
+    <style>
+        body { font-family: monospace; padding: 20px; background: #1e1e1e; color: #d4d4d4; }
+        .log { margin: 5px 0; padding: 5px; background: #2d2d2d; border-left: 3px solid #4CAF50; }
+        .error { border-left-color: #f44336; }
+        .warning { border-left-color: #ff9800; }
+        .info { border-left-color: #2196F3; }
+        button { padding: 10px 20px; margin: 10px 0; background: #4CAF50; color: white; border: none; cursor: pointer; }
+        button:hover { background: #45a049; }
+        pre { background: #2d2d2d; padding: 10px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Diagnostic IndexedDB ClaraVerse</h1>
+    <button onclick="checkIndexedDB()">Vérifier IndexedDB</button>
+    <button onclick="clearLogs()">Effacer Logs</button>
+    <div id="logs"></div>
+
+    <script>
+        function log(message, type = 'log') {
+            const logsDiv = document.getElementById('logs');
+            const logEntry = document.createElement('div');
+            logEntry.className = `log ${type}`;
+            logEntry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logsDiv.appendChild(logEntry);
+            console.log(message);
+        }
+
+        function clearLogs() {
+            document.getElementById('logs').innerHTML = '';
+        }
+
+        async function checkIndexedDB() {
+            clearLogs();
+            log('🔍 Démarrage vérification IndexedDB...', 'info');
+
+            try {
+                // Ouvrir la base de données
+                const request = indexedDB.open('clara_database', 1);
+
+                request.onerror = () => {
+                    log('❌ Erreur ouverture database: ' + request.error, 'error');
+                };
+
+                request.onsuccess = async (event) => {
+                    const db = event.target.result;
+                    log('✅ Database "clara_database" ouverte avec succès', 'log');
+
+                    // Vérifier les object stores
+                    const storeNames = Array.from(db.objectStoreNames);
+                    log(`📊 Object Stores trouvés: ${storeNames.length}`, 'info');
+                    storeNames.forEach(name => log(`  - ${name}`, 'info'));
+
+                    // Vérifier clara_generated_tables
+                    if (!storeNames.includes('clara_generated_tables')) {
+                        log('⚠️ Store "clara_generated_tables" introuvable!', 'warning');
+                        return;
+                    }
+
+                    // Lire les tables
+                    const transaction = db.transaction('clara_generated_tables', 'readonly');
+                    const store = transaction.objectStore('clara_generated_tables');
+                    const getAllRequest = store.getAll();
+
+                    getAllRequest.onsuccess = () => {
+                        const tables = getAllRequest.result;
+                        log(`📚 Total tables dans IndexedDB: ${tables.length}`, 'info');
+
+                        if (tables.length === 0) {
+                            log('⚠️ AUCUNE table sauvegardée!', 'warning');
+                            log('❌ Ceci confirme: Sauvegarde ne fonctionne PAS', 'error');
+                            return;
+                        }
+
+                        log('✅ Tables trouvées! Sauvegarde fonctionne probablement', 'log');
+                        log('', 'info');
+
+                        // Analyser chaque table
+                        const sessionGroups = {};
+                        tables.forEach((table, index) => {
+                            log(`📋 Table #${index + 1}:`, 'info');
+                            log(`  ID: ${table.id}`, 'info');
+                            log(`  Keyword: ${table.keyword}`, 'info');
+                            log(`  SessionId: ${table.sessionId ? table.sessionId.substring(0, 40) + '...' : 'undefined'}`, table.sessionId ? 'log' : 'error');
+                            log(`  Timestamp: ${table.timestamp}`, 'info');
+                            log(`  Source: ${table.source}`, 'info');
+                            log(`  HTML Length: ${table.html ? table.html.length : 0} bytes`, 'info');
+                            log(`  Compressed: ${table.metadata?.compressed ? 'Oui' : 'Non'}`, 'info');
+                            log(`  Fingerprint: ${table.fingerprint ? table.fingerprint.substring(0, 16) + '...' : 'N/A'}`, 'info');
+                            log('', 'info');
+
+                            // Grouper par session
+                            const sid = table.sessionId || 'undefined';
+                            sessionGroups[sid] = (sessionGroups[sid] || 0) + 1;
+                        });
+
+                        // Résumé par session
+                        log('📊 Résumé par Session:', 'info');
+                        Object.entries(sessionGroups).forEach(([sid, count]) => {
+                            const displayId = sid !== 'undefined' ? sid.substring(0, 40) + '...' : 'undefined';
+                            log(`  Session ${displayId}: ${count} table(s)`, sid !== 'undefined' ? 'log' : 'warning');
+                        });
+
+                        // Diagnostic
+                        log('', 'info');
+                        log('🔍 DIAGNOSTIC:', 'info');
+                        
+                        const hasUndefinedSession = tables.some(t => !t.sessionId);
+                        if (hasUndefinedSession) {
+                            log('⚠️ PROBLÈME: Certaines tables ont sessionId undefined!', 'warning');
+                            log('   → detectSessionId() échoue probablement', 'warning');
+                            log('   → SessionId temporaire créé à chaque fois', 'warning');
+                        } else {
+                            log('✅ Toutes les tables ont un sessionId valide', 'log');
+                        }
+
+                        const uniqueSessions = Object.keys(sessionGroups).length;
+                        log(`📊 Nombre de sessions uniques: ${uniqueSessions}`, 'info');
+
+                        if (uniqueSessions > 10) {
+                            log('⚠️ ATTENTION: Beaucoup de sessions!', 'warning');
+                            log('   → Possiblement des sessionId temporaires différents', 'warning');
+                        }
+                    };
+
+                    getAllRequest.onerror = () => {
+                        log('❌ Erreur lecture tables: ' + getAllRequest.error, 'error');
+                    };
+                };
+
+                request.onupgradeneeded = (event) => {
+                    log('⚠️ Database upgrade needed - première utilisation?', 'warning');
+                };
+
+            } catch (error) {
+                log('❌ Exception: ' + error.message, 'error');
+                console.error(error);
+            }
+        }
+
+        // Auto-exécution au chargement
+        window.addEventListener('load', () => {
+            log('🚀 Page chargée - Cliquez sur "Vérifier IndexedDB"', 'info');
+        });
+    </script>
+</body>
+</html>

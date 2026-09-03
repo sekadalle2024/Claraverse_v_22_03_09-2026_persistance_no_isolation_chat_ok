@@ -1,0 +1,91 @@
+╔═══════════════════════════════════════════════════════════════════╗
+║       GUIDE RAPIDE PUSH CLARAVERSE V22 - 03 SEPTEMBRE 2026       ║
+║              Repository: Persistance No Isolation Chat OK         ║
+╚═══════════════════════════════════════════════════════════════════╝
+
+📍 REPOSITORY CIBLE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+https://github.com/sekadalle2024/Claraverse_v_22_03_09-2026_persistance_no_isolation_chat_ok.git
+
+🚀 MÉTHODE RECOMMANDÉE (Automatique)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. Ouvrir PowerShell dans le dossier h:\Claverse_1
+2. Lancer la vérification préalable (optionnel mais recommandé):
+   
+   .\verif-avant-push-v22.ps1
+   
+3. Lancer le push automatique:
+   
+   .\push-claraverse-v22-03-sept-2026.ps1
+
+✅ Durée: 10-15 minutes
+✅ Retry automatique en cas d'échec
+✅ Division en 7 parties < 30 MB chacune
+
+📦 LES 7 PARTIES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Partie 1: src/ (Code React/TypeScript)
+Partie 2: py_backend/ (Backend Python)
+Partie 3: public/ (Fichiers publics + scripts diagnostic)
+Partie 4: Doc Systeme persistance chat/ (Documentation technique)
+Partie 5: Docs principales (Doc menu, Doc export, etc.)
+Partie 6: Fichiers racine (*.html, *.md, *.txt)
+Partie 7: Configuration et divers (scripts, config)
+
+🔄 MÉTHODE ALTERNATIVE (Si le script échoue)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Option A: GitHub Desktop (Recommandé)
+  1. Ouvrir GitHub Desktop
+  2. File → Add Local Repository → h:\Claverse_1
+  3. Repository → Repository Settings → Remote
+  4. Changer l'URL vers le nouveau repository
+  5. Commit all → Push
+
+Option B: Commandes Manuelles
+  git remote set-url origin https://github.com/sekadalle2024/Claraverse_v_22_03_09-2026_persistance_no_isolation_chat_ok.git
+  git add .
+  git commit -m "Sauvegarde ClaraVerse V22"
+  git push -u origin main
+
+⚠️ PROBLÈMES COURANTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. "HTTP 408 Timeout"
+   → Le script réessayera automatiquement (3 tentatives)
+   
+2. "Connection reset"
+   → Vérifier votre connexion Internet
+   → Attendre 5 minutes et relancer
+   
+3. "Permission denied"
+   → Utiliser GitHub Desktop
+   → Vérifier vos identifiants GitHub
+
+4. "nothing to commit"
+   → Normal, les fichiers sont déjà à jour
+   → Vérifier avec: git status
+
+📚 DOCUMENTATION COMPLÈTE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+GUIDE_PUSH_V22_03_SEPT_2026.md        (Guide complet)
+Doc_Github_Issue/SOLUTION_PROJET_140MB_16_AVRIL_2026.md  (Solution détaillée)
+
+✅ VÉRIFICATION APRÈS PUSH
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. Sur GitHub:
+   https://github.com/sekadalle2024/Claraverse_v_22_03_09-2026_persistance_no_isolation_chat_ok
+
+2. En local:
+   git status
+   git log --oneline -7
+
+💡 CONSEILS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✅ Garder une connexion Internet stable
+✅ Ne pas interrompre le script
+✅ Fermer les applications utilisant Git
+✅ Laisser le script gérer les retries
+
+Date: 03 Septembre 2026
+Version: V22
+Taille: >140 MB
+Méthode: Commits multiples (7 parties)
