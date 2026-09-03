@@ -3,6 +3,8 @@
  * Combine IndexedDB + État Restauration dans un seul popup
  */
 
+console.log('🔧 [Diagnostic] Chargement diagnostic-complet-fusionne.js...');
+
 window.diagnosticComplet = async function() {
   console.log('\n🔍 ===== DIAGNOSTIC COMPLET FUSIONNÉ =====\n');
   
@@ -71,6 +73,7 @@ window.diagnosticComplet = async function() {
       const db = await new Promise((resolve, reject) => {
         dbRequest.onsuccess = () => resolve(dbRequest.result);
         dbRequest.onerror = () => reject(dbRequest.error);
+        dbRequest.onupgradeneeded = () => console.warn('⚠️ DB upgrade triggered');
       });
       
       message += `4️⃣ DATABASE\n`;
@@ -167,22 +170,22 @@ window.diagnosticComplet = async function() {
       
     } else {
       // Tables dans DOM, vérifier DB
-      const dbRequest = indexedDB.open('FloTableDB', 2);
-      const db = await new Promise((resolve, reject) => {
-        dbRequest.onsuccess = () => resolve(dbRequest.result);
-        dbRequest.onerror = () => reject(dbRequest.error);
+      const dbRequest2 = indexedDB.open('FloTableDB', 2);
+      const db2 = await new Promise((resolve, reject) => {
+        dbRequest2.onsuccess = () => resolve(dbRequest2.result);
+        dbRequest2.onerror = () => reject(dbRequest2.error);
       });
-      const transaction = db.transaction(['generatedTables'], 'readonly');
-      const store = transaction.objectStore('generatedTables');
-      const allRequest = store.getAll();
-      const allTables = await new Promise((resolve, reject) => {
-        allRequest.onsuccess = () => resolve(allRequest.result);
-        allRequest.onerror = () => reject(allRequest.error);
+      const transaction2 = db2.transaction(['generatedTables'], 'readonly');
+      const store2 = transaction2.objectStore('generatedTables');
+      const allRequest2 = store2.getAll();
+      const allTables2 = await new Promise((resolve, reject) => {
+        allRequest2.onsuccess = () => resolve(allRequest2.result);
+        allRequest2.onerror = () => reject(allRequest2.error);
       });
       const currentSessionTables = sessionId 
-        ? allTables.filter(t => t.sessionId === sessionId)
+        ? allTables2.filter(t => t.sessionId === sessionId)
         : [];
-      db.close();
+      db2.close();
       
       if (currentSessionTables.length === 0) {
         message += `❌ SAUVEGARDE ÉCHOUE\n\n`;
@@ -229,4 +232,4 @@ window.diagnosticComplet = async function() {
   alert(message);
 };
 
-console.log('✅ Diagnostic complet fusionné chargé (bouton "🔍 Diagnostic")');
+console.log('✅ [Diagnostic] Fonction window.diagnosticComplet chargée');
