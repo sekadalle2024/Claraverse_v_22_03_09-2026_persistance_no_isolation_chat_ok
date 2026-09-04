@@ -760,3 +760,313 @@ function observeNewTables() {
 **Dernière mise à jour:** 4 Septembre 2026 01:50  
 **Statut:** ✅ Auto-save fonctionnel, tests en cours  
 **Développeur:** Kiro AI + User
+
+
+---
+
+## 🔧 CORRECTION 4: Timing & Signature API (4 Septembre 2026 - 02h40)
+
+### 🔴 Problèmes Découverts lors des Tests
+
+#### Problème 4.1: Script exécuté trop tôt
+```
+Console log:
+🧪 [TEST PATCHER] Trouvé 0 table(s)
+```
+
+**Cause:**
+- Scripts JS chargés immédiatement au chargement de `index.html`
+- React prend 2-3 secondes pour monter les composants
+- Patcher s'exécute avant que les tables existent dans le DOM
+- Résultat : keywords restent "unknown"
+
+**Solution implémentée:**
+
+**Fichier:** `public/test-keyword-patcher-simple.js`
+
+1. **Délai d'initialisation augmenté** : 2s → 5s
+```javascript
+// AVANT
+setTimeout(() => {
+  testPatcher();
+}, 2000);
+
+// APRÈS
+setTimeout(() => {
+  console.log('🧪 [TEST PATCHER] Auto-démarrage (5s)...');
+  testPatcher();
+  startObserver(); // + Observer pour futures tables
+}, 5000);
+```
+
+2. **MutationObserver ajouté** pour détecter tables ajoutées dynamiquement
+```javascript
+function startObserver() {
+  const observer = new MutationObserver((mutations) => {
+    let foundNewTable = false;
+    
+    mutations.forEach((mutation) => {
+      mutation.addedNodes.forEach((node) => {
+        if (node.nodeType === 1) {
+          if (node.tagName === 'TABLE') {
+            foundNewTable = true;
+          }
+          if (node.querySelectorAll && node.querySelectorAll('table').length > 0) {
+            foundNewTable = true;
+          }
+        }
+      });
+    });
+    
+    if (foundNewTable) {
+      console.log('🔔 [TEST PATCHER] Nouvelle(s) table(s) détectée(s), patch...');
+      setTimeout(() => {
+        testPatcher();
+      }, 500);
+    }
+  });
+  
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true
+  });
+}
+```
+
+3. **Retry périodique** (sécurité)
+```javascript
+setInterval(() => {
+  const tables = document.querySelectorAll('table');
+  const needsPatch = Array.from(tables).filter(t => 
+    !t.dataset.keyword || t.dataset.keyword === 'unknown'
+  );
+  
+  if (needsPatch.length > 0) {
+    console.log(`🔄 [TEST PATCHER] Retry: ${needsPatch.length} table(s) sans keyword`);
+    testPatcher();
+  }
+}, 10000);
+```
+
+---
+
+#### Problème 4.2: Mauvaise signature API saveGeneratedTable
+
+**Erreur obtenue:**
+```
+TypeError: Cannot read properties of undefined (reading 'querySelector')
+at FlowiseTableService.extractHeaders (flowiseTableService.ts:78:29)
+at FlowiseTableService.generateTableFingerprint (flowiseTableService.ts:54:26)
+at FlowiseTableService.saveGeneratedTable (flowiseTableService.ts:197:32)
+at FlowiseTableBridge.performAutoSave (flowiseTableBridge.ts:2755:35)
+```
+
+**Cause:**
+- `performAutoSave()` passait un **objet** à `saveGeneratedTable()`
+- Mais la fonction attend des **paramètres séparés** avec `HTMLTableElement` en 2ème position
+- L'objet n'a pas de méthode `.querySelector()` → crash
+
+**Signature correcte de saveGeneratedTable:**
+```typescript
+async saveGeneratedTable(
+  sessionId: string,
+  tableElement: HTMLTableElement,  // ← DOIT être HTMLTableElement
+  keyword: string,
+  source: FlowiseTableSource,
+  messageId?: string,
+  forceUpdate: boolean = false
+): Promise<string>
+```
+
+**Code AVANT (incorrect):**
+```typescript
+// flowiseTableBridge.ts ligne ~2750
+await flowiseTableService.saveGeneratedTable({
+  id: tableId,
+  sessionId: this.currentSessionId || 'unknown',
+  keyword,
+  html,
+  fingerprint,
+  source: 'user_edit',
+  timestamp: Date.now(),
+  messageId: undefined
+});
+```
+
+**Code APRÈS (corrigé):**
+```typescript
+// flowiseTableBridge.ts ligne ~2750
+const savedId = await flowiseTableService.saveGeneratedTable(
+  this.currentSessionId || 'unknown',  // sessionId
+  table,                                // HTMLTableElement
+  keyword,                              // keyword
+  'user_edit',                          // source
+  undefined,                            // messageId
+  false                                 // forceUpdate
+);
+
+if (savedId) {
+  savedTables.push(keyword);
+  this.dirtyTables.delete(identifier);
+  console.log(`✅ [AUTO-SAVE] Table "${keyword}" sauvegardée (ID: ${savedId})`);
+}
+```
+
+---
+
+### 📊 Timeline de Résolution
+
+| Heure | Événement | Action |
+|-------|-----------|--------|
+| 02:09 | Test 1 - 12 tables, keywords "unknown", IndexedDB vide | Diagnostic initial |
+| 02:20 | Cache Vite vidé, serveur redémarré | Tentative fix cache |
+| 02:22 | Test 2 - 23 tables (duplication), toujours "unknown" | Problème persiste |
+| 02:34 | Logs montrent `Trouvé 0 table(s)` | Problème de timing identifié |
+| 02:37 | Délai 5s + Observer ajoutés | Correction timing |
+| 02:40 | Erreur `querySelector` détectée | Problème signature API |
+| 02:42 | Signature corrigée dans performAutoSave | Fix complet |
+| 02:43 | **Rebuild TypeScript nécessaire** | User lance rebuild |
+
+---
+
+### ✅ Résultats Attendus Post-Correction
+
+#### Logs Console Attendus
+
+**Phase 1 - Initialisation (0-5s):**
+```
+🧪 [TEST PATCHER] Script chargé
+💡 [TEST PATCHER] Commande manuelle: testKeywordPatcher()
+```
+
+**Phase 2 - Démarrage automatique (5s):**
+```
+🧪 [TEST PATCHER] Auto-démarrage (5s)...
+🧪 [TEST PATCHER] Démarrage test...
+🧪 [TEST PATCHER] Trouvé 12 table(s)  ← devrait être > 0
+🧪 [TEST PATCHER] Table 1 → keyword: "Assertion"
+🧪 [TEST PATCHER] Table 2 → keyword: "Conclusion"
+...
+👁️ [TEST PATCHER] Observer actif
+✅ [TEST PATCHER] Terminé: 12 table(s) patchée(s)
+```
+
+**Phase 3 - Sauvegarde (5-7s):**
+```
+💾 [TEST PATCHER] Événement émis pour: "Assertion"
+💾 [TEST PATCHER] Événement émis pour: "Conclusion"
+...
+✅ Table saved: abc-123-def (keyword: Assertion, fingerprint: a1b2c3d4...)
+✅ [AUTO-SAVE] Table "Assertion" sauvegardée (ID: abc-123-def)
+...
+💾 [AUTO-SAVE] Sauvegarde de 12 table(s) modifiée(s)...
+✅ [AUTO-SAVE] 12 table(s) sauvegardée(s): Assertion, Conclusion, ...
+```
+
+#### Diagnostic Visuel (Bouton 🔍)
+
+**Section "📊 État du Système":**
+```
+INDEXEDDB
+✅ FloTableDB
+v2 - 12 table(s)  ← devrait être > 0
+```
+
+**Section "📋 Tables dans le DOM":**
+```
+Table 1: Assertion           ← pas "unknown"
+Position: 1
+Visible: ✅ Oui
+Dimensions: 5 lignes × 2 colonnes
+Auto-générée: ❌ Non
+SessionId: cb24bd20...
+```
+
+**Section "💾 Tables dans IndexedDB":**
+```
+📌 cb24bd20... (Session actuelle)
+12 table(s):
+• Assertion - 04/09 02:43
+• Conclusion - 04/09 02:43
+• CTR_6123 - 04/09 02:43
+...
+```
+
+**Section "⚠️ Contamination":**
+```
+✅ Aucune Contamination
+Toutes les tables appartiennent à la session actuelle. Isolation correcte.
+```
+
+#### Test Persistance (F5)
+
+1. **Avant F5:** 12 tables
+2. **F5 (recharger page)**
+3. **Après F5:** 12 tables (pas 24)
+4. **Modifications conservées:** ✅
+
+---
+
+### 📁 Fichiers Modifiés - Correction 4
+
+| Fichier | Changement | Lignes Modifiées |
+|---------|-----------|------------------|
+| `public/test-keyword-patcher-simple.js` | Délai 2s → 5s | 1 |
+| `public/test-keyword-patcher-simple.js` | Ajout MutationObserver | +35 |
+| `public/test-keyword-patcher-simple.js` | Ajout retry périodique | +10 |
+| `src/services/flowiseTableBridge.ts` | Fix signature saveGeneratedTable | 17 lignes (2747-2764) |
+| `index.html` | Temporaire: auto-keyword-patcher.js désactivé | 1 commentaire |
+| `index.html` | Temporaire: test-keyword-patcher-simple.js activé | +1 |
+
+---
+
+### 🔄 Prochaine Étape (Post-Rebuild)
+
+1. ✅ **Rebuild TypeScript** : `npm run build` ou Ctrl+S dans VS Code
+2. 🧪 **Test complet** :
+   - Ouvrir http://localhost:5174/
+   - Attendre 5 secondes
+   - Vérifier logs console
+   - Cliquer 🔍 Diagnostic
+   - Vérifier IndexedDB > 0 tables
+   - F5 → Vérifier pas de duplication
+
+3. 🔄 **Si succès** : Réactiver `auto-keyword-patcher.js` (version complète avec extraction intelligente)
+4. 🔄 **Si échec** : Analyser nouveaux logs d'erreur
+
+---
+
+### 🐛 Debugging Additionnel
+
+**Si keywords toujours "unknown" après rebuild:**
+```javascript
+// Dans console F12, taper :
+testKeywordPatcher()
+
+// Vérifier output :
+// - Combien de tables trouvées ?
+// - Keywords assignés ?
+// - Événements émis ?
+```
+
+**Si erreurs saveGeneratedTable persistent:**
+```javascript
+// Vérifier type de l'objet passé
+console.log(table instanceof HTMLTableElement); // doit être true
+console.log(table.tagName); // doit être "TABLE"
+```
+
+**Si duplication après F5:**
+```javascript
+// Vérifier si restauration activée
+console.log(window.flowiseTableBridge);
+// Chercher dans flowiseTableBridge.ts ligne ~90
+// Doit être désactivé : return;
+```
+
+---
+
+**Dernière mise à jour:** 4 Septembre 2026 02:43  
+**Statut:** 🔄 En attente rebuild TypeScript  
+**Prochaine action:** Tests post-rebuild  
+**Développeur:** Kiro AI + User
