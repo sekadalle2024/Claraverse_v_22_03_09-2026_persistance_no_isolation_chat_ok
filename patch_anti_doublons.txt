@@ -1,0 +1,23 @@
+// PATCH ANTI-DOUBLONS
+// À insérer dans flowiseTableBridge.ts ligne ~2455 (AVANT "let restoredCount = 0;")
+
+      // 🆕 ANTI-DOUBLONS: Nettoyer tables existantes AVANT restauration
+      console.log('🧹 [ANTI-DOUBLONS] Nettoyage tables existantes...');
+      const existingTables = document.querySelectorAll('table[data-keyword]');
+      let cleanedCount = 0;
+      
+      existingTables.forEach(table => {
+        const sessionId = table.getAttribute('data-session-id');
+        // Supprimer uniquement tables de CETTE session
+        if (!sessionId || sessionId === this.currentSessionId) {
+          const keyword = table.getAttribute('data-keyword');
+          const parent = table.closest('.restored-table-wrapper') || table.parentElement;
+          if (parent) {
+            parent.remove();
+            cleanedCount++;
+            console.log(`   🗑️ Supprimé: "${keyword}"`);
+          }
+        }
+      });
+      
+      console.log(`✅ [ANTI-DOUBLONS] ${cleanedCount} table(s) nettoyée(s)`);
