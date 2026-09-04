@@ -151,6 +151,33 @@
   }
   
   // ==========================================
+  // ÉMETTRE ÉVÉNEMENT DE SAUVEGARDE
+  // ==========================================
+  
+  function emitSaveEvent(table, keyword) {
+    try {
+      // Attendre un peu pour que React finisse de monter le composant
+      setTimeout(() => {
+        const saveEvent = new CustomEvent('flowise:table:save:request', {
+          bubbles: true,
+          detail: {
+            table: table,
+            keyword: keyword,
+            sessionId: window.currentSessionId || localStorage.getItem('currentSessionId'),
+            source: 'auto_keyword_patcher',
+            timestamp: Date.now()
+          }
+        });
+        
+        document.dispatchEvent(saveEvent);
+        console.log(`💾 [Patcher] Événement de sauvegarde émis pour: "${keyword}"`);
+      }, 500); // 500ms pour laisser React stabiliser le DOM
+    } catch (error) {
+      console.error(`❌ [Patcher] Erreur émission événement:`, error);
+    }
+  }
+  
+  // ==========================================
   // PATCHER LES TABLES
   // ==========================================
   
@@ -170,6 +197,9 @@
       patchedCount++;
       
       console.log(`✏️ [Patcher] Keyword assigné: "${keyword}"`, table);
+      
+      // 🆕 ÉMETTRE ÉVÉNEMENT DE SAUVEGARDE
+      emitSaveEvent(table, keyword);
     });
     
     if (patchedCount > 0) {
@@ -199,6 +229,9 @@
               node.dataset.keyword = keyword;
               console.log(`✏️ [Patcher Observer] Nouvelle table détectée, keyword: "${keyword}"`);
               foundNewTables = true;
+              
+              // 🆕 ÉMETTRE ÉVÉNEMENT DE SAUVEGARDE
+              emitSaveEvent(node, keyword);
             }
             
             // Vérifier les tables dans les enfants
@@ -209,6 +242,9 @@
                 table.dataset.keyword = keyword;
                 console.log(`✏️ [Patcher Observer] Table enfant détectée, keyword: "${keyword}"`);
                 foundNewTables = true;
+                
+                // 🆕 ÉMETTRE ÉVÉNEMENT DE SAUVEGARDE
+                emitSaveEvent(table, keyword);
               }
             });
           }

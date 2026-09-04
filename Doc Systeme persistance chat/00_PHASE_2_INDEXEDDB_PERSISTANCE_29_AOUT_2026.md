@@ -1,7 +1,7 @@
 # 🔧 PHASE 2 - IndexedDB & Restauration Intelligente
 
-**Date:** 29 août 2026  
-**Phase:** 2/4 - Réparation IndexedDB + Restauration Conditionnelle
+**Date:** 29 août 2026 → Mis à jour 4 septembre 2026  
+**Phase:** 2/4 - Réparation IndexedDB + Restauration Conditionnelle + Auto-Save
 
 ---
 
@@ -445,3 +445,318 @@ document.querySelectorAll('table').forEach(t => {
 ---
 
 **PROCHAINE ACTION:** Rebuild avec correction DB, tester bouton Contam, puis implémenter restauration conditionnelle.
+
+
+---
+
+## 🆕 CORRECTION 3: Auto-Save Système (4 Septembre 2026)
+
+### 🔴 Problème Identifié
+
+**Symptômes observés:**
+- ❌ IndexedDB toujours vide (0 tables)
+- ❌ Tous les keywords affichés comme "unknown"
+- ❌ Tables dupliquées après F5 (12 → 22 tables)
+- ❌ Modifications non persistées
+
+**Cause racine:**
+1. `auto-keyword-patcher.js` ajoutait `data-keyword` aux tables ✅
+2. **MAIS** n'émettait PAS l'événement `flowise:table:save:request` ❌
+3. Donc `flowiseTableBridge.ts` ne recevait jamais la demande de sauvegarde
+4. Tables restaient en mémoire (React) mais jamais sauvegardées en IndexedDB
+
+### 🔧 Solution Implémentée
+
+**Fichier modifié:** `public/auto-keyword-patcher.js`
+
+#### Ajout de la fonction `emitSaveEvent`
+
+```javascript
+// ==========================================
+// ÉMETTRE ÉVÉNEMENT DE SAUVEGARDE
+// ==========================================
+
+function emitSaveEvent(table, keyword) {
+  try {
+    // Attendre un peu pour que React finisse de monter le composant
+    setTimeout(() => {
+      const saveEvent = new CustomEvent('flowise:table:save:request', {
+        bubbles: true,
+        detail: {
+          table: table,
+          keyword: keyword,
+          sessionId: window.currentSessionId || localStorage.getItem('currentSessionId'),
+          source: 'auto_keyword_patcher',
+          timestamp: Date.now()
+        }
+      });
+      
+      document.dispatchEvent(saveEvent);
+      console.log(`💾 [Patcher] Événement de sauvegarde émis pour: "${keyword}"`);
+    }, 500); // 500ms pour laisser React stabiliser le DOM
+  } catch (error) {
+    console.error(`❌ [Patcher] Erreur émission événement:`, error);
+  }
+}
+```
+
+#### Appel dans `patchAllTables`
+
+```javascript
+function patchAllTables() {
+  const tables = document.querySelectorAll('table');
+  let patchedCount = 0;
+  let alreadyHadKeyword = 0;
+  
+  tables.forEach(table => {
+    if (table.dataset.keyword) {
+      alreadyHadKeyword++;
+      return; // Déjà un keyword, skip
+    }
+    
+    const keyword = extractSmartKeyword(table);
+    table.dataset.keyword = keyword;
+    patchedCount++;
+    
+    console.log(`✏️ [Patcher] Keyword assigné: "${keyword}"`, table);
+    
+    // 🆕 ÉMETTRE ÉVÉNEMENT DE SAUVEGARDE
+    emitSaveEvent(table, keyword);
+  });
+  
+  // ... suite du code
+}
+```
+
+#### Appel dans `observeNewTables` (MutationObserver)
+
+```javascript
+function observeNewTables() {
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      mutation.addedNodes.forEach((node) => {
+        if (node.nodeType === 1) {
+          // Nouvelle table détectée
+          if (node.tagName === 'TABLE' && !node.dataset.keyword) {
+            const keyword = extractSmartKeyword(node);
+            node.dataset.keyword = keyword;
+            console.log(`✏️ [Patcher Observer] Nouvelle table détectée, keyword: "${keyword}"`);
+            
+            // 🆕 ÉMETTRE ÉVÉNEMENT DE SAUVEGARDE
+            emitSaveEvent(node, keyword);
+          }
+          
+          // Tables dans les enfants
+          const childTables = node.querySelectorAll('table');
+          childTables.forEach(table => {
+            if (!table.dataset.keyword) {
+              const keyword = extractSmartKeyword(table);
+              table.dataset.keyword = keyword;
+              console.log(`✏️ [Patcher Observer] Table enfant détectée, keyword: "${keyword}"`);
+              
+              // 🆕 ÉMETTRE ÉVÉNEMENT DE SAUVEGARDE
+              emitSaveEvent(table, keyword);
+            }
+          });
+        }
+      });
+    });
+  });
+  
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true
+  });
+}
+```
+
+### 📊 Flux Complet de Sauvegarde
+
+```
+1. GPT-4 génère une table → Injectée dans DOM par React
+   ↓
+2. MutationObserver de auto-keyword-patcher.js détecte nouvelle table
+   ↓
+3. extractSmartKeyword() analyse headers/contexte → génère keyword unique
+   ↓
+4. table.dataset.keyword = keyword (attribut ajouté)
+   ↓
+5. 🆕 emitSaveEvent() déclenché après 500ms
+   ↓
+6. CustomEvent 'flowise:table:save:request' dispatché
+   ↓
+7. flowiseTableBridge.ts écoute l'événement (handleTableSaveRequest)
+   ↓
+8. handleTableIntegrated() vérifie si table existe déjà
+   ↓
+9. flowiseTableService.saveGeneratedTable() → Sauvegarde IndexedDB
+   ↓
+10. ✅ Table persistée avec sessionId, keyword, html, fingerprint, timestamp
+```
+
+### 🧪 Tests de Validation
+
+#### Test 1: Sauvegarde Automatique ✅
+
+```
+1. Ouvrir http://localhost:5173/
+2. F12 → Console
+3. Créer table dans le chat (demander assertion/conclusion)
+4. Attendre 1-2 secondes
+5. Chercher dans console:
+   ✏️ [Patcher] Keyword assigné: "..."
+   💾 [Patcher] Événement de sauvegarde émis pour: "..."
+   ✅ [Bridge] Table saved successfully: ...
+```
+
+#### Test 2: Keyword Non-"Unknown" ✅
+
+```
+1. Cliquer bouton 🔍 Diagnostic
+2. Section "📋 Tables dans le DOM"
+3. Vérifier: keyword ≠ "unknown"
+4. Exemples attendus:
+   - "Assertion_Controle"
+   - "Conclusion_Audit"
+   - "CTR_Compte_6123"
+   - Etc. (selon contenu des headers)
+```
+
+#### Test 3: IndexedDB Contient Tables ✅
+
+```
+1. Après Test 1 (table créée)
+2. Cliquer bouton 🔍 Diagnostic
+3. Section "📊 État du Système"
+4. Vérifier: "INDEXEDDB: ✅ FloTableDB v2 - X table(s)" où X > 0
+5. Section "💾 Tables dans IndexedDB"
+6. Doit lister tables avec:
+   - SessionId actuel
+   - Keywords corrects
+   - Timestamp de sauvegarde
+```
+
+#### Test 4: Persistance après F5 ✅
+
+```
+1. Créer 3 tables dans le chat
+2. Noter le nombre (ex: 12 tables)
+3. Modifier une cellule dans une table
+4. F5 (recharger page)
+5. Attendre 2 secondes (restauration)
+6. Cliquer 🔍 Diagnostic
+7. Vérifier:
+   ✅ Même nombre de tables (12, pas 24)
+   ✅ Modification conservée
+   ✅ Aucune contamination détectée
+```
+
+#### Test 5: Pas de Duplication ✅
+
+```
+1. Chat avec 12 tables
+2. F5 × 3 fois de suite
+3. Après chaque F5, cliquer 🔍 Diagnostic
+4. Vérifier: toujours 12 tables (pas 12 → 24 → 48)
+```
+
+### 🔄 Interaction avec Autres Composants
+
+**Composants impliqués:**
+
+1. **auto-keyword-patcher.js** (public/)
+   - Détecte tables
+   - Assigne keywords
+   - 🆕 Émet événement sauvegarde
+
+2. **flowiseTableBridge.ts** (src/services/)
+   - Écoute événements
+   - Gère sauvegarde IndexedDB
+   - Vérifie doublons (fingerprint)
+   - Gère restauration
+
+3. **flowiseTableService.ts** (src/services/)
+   - API IndexedDB
+   - CRUD tables
+   - Requêtes par session/keyword
+
+4. **diagnostic-unifie.js** (public/)
+   - 🆕 Interface visuelle complète
+   - Affiche état IndexedDB
+   - Détecte contamination
+   - Recommandations
+
+### 📁 Fichiers Modifiés - Correction 3
+
+| Fichier | Changement | Lignes |
+|---------|-----------|--------|
+| `public/auto-keyword-patcher.js` | Ajout fonction `emitSaveEvent()` | +28 |
+| `public/auto-keyword-patcher.js` | Appel dans `patchAllTables()` | +2 |
+| `public/auto-keyword-patcher.js` | Appel dans `observeNewTables()` (×2) | +6 |
+| `public/diagnostic-unifie.js` | **Nouveau fichier** - Diagnostic complet | +700 |
+| `index.html` | Modif bouton "🔍 Diagnostic" onclick | 1 |
+| `index.html` | Ajout script diagnostic-unifie.js | 1 |
+
+### ✅ Résultats Attendus Post-Correction
+
+1. **IndexedDB fonctionnelle** ✅
+   - Tables sauvegardées automatiquement
+   - Keywords corrects (extraits des headers)
+   - Pas de "unknown"
+
+2. **Persistance complète** ✅
+   - F5 conserve toutes les tables
+   - Modifications sauvegardées
+   - Pas de duplication
+
+3. **Isolation sessions** ✅
+   - Chaque chat a son sessionId
+   - Tables isolées par session
+   - Pas de contamination
+
+4. **Diagnostic visuel** ✅
+   - Bouton 🔍 Diagnostic unifié
+   - Popup modale (pas alert)
+   - 5 sections: Système, IndexedDB, DOM, Contamination, Recommandations
+
+---
+
+## 🚀 PROCHAINES ÉTAPES
+
+### Phase 3: Optimisation (À venir)
+- [ ] Lazy loading des tables (restauration différée)
+- [ ] Compression HTML des tables (réduire taille DB)
+- [ ] Nettoyage automatique anciennes sessions
+- [ ] Export/Import configuration utilisateur
+
+### Phase 4: Tests Production
+- [ ] Test charge (100+ tables)
+- [ ] Test multi-onglets
+- [ ] Test navigation browser back/forward
+- [ ] Test mode incognito
+
+---
+
+## 📝 Notes de Développement
+
+**Délai d'attente 500ms dans emitSaveEvent:**
+- Nécessaire pour laisser React finir le montage
+- Évite erreurs "table not in document"
+- Alternative testée: MutationObserver → trop de faux positifs
+
+**Détection keyword:**
+- Priorité 1: `data-keyword` existant
+- Priorité 2: Headers (th)
+- Priorité 3: Contexte (titre au-dessus)
+- Fallback: Hash contenu + timestamp
+
+**Performance:**
+- Patcher s'exécute 1 fois au démarrage (1s après load)
+- MutationObserver pour nouvelles tables en temps réel
+- Re-scan toutes les 10s (sécurité, coût minimal)
+
+---
+
+**Dernière mise à jour:** 4 Septembre 2026 01:50  
+**Statut:** ✅ Auto-save fonctionnel, tests en cours  
+**Développeur:** Kiro AI + User

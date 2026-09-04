@@ -30,7 +30,7 @@
             style="padding: 12px 20px; background: #06b6d4; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
       🧪 Test Phase 2
     </button>
-    <button onclick="if (window.diagnosticComplet) { window.diagnosticComplet(); } else { alert('❌ ERREUR\\n\\nFonction diagnosticComplet non chargée\\n\\nVérifier console F12 pour:\\n✅ [Diagnostic] Fonction window.diagnosticComplet chargée'); }"
+    <button onclick="if (window.diagnosticUnifie) { window.diagnosticUnifie(); } else { alert('❌ ERREUR\\n\\nFonction diagnosticUnifie non chargée\\n\\nVérifier console F12 pour:\\n✅ [Diagnostic Unifié] Fonction window.diagnosticUnifie chargée'); }"
             style="padding: 12px 20px; background: #8b5cf6; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
       🔍 Diagnostic
     </button>
@@ -162,6 +162,9 @@
   <script src="/test-phase-3-persistance.js"></script>
   <script src="/diagnostic-complet-fusionne.js"></script>
   
+  <!-- 🔍 DIAGNOSTIC UNIFIÉ (OPTION B: Fusion complète) -->
+  <script src="/diagnostic-unifie.js"></script>
+  
   <!-- 🔍 LANCER DIAGNOSTIC AUTO (10 secondes après chargement) -->
   <script>
     setTimeout(() => {
@@ -183,6 +186,9 @@
   
   <!-- 🔍 DIAGNOSTIC DÉTAILLÉ PERSISTANCE -->
   <script src="/diagnostic-persistence-detailed.js"></script>
+  
+  <!-- 🔧 DIAGNOSTIC PERSISTANCE DES MODIFICATIONS -->
+  <script src="/diagnostic-persistance-modifs.js"></script>
   
   <!-- 🔍 BOUTON DE DIAGNOSTIC FRONT-END -->
   <!-- DÉSACTIVÉ : Conflit avec boutons HTML statiques ligne 22-38 -->
