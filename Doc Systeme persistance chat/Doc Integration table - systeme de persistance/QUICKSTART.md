@@ -7,6 +7,19 @@
 
 ## ⚡ Solution Rapide (5 minutes)
 
+### Méthode 1 : Bouton Front-End (RECOMMANDÉ) ⭐
+
+**Le plus simple** : Cherchez le bouton rouge **"🧹 Nettoyer IndexedDB"** en haut à droite (5ème bouton)
+
+1. **Cliquer** sur le bouton
+2. **Lire** la confirmation (explique ce qui va se passer)
+3. **Cliquer "OK"**
+4. ✅ Rechargement automatique après 2 secondes
+
+---
+
+### Méthode 2 : Commande Console (Alternative)
+
 ### Étape 1 : Nettoyer IndexedDB
 
 **Ouvrir console F12** (touche F12 dans navigateur)

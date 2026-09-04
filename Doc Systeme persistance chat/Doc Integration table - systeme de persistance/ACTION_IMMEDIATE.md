@@ -16,6 +16,14 @@ Vous voyez actuellement **une seule feuille de test** au lieu de toutes.
 
 ## ✅ Solution en 3 Étapes
 
+### ⭐ MÉTHODE SIMPLE : Bouton Front-End
+
+Cherchez le bouton rouge **"🧹 Nettoyer IndexedDB"** en haut à droite (5ème bouton) et cliquez dessus.
+
+---
+
+### Alternative : Commande Console
+
 ### Étape 1 : Ouvrir Console
 Appuyez sur **F12** dans votre navigateur
 

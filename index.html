@@ -38,6 +38,10 @@
             style="padding: 12px 20px; background: #f59e0b; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
       🔄 Intégrer Tables
     </button>
+    <button onclick="if (confirm('🧹 NETTOYAGE INDEXEDDB\\n\\nCette action va:\\n✅ Supprimer toutes les tables sauvegardées\\n✅ Résoudre incompatibilité keywords\\n✅ Recharger la page automatiquement\\n\\n⚠️ Les tables seront régénérées au prochain F5\\n\\nContinuer ?')) { const req = indexedDB.deleteDatabase('FloTableDB'); req.onsuccess = () => { alert('✅ IndexedDB nettoyée !\\n\\nRechargement dans 2 secondes...'); setTimeout(() => location.reload(), 2000); }; req.onerror = (e) => alert('❌ Erreur: ' + e.target.error); req.onblocked = () => alert('⚠️ Bloqué\\n\\nFermez tous les autres onglets de cette app et réessayez'); }"
+            style="padding: 12px 20px; background: #dc2626; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
+      🧹 Nettoyer IndexedDB
+    </button>
   </div>
   
   <div id="root"></div>

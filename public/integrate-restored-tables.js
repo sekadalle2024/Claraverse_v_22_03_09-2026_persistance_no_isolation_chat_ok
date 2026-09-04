@@ -99,25 +99,35 @@
   }
   
   function getTableIdentifier(table) {
-    // Priorité 1 : data-keyword (mais ignorer keywords temporaires)
+    // Priorité 1 : data-keyword (mais ignorer keywords temporaires ET UUIDs)
     const keyword = table.getAttribute('data-keyword');
     if (keyword && keyword !== 'unknown') {
+      // Vérifier si c'est un UUID (format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx)
+      const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(keyword);
+      
       // Vérifier si c'est un keyword temporaire (contient timestamp)
       const isTemporary = keyword.match(/Table_\d+_\d{13}$/);  // Format: Table_X_timestamp
       
-      if (!isTemporary) {
+      // Si c'est un keyword "stable" (ni UUID ni temporaire), l'utiliser
+      if (!isUUID && !isTemporary) {
         return { type: 'keyword', value: keyword };
       }
-      // Si temporaire, passer à la méthode suivante
+      // Si UUID ou temporaire, passer à la méthode suivante mais garder info
+      if (isUUID) {
+        console.log(`   ℹ️ UUID détecté (${keyword.substring(0, 8)}...), recherche par header/position`);
+      }
     }
     
-    // Priorité 2 : data-table-id
+    // Priorité 2 : data-table-id (sauf si UUID)
     const tableId = table.getAttribute('data-table-id');
     if (tableId) {
-      return { type: 'tableId', value: tableId };
+      const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(tableId);
+      if (!isUUID) {
+        return { type: 'tableId', value: tableId };
+      }
     }
     
-    // Priorité 3 : Premier header (th)
+    // Priorité 3 : Premier header (th) - MÉTHODE PRÉFÉRÉE pour UUIDs
     const firstTh = table.querySelector('th');
     if (firstTh && firstTh.textContent.trim()) {
       const headerText = firstTh.textContent.trim();
@@ -127,7 +137,11 @@
       }
     }
     
-    // Priorité 4 : Position dans DOM (améliorée)
+    // Priorité 4 : Compter nombre de colonnes et lignes (signature structurelle)
+    const rows = table.querySelectorAll('tr').length;
+    const cols = table.querySelector('tr')?.querySelectorAll('th, td').length || 0;
+    
+    // Priorité 5 : Position dans DOM (améliorée)
     const allTables = Array.from(document.querySelectorAll('table'));
     const position = allTables.indexOf(table);
     
@@ -137,11 +151,17 @@
       return { 
         type: 'position_temp', 
         value: position,
-        tempKeywordPattern: tableNumber ? `Table_${tableNumber}_` : null
+        tempKeywordPattern: tableNumber ? `Table_${tableNumber}_` : null,
+        structure: { rows, cols }
       };
     }
     
-    return { type: 'position', value: position };
+    return { 
+      type: 'position', 
+      value: position,
+      structure: { rows, cols },
+      originalKeyword: keyword  // Garder trace UUID pour logs
+    };
   }
   
   // ==========================================
@@ -166,6 +186,16 @@
     // 2. Collecter tables initiales
     const tablesInitiales = collectTables(SELECTORS.tablesInitialesSelectors, true);
     console.log(`📊 [INTEGRATION] ${tablesInitiales.length} table(s) initiale(s) trouvée(s)`);
+    
+    // Debug: afficher structure des tables initiales
+    console.log(`🔍 [DEBUG] Structure tables initiales:`);
+    tablesInitiales.forEach((t, i) => {
+      const rows = t.querySelectorAll('tr').length;
+      const cols = t.querySelector('tr')?.querySelectorAll('th, td').length || 0;
+      const keyword = t.getAttribute('data-keyword') || 'none';
+      const header = t.querySelector('th')?.textContent.trim().substring(0, 20) || 'none';
+      console.log(`   ${i + 1}. ${rows}x${cols} | keyword: ${keyword} | header: "${header}"`);
+    });
     
     if (tablesInitiales.length === 0) {
       console.warn('⚠️ [INTEGRATION] Aucune table initiale trouvée dans chat');
@@ -214,7 +244,32 @@
           if (tableInitiale) matchMethod = 'header';
         }
         
-        // Tentative 4 : Match par position (amélioré pour keywords temporaires)
+        // Tentative 4 : Match par structure (rows x cols) puis position
+        if (!tableInitiale && identRestauree.structure) {
+          // Chercher table avec structure similaire
+          const candidatesWithSameStructure = tablesInitiales.filter(t => {
+            const rows = t.querySelectorAll('tr').length;
+            const cols = t.querySelector('tr')?.querySelectorAll('th, td').length || 0;
+            return rows === identRestauree.structure.rows && cols === identRestauree.structure.cols;
+          });
+          
+          if (candidatesWithSameStructure.length === 1) {
+            // Une seule table avec cette structure unique → match certain
+            tableInitiale = candidatesWithSameStructure[0];
+            matchMethod = 'structure_unique';
+            console.log(`   🎯 Match par structure unique: ${identRestauree.structure.rows}x${identRestauree.structure.cols}`);
+          } else if (candidatesWithSameStructure.length > 1) {
+            // Plusieurs tables similaires → utiliser position relative
+            const restoredIndex = tablesRestaurees.indexOf(tableRestauree);
+            if (restoredIndex < candidatesWithSameStructure.length) {
+              tableInitiale = candidatesWithSameStructure[restoredIndex];
+              matchMethod = 'structure_position';
+              console.log(`   🎯 Match par structure + position: ${restoredIndex + 1}/${candidatesWithSameStructure.length}`);
+            }
+          }
+        }
+        
+        // Tentative 5 : Match par position (amélioré pour keywords temporaires)
         if (!tableInitiale && (identRestauree.type === 'position' || identRestauree.type === 'position_temp')) {
           // Pour keywords temporaires, chercher table avec même pattern
           if (identRestauree.type === 'position_temp' && identRestauree.tempKeywordPattern) {
@@ -233,9 +288,12 @@
         }
         
         if (!tableInitiale) {
-          console.log(`   ⏭️ Pas de match trouvé, skip (peut-être nouvelle table)`);
+          const keywordDisplay = identRestauree.originalKeyword 
+            ? `${identRestauree.originalKeyword.substring(0, 8)}...` 
+            : (identRestauree.value || 'unknown');
+          console.log(`   ⏭️ Pas de match trouvé pour ${keywordDisplay}, skip (peut-être nouvelle table)`);
           integrationDetails.push({
-            keyword: identRestauree.value || 'unknown',
+            keyword: keywordDisplay,
             method: 'none',
             result: 'SKIPPED'
           });
@@ -276,9 +334,11 @@
         }
         parent.removeChild(tableInitiale);
         
-        console.log(`   ✅ Table ${identRestauree.value} intégrée avec succès`);
+        console.log(`   ✅ Table ${identRestauree.originalKeyword ? identRestauree.originalKeyword.substring(0, 8) + '...' : identRestauree.value} intégrée avec succès`);
         integrationDetails.push({
-          keyword: identRestauree.value || 'unknown',
+          keyword: identRestauree.originalKeyword 
+            ? identRestauree.originalKeyword.substring(0, 8) + '...'
+            : (identRestauree.value || 'unknown'),
           method: matchMethod,
           result: 'INTEGRATED'
         });
