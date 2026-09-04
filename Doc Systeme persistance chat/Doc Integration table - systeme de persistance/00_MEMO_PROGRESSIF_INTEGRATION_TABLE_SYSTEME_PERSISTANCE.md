@@ -1085,3 +1085,188 @@ Rechargement dans 2 secondes...
 ---
 
 **Dernière mise à jour** : 29 Août 2026 04:15
+
+
+---
+
+## ✅ RÉSOLUTION FINALE : PROBLÈME 2 RÉSOLU (29 AOÛT 2026)
+
+**Date validation** : 29 Août 2026 04:30  
+**Statut** : ✅ **PROBLÈME 2 COMPLÈTEMENT RÉSOLU**
+
+### Résultats Tests Utilisateur Réels
+
+**Test exécuté** : Génération tables → F5 → Intégration automatique
+
+**Résultats obtenus** :
+```
+✅ Intégrées: 11/11 (100%)
+⏭️ Skippées: 0/11 (0%)
+❌ Erreurs: 0/11 (0%)
+```
+
+**Détail des matchings** :
+```
+MÉTHODE KEYWORD (4 tables) :
+1. Rubrique → keyword → INTEGRATED
+2. OBJECTIFS → keyword → INTEGRATED
+4. Résultats_des_tests → keyword → INTEGRATED
+7. Légende → keyword → INTEGRATED
+
+MÉTHODE STRUCTURE_UNIQUE (6 tables) :
+3. Table 14 (dimensions uniques) → structure_unique → INTEGRATED
+5. Table 17 (dimensions uniques) → structure_unique → INTEGRATED
+6. Table 18 (dimensions uniques) → structure_unique → INTEGRATED
+8. Table 20 (dimensions uniques) → structure_unique → INTEGRATED
+9. Table 21 (dimensions uniques) → structure_unique → INTEGRATED
+10. Table 22 (dimensions uniques) → structure_unique → INTEGRATED
+
+MÉTHODE KEYWORD CONSOLIDATION (1 table) :
+11. Table_Consolidation → keyword → INTEGRATED
+```
+
+### Métriques Finales
+
+| Métrique | Avant Solution | Après Solution | Gain |
+|----------|---------------|----------------|------|
+| **Tables intégrées** | 5/11 (45%) | **11/11 (100%)** | **+120%** |
+| **Tables skippées** | 6/11 (55%) | **0/11 (0%)** | **-100%** |
+| **Erreurs** | 0 | 0 | - |
+| **Temps utilisateur** | 30s (console) | **5s (bouton)** | **-83%** |
+| **Méthodes matching** | 1 (keyword only) | **5 (keyword, structure, header, position)** | **+400%** |
+
+### Validation Critères Succès
+
+**Critère 1** : Bouton visible en front-end ✅
+- Position : Haut droite (4ème bouton)
+- Couleur : Orange (#f59e0b)
+- z-index : 999999
+- **Statut** : ✅ VALIDÉ
+
+**Critère 2** : Intégration automatique fonctionne ✅
+- Déclenchement après restauration détectée
+- Timeout : 5 secondes
+- **Statut** : ✅ VALIDÉ
+
+**Critère 3** : Pas de duplication après F5 ✅
+- Avant : 12 → 24 → 36 tables
+- Après : 12 → 12 → 12 tables
+- **Statut** : ✅ VALIDÉ
+
+**Critère 4** : Logs console confirment succès ✅
+- Section `[INTEGRATION]` présente
+- Détails clairs pour chaque table
+- **Statut** : ✅ VALIDÉ
+
+**Critère 5** : Toutes feuilles de test visibles ✅
+- Avant : 1 seule feuille visible (9 skippées)
+- Après : **11 feuilles visibles** (0 skippées)
+- **Statut** : ✅ VALIDÉ
+
+### Solution Technique Appliquée
+
+**Approche retenue** : Matching multi-critères avec détection UUID
+
+**Algorithme final** (5 méthodes, ordre priorité) :
+
+```javascript
+// 1. KEYWORD STABLE (non-UUID, non-timestamp)
+if (keyword && !isUUID && !isTemporary) {
+  match par keyword exact
+}
+
+// 2. HEADER TEXT (premier <th>)
+if (firstTh.textContent.length >= 3) {
+  match par texte header
+}
+
+// 3. STRUCTURE UNIQUE (rows × cols)
+if (une seule table avec rows×cols identiques) {
+  match certain par structure
+}
+
+// 4. STRUCTURE + POSITION RELATIVE
+if (plusieurs tables avec structure similaire) {
+  match par position relative dans groupe
+}
+
+// 5. POSITION DOM PURE (fallback)
+match par position dans array toutes tables
+```
+
+**Innovations clés** :
+1. ✅ Détection automatique UUIDs (regex `/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i`)
+2. ✅ Matching par dimensions structurelles (évite dépendance keywords)
+3. ✅ Fallback robuste avec 5 niveaux
+4. ✅ Logs debug exhaustifs (structure toutes tables affichée)
+
+### Fichiers Livrés (Solution Complète)
+
+**Code** :
+- `public/integrate-restored-tables.js` - Script intégration (500+ lignes)
+- `public/clean-indexeddb.js` - Script nettoyage (40 lignes)
+- `index.html` - 2 boutons front-end (lignes 38-48)
+
+**Documentation** (7 fichiers, 3000+ lignes) :
+- `README.md` - Vue d'ensemble & guide navigation
+- `QUICKSTART.md` - Guide rapide 5 minutes
+- `ACTION_IMMEDIATE.md` - Procédure urgente 3 étapes
+- `RESOLUTION_KEYWORDS_INCOMPATIBLES.md` - Explication détaillée problème
+- `INDEX.md` - Navigation structurée par rôle/besoin
+- `00_MEMO_PROGRESSIF_...md` - Mémo technique complet (1500+ lignes)
+- `00_MEMO_INTEGRATION_...md` - Mémo implémentation (650 lignes)
+
+### Leçons Apprises
+
+**Ce qui a fonctionné** :
+1. ✅ Approche incrémentale (test après chaque modification)
+2. ✅ Logs exhaustifs (facilite debug)
+3. ✅ Boutons front-end (accessibilité > console)
+4. ✅ Matching structurel (plus robuste que keywords)
+5. ✅ Documentation progressive (capture décisions temps réel)
+
+**Ce qui n'a pas fonctionné** :
+1. ❌ Nettoyage IndexedDB seul (tables re-sauvegardées avec UUIDs)
+2. ❌ Match position pure initialement (ordre DOM instable)
+3. ❌ Sélecteurs CSS trop spécifiques (`.markdown-body table` trouvait 0)
+
+**Améliorations futures possibles** :
+1. ⏳ Match par contenu cellules (hash MD5) si structure identique
+2. ⏳ Détection changements utilisateur avant intégration (éviter perte modifs)
+3. ⏳ Mode "prévisualisation" intégration (confirm avant remplacement)
+4. ⏳ Statistiques persistence (tracker quelles tables posent problème)
+
+### Déclaration de Clôture
+
+**Problème 2 : Tables restaurées ne remplacent pas tables initiales**
+
+**Statut final** : ✅ **RÉSOLU ET VALIDÉ**
+
+**Date résolution** : 29 Août 2026  
+**Durée totale** : 4h30 (analyse 2h30 + implémentation 1h + tests 1h)  
+**Tests utilisateur** : ✅ PASSÉS (11/11 tables intégrées, 0 skippées)
+
+**Ce problème est maintenant considéré comme RÉSOLU et ne nécessite plus d'action.**
+
+---
+
+## 🔜 PROCHAINE ÉTAPE : PROBLÈME 1
+
+**Problème suivant à résoudre** : Modifications manuelles non persistées
+
+**Symptôme** :
+- Utilisateur édite cellule → F5 → Modification perdue
+- Utilisateur ajoute ligne → F5 → Ligne perdue
+- Tables restaurées affichent version sauvegardée (avant modifs)
+
+**Approche prévue** :
+1. Analyser système auto-save actuel (`flowiseTableBridge.ts`)
+2. Identifier pourquoi modifications pas détectées
+3. Implémenter listeners mutation DOM
+4. Tester persistence éditions cellules + ajout lignes
+
+**Date début** : 29 Août 2026 04:30
+
+---
+
+**Dernière mise à jour** : 29 Août 2026 04:30
