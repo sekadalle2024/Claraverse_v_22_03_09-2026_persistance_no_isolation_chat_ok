@@ -2452,8 +2452,63 @@ export class FlowiseTableBridge {
       });
 
       // Restore each table in chronological order
-      console.log(`\nðŸ“Š [7/7] INJECTION DOM (${tableItems.length} tables)...\n`);
+      console.log('📊 [7/7] INJECTION DOM (' + tableItems.length + ' tables)...');
       
+      // 🆕 ANTI-DOUBLONS: Nettoyer tables existantes AVANT restauration
+      console.log('🧹 [ANTI-DOUBLONS] Nettoyage tables existantes...');
+      const existingTables = document.querySelectorAll('table[data-keyword]');
+      let cleanedCount = 0;
+      
+      existingTables.forEach(table => {
+        const sessionId = table.getAttribute('data-session-id');
+        if (!sessionId || sessionId === this.currentSessionId) {
+          const keyword = table.getAttribute('data-keyword');
+          const parent = table.closest('.restored-table-wrapper') || table.parentElement;
+          if (parent) {
+            parent.remove();
+            cleanedCount++;
+            console.log('   🗑️ Supprimé: ' + keyword);
+          }
+        }
+      });
+      
+      console.log('✅ [ANTI-DOUBLONS] ' + cleanedCount + ' table(s) nettoyée(s)');
+      // ANTI-DOUBLONS: Nettoyer tables existantes AVANT restauration
+      console.log('🧹 [ANTI-DOUBLONS] Nettoyage tables existantes...');
+      const existingTables = document.querySelectorAll('table[data-keyword]');
+      let cleanedCount = 0;
+      existingTables.forEach(table => {
+        const sessionId = table.getAttribute('data-session-id');
+        if (!sessionId || sessionId === this.currentSessionId) {
+          const keyword = table.getAttribute('data-keyword');
+          const parent = table.closest('.restored-table-wrapper') || table.parentElement;
+          if (parent) { parent.remove(); cleanedCount++; }
+        }
+      });
+      console.log('✅ [ANTI-DOUBLONS] ' + cleanedCount + ' table(s) nettoyée(s)');
+
+      let restoredCount = 0;
+      
+            
+      // 🆕 ANTI-DOUBLONS: Nettoyer tables existantes AVANT restauration
+      console.log('🧹 [ANTI-DOUBLONS] Nettoyage tables existantes...');
+      const existingTables = document.querySelectorAll('table[data-keyword]');
+      let cleanedCount = 0;
+      
+      existingTables.forEach(table => {
+        const sessionId = table.getAttribute('data-session-id');
+        if (!sessionId || sessionId === this.currentSessionId) {
+          const keyword = table.getAttribute('data-keyword');
+          const parent = table.closest('.restored-table-wrapper') || table.parentElement;
+          if (parent) {
+            parent.remove();
+            cleanedCount++;
+            console.log('   🗑️ Supprimé: ' + keyword);
+          }
+        }
+      });
+      
+      console.log('✅ [ANTI-DOUBLONS] ' + cleanedCount + ' table(s) nettoyée(s)');
       let restoredCount = 0;
       for (const tableItem of tableItems) {
         console.log(`   ðŸ”„ Restauration "${tableItem.keyword}"...`);
