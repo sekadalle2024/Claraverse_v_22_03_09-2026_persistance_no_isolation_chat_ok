@@ -2747,24 +2747,22 @@ export class FlowiseTableBridge {
 
         // Extraire les donnÃ©es de la table
         const keyword = table.getAttribute('data-keyword') || identifier;
-        const tableId = table.getAttribute('data-table-id') || this.generateTableId();
-        const html = table.outerHTML;
-        const fingerprint = this.generateFingerprint(html);
 
-        // Sauvegarder dans IndexedDB
-        await flowiseTableService.saveGeneratedTable({
-          id: tableId,
-          sessionId: this.currentSessionId || 'unknown',
+        // Sauvegarder dans IndexedDB en utilisant la bonne signature
+        const savedId = await flowiseTableService.saveGeneratedTable(
+          this.currentSessionId || 'unknown',
+          table, // HTMLTableElement
           keyword,
-          html,
-          fingerprint,
-          source: 'user_edit', // Nouvelle source pour modifications utilisateur
-          timestamp: Date.now(),
-          messageId: undefined
-        });
+          'user_edit', // source
+          undefined, // messageId
+          false // forceUpdate
+        );
 
-        savedTables.push(keyword);
-        this.dirtyTables.delete(identifier);
+        if (savedId) {
+          savedTables.push(keyword);
+          this.dirtyTables.delete(identifier);
+          console.log(`✅ [AUTO-SAVE] Table "${keyword}" sauvegardée (ID: ${savedId})`);
+        }
         console.log(`âœ… [AUTO-SAVE] Table "${keyword}" sauvegardÃ©e`);
 
       } catch (error) {

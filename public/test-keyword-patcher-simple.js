@@ -75,11 +75,66 @@
   // Exposer globalement
   window.testKeywordPatcher = testPatcher;
   
-  // Auto-démarrage après 2 secondes
+  // Observer les nouvelles tables avec MutationObserver
+  function startObserver() {
+    console.log('👁️ [TEST PATCHER] Démarrage observer...');
+    
+    const observer = new MutationObserver((mutations) => {
+      let foundNewTable = false;
+      
+      mutations.forEach((mutation) => {
+        mutation.addedNodes.forEach((node) => {
+          if (node.nodeType === 1) {
+            // Vérifier si c'est une table
+            if (node.tagName === 'TABLE') {
+              foundNewTable = true;
+            }
+            // Vérifier les tables dans les enfants
+            if (node.querySelectorAll && node.querySelectorAll('table').length > 0) {
+              foundNewTable = true;
+            }
+          }
+        });
+      });
+      
+      if (foundNewTable) {
+        console.log('🔔 [TEST PATCHER] Nouvelle(s) table(s) détectée(s), patch...');
+        // Attendre un peu que React finisse
+        setTimeout(() => {
+          testPatcher();
+        }, 500);
+      }
+    });
+    
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true
+    });
+    
+    console.log('✅ [TEST PATCHER] Observer actif');
+  }
+  
+  // Auto-démarrage après 5 secondes (laisser React se charger)
   setTimeout(() => {
-    console.log('🧪 [TEST PATCHER] Auto-démarrage...');
+    console.log('🧪 [TEST PATCHER] Auto-démarrage (5s)...');
     testPatcher();
-  }, 2000);
+    
+    // Démarrer l'observer pour les futures tables
+    startObserver();
+  }, 5000);
+  
+  // Retry toutes les 10 secondes (sécurité)
+  setInterval(() => {
+    const tables = document.querySelectorAll('table');
+    const needsPatch = Array.from(tables).filter(t => 
+      !t.dataset.keyword || t.dataset.keyword === 'unknown'
+    );
+    
+    if (needsPatch.length > 0) {
+      console.log(`🔄 [TEST PATCHER] Retry: ${needsPatch.length} table(s) sans keyword`);
+      testPatcher();
+    }
+  }, 10000);
   
   console.log('💡 [TEST PATCHER] Commande manuelle: testKeywordPatcher()');
   
