@@ -34,6 +34,10 @@
             style="padding: 12px 20px; background: #8b5cf6; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
       🔍 Diagnostic
     </button>
+    <button onclick="if (window.integrerTablesRestaurees) { const r = window.integrerTablesRestaurees(); const details = r.details || []; const detailsText = details.slice(0, 10).map((d, i) => `${i+1}. ${d.keyword} → ${d.method} → ${d.result}`).join('\\n'); alert('🔄 INTÉGRATION TABLES\\n\\n✅ Intégrées: ' + r.integrated + '\\n⏭️ Skippées: ' + r.skipped + '\\n❌ Erreurs: ' + r.errors + '\\n\\n📋 DÉTAILS:\\n' + (detailsText || 'Aucun détail') + '\\n\\n💡 Console F12 pour logs complets'); } else { alert('❌ ERREUR\\n\\nFonction integrerTablesRestaurees non chargée\\n\\nVérifier console F12'); }"
+            style="padding: 12px 20px; background: #f59e0b; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
+      🔄 Intégrer Tables
+    </button>
   </div>
   
   <div id="root"></div>
@@ -167,6 +171,9 @@
   
   <!-- 🔍 DIAGNOSTIC UNIFIÉ (OPTION B: Fusion complète) -->
   <script src="/diagnostic-unifie.js"></script>
+  
+  <!-- 🔄 INTÉGRATION TABLES RESTAURÉES (Résolution Problème 2) -->
+  <script src="/integrate-restored-tables.js"></script>
   
   <!-- 🔍 LANCER DIAGNOSTIC AUTO (10 secondes après chargement) -->
   <script>
