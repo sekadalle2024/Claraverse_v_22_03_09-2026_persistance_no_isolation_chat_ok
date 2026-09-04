@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Clara Text-to-Speech Service
  * 
  * This service handles text-to-speech functionality with health checking
@@ -37,9 +37,7 @@ export class ClaraTTSService {
 
   constructor(baseUrl: string = 'http://localhost:5001') {
     this.baseUrl = baseUrl;
-    // DESACTIVE - Backend non necessaire
-    // this.startHealthChecking();
-    console.log('[INFO] TTS Service: Health checking disabled');
+    this.startHealthChecking();
   }
 
   /**

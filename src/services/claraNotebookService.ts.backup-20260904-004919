@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Clara Notebook Service
  * 
  * This service handles notebook functionality with LightRAG integration.
@@ -106,9 +106,7 @@ export class ClaraNotebookService {
 
   constructor(baseUrl: string = 'http://localhost:5001') {
     this.baseUrl = baseUrl;
-    // DESACTIVE - Backend non necessaire
-    // this.startHealthChecking();
-    console.log('[INFO] Notebook Service: Health checking disabled');
+    this.startHealthChecking();
   }
 
   /**

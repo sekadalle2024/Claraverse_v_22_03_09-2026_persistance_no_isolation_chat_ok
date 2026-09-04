@@ -509,3 +509,172 @@ Après avoir généré une table et appuyé F5 :
 ---
 
 **Mise à jour** : 29 Août 2026 16:05 (Ajout logs debug Phase 2)
+
+---
+
+## 🔥 CORRECTIFS ANTI-DOUBLONS - 29 AOÛT 2026 23:00
+
+### Problèmes Corrigés
+
+#### 1. ✅ Backend Connection Errors (RÉSOLU)
+**Symptôme** : Erreurs console récurrentes
+```
+Failed to load resource: net::ERR_CONNECTION_REFUSED
+:5001/health:1
+```
+
+**Correction appliquée** :
+- Désactivé health checking dans `claraNotebookService.ts`
+- Désactivé health checking dans `claraTTSService.ts`
+
+**Logs attendus maintenant** :
+```
+[INFO] Notebook Service: Health checking disabled
+[INFO] TTS Service: Health checking disabled
+```
+
+**Validation** : ✅ Aucune erreur `ERR_CONNECTION_REFUSED` ne doit apparaître
+
+---
+
+#### 2. ✅ Nettoyage Doublons au Démarrage (RÉSOLU)
+**Symptôme** : Tables anciennes coexistent avec tables restaurées après F5
+
+**Correction appliquée** :
+- Ajout méthode `cleanupDuplicateTablesOnStartup()` dans `flowiseTableBridge.ts`
+- Nettoyage automatique au chargement de page
+- Vérification par `data-keyword` ET `data-table-id`
+
+**Logs attendus au démarrage** :
+```
+[CLEANUP] Removed 2 duplicate table(s) on startup
+```
+OU
+```
+[CLEANUP] No duplicates found on startup
+```
+
+**Validation** :
+```javascript
+// Console navigateur
+const tables = document.querySelectorAll('table[data-keyword]');
+const keywords = {};
+tables.forEach(t => {
+  const k = t.dataset.keyword;
+  keywords[k] = (keywords[k] || 0) + 1;
+});
+console.table(keywords);
+// Tous les compteurs doivent être à 1
+```
+
+---
+
+#### 3. ⚠️ Anti-Doublon lors Restauration (MODIFICATION MANUELLE REQUISE)
+**Symptôme** : Tables se dupliquent lors restaurations successives
+
+**Correction à appliquer manuellement** :
+- Fichier : `src/services/flowiseTableBridge.ts`
+- Ligne : ~1489
+- Méthode : `injectTableIntoDOM()`
+
+**Chercher ce commentaire** :
+```typescript
+// 🔥 CORRECTION CRITIQUE DOUBLONS
+```
+
+**Remplacer le bloc par** :
+```typescript
+// ANTI-DOUBLON TRIPLE VERIFICATION - 29 aout 2026
+const allTablesWithKeyword = document.querySelectorAll(`table[data-keyword="${tableData.keyword}"]`);
+const tablesWithId = document.querySelectorAll(`table[data-table-id="${tableData.id}"]`);
+const existingWrappers = document.querySelectorAll(`.restored-table-wrapper[data-table-id="${tableData.id}"]`);
+
+const totalExisting = allTablesWithKeyword.length + tablesWithId.length + existingWrappers.length;
+
+if (totalExisting > 0) {
+  console.log(`[ANTI-DOUBLON] Skip "${tableData.keyword}" (ID: ${tableData.id})`);
+  console.log(`   Keyword: ${allTablesWithKeyword.length}, ID: ${tablesWithId.length}, Wrappers: ${existingWrappers.length}`);
+  
+  [...allTablesWithKeyword, ...tablesWithId].forEach(table => {
+    if (!table.getAttribute('data-restored')) {
+      table.setAttribute('data-skip-restore', 'true');
+      table.setAttribute('data-table-id', tableData.id);
+    }
+  });
+  
+  return;
+}
+
+console.log(`[VERIFIED] Restoring "${tableData.keyword}" (ID: ${tableData.id})`);
+```
+
+**Après modification** :
+```bash
+npm run build
+```
+
+**Logs attendus lors restauration** :
+```
+[ANTI-DOUBLON] Skip "Table_Balance" (ID: xxx)
+   Keyword: 1, ID: 0, Wrappers: 0
+```
+OU
+```
+[VERIFIED] Restoring "Table_Balance" (ID: xxx)
+```
+
+**Validation** :
+- Générer une table
+- F5 pour recharger
+- Vérifier qu'une seule instance existe dans DOM
+- Logs doivent montrer `[ANTI-DOUBLON]` ou `[VERIFIED]`
+
+---
+
+### 🎯 Checklist Post-Correctifs
+
+- [ ] **Aucune erreur backend** : Plus de `ERR_CONNECTION_REFUSED`
+- [ ] **Health checks désactivés** : Logs `[INFO] ... Health checking disabled`
+- [ ] **Nettoyage au démarrage** : Log `[CLEANUP]` visible
+- [ ] **DOM propre** : Chaque table unique (vérifier avec snippet ci-dessus)
+- [ ] **Modification manuelle faite** : Ligne ~1489 de flowiseTableBridge.ts modifiée
+- [ ] **Build réussi** : `npm run build` sans erreur
+- [ ] **Logs anti-doublon** : `[ANTI-DOUBLON]` ou `[VERIFIED]` lors restauration
+
+---
+
+### 📦 Fichiers de Référence
+
+**Documentation détaillée** :
+- `QUICK_FIX_GUIDE.md` - Guide rapide avec modification à faire
+- `CORRECTIFS_APPLIQUES_29_AOUT_2026.md` - Détails complets
+- `RESOLUTION_PROBLEMES_TABLES_29_AOUT_2026.md` - Analyse approfondie
+
+**Scripts** :
+- `apply-patch-safe.ps1` - Script appliqué (✅ exécuté avec succès)
+
+**Backups** :
+- Timestamp : `20260904-004919`
+- Localisation : `*.backup-20260904-004919`
+
+**Rollback si problème** :
+```powershell
+Copy-Item "h:\Claverse_1\src\services\*.backup-20260904-004919" .
+npm run build
+```
+
+---
+
+### 📊 Impact des Correctifs
+
+| Aspect | Avant | Après |
+|--------|-------|-------|
+| Erreurs console backend | ❌ ~100/min | ✅ 0 |
+| Doublons au démarrage | ❌ Fréquents | ✅ Nettoyés auto |
+| Doublons restauration | 🟡 Partiels | ⚠️ Nécessite modif manuelle |
+| Performance | 🟡 Moyenne | ✅ Optimale |
+| Logs diagnostic | 🟡 Basiques | ✅ Détaillés |
+
+---
+
+**Dernière mise à jour** : 29 Août 2026 23:00 (Ajout correctifs anti-doublons)

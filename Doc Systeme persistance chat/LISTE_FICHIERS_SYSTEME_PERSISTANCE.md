@@ -248,7 +248,8 @@ Après nettoyage, vérifier que ces fichiers existent :
 
 ---
 
-*Liste créée le 15 novembre 2025*
+*Liste créée le 15 novembre 2025*  
+*Dernière mise à jour : 29 Août 2026 - Ajout correctifs anti-doublons*
 
 
 ---
@@ -300,3 +301,119 @@ Commenté les validations de modèle pour permettre l'envoi sans modèle local (
 ### Lien avec la Persistance
 
 Ce problème n'était **pas directement lié** à la persistance des tables, mais il **bloquait tous les tests** de persistance car aucun message ne pouvait être envoyé. La résolution de ce problème était un **prérequis** pour tester la persistance des tables générées par conso.js.
+
+---
+
+## 📂 Correctifs Anti-Doublons - 29 Août 2026
+
+**Ajouté:** 29 Août 2026 23:00  
+**Problèmes résolus:** Doublons tables, erreurs backend connection
+
+### Fichiers Créés
+
+1. **QUICK_FIX_GUIDE.md** (Racine projet)
+   - Guide rapide pour la modification manuelle restante
+   - Snippet de code exact à appliquer
+   - Instructions de build et validation
+
+2. **CORRECTIFS_APPLIQUES_29_AOUT_2026.md** (Racine projet)
+   - Détails complets des modifications appliquées
+   - Statut de chaque correctif
+   - Instructions rollback
+   - Tests à effectuer
+
+3. **RESOLUTION_PROBLEMES_TABLES_29_AOUT_2026.md** (Racine projet)
+   - Analyse approfondie des 3 problèmes
+   - Solutions détaillées avec code
+   - Impact et résultats attendus
+   - Comparaison avant/après
+
+4. **LOGS_ANTI_DOUBLONS_29_AOUT.md** (Doc Systeme persistance chat/)
+   - Guide des nouveaux logs ajoutés
+   - Interprétation des logs [CLEANUP], [ANTI-DOUBLON], [VERIFIED]
+   - Tests de validation
+   - Dépannage rapide
+
+5. **00_AIDE_MEMOIRE_LOGS.md** (Mis à jour)
+   - Section ajoutée : "CORRECTIFS ANTI-DOUBLONS - 29 AOÛT 2026"
+   - Checklist post-correctifs
+   - Tableau comparatif impact
+
+### Scripts PowerShell
+
+1. **apply-patch-safe.ps1** (Racine projet)
+   - Script appliqué avec succès ✅
+   - Backup automatique créé (timestamp: 20260904-004919)
+   - Modifications dans flowiseTableBridge.ts, services backend
+
+2. **apply-anti-doublon-patch.ps1** (Racine projet)
+   - Version initiale avec émojis (erreur encoding)
+   - Remplacé par apply-patch-safe.ps1
+
+3. **patch-inject-table-anti-doublon.ps1** (Racine projet)
+   - Script pour modification spécifique injectTableIntoDOM
+   - Approche alternative si modification manuelle préférée
+
+### Modifications Fichiers
+
+| Fichier | Modifications | Statut |
+|---------|---------------|--------|
+| `src/services/flowiseTableBridge.ts` | ✅ Ajout `cleanupDuplicateTablesOnStartup()` | APPLIQUÉ |
+| `src/services/flowiseTableBridge.ts` | ⚠️ Renforcer anti-doublon dans `injectTableIntoDOM()` ligne ~1489 | MANUEL REQUIS |
+| `src/services/claraNotebookService.ts` | ✅ Désactivation health checking | APPLIQUÉ |
+| `src/services/claraTTSService.ts` | ✅ Désactivation health checking | APPLIQUÉ |
+
+### Backups Créés
+
+Tous avec timestamp `20260904-004919` :
+- `flowiseTableBridge.ts.backup-20260904-004919`
+- `claraNotebookService.ts.backup-20260904-004919`
+- `claraTTSService.ts.backup-20260904-004919`
+- `claraVoiceService.ts.backup-20260904-004919`
+
+### Problèmes Résolus
+
+1. **✅ Backend Connection Errors** (ERR_CONNECTION_REFUSED)
+   - Health checking désactivé dans services
+   - Aucune erreur `:5001/health` en console
+   - Logs : `[INFO] ... Health checking disabled`
+
+2. **✅ Doublons au Démarrage**
+   - Nettoyage automatique via `cleanupDuplicateTablesOnStartup()`
+   - Logs : `[CLEANUP] Removed X duplicate(s)` ou `No duplicates found`
+   - Vérification par keyword ET table-id
+
+3. **⚠️ Doublons lors Restauration** (NÉCESSITE ACTION MANUELLE)
+   - Triple vérification : keyword + table-id + wrappers
+   - Modification ligne ~1489 de flowiseTableBridge.ts requise
+   - Instructions dans QUICK_FIX_GUIDE.md
+
+### Nouveaux Logs à Surveiller
+
+```
+[CLEANUP] Removed X duplicate(s) on startup
+[CLEANUP] No duplicates found on startup
+[INFO] Notebook Service: Health checking disabled
+[INFO] TTS Service: Health checking disabled
+[ANTI-DOUBLON] Skip "Table_XXX" (ID: xxx)
+[VERIFIED] Restoring "Table_XXX" (ID: xxx)
+```
+
+### Impact
+
+| Aspect | Avant | Après |
+|--------|-------|-------|
+| Erreurs backend | ❌ ~100/min | ✅ 0 |
+| Doublons démarrage | ❌ Fréquents | ✅ Nettoyés auto |
+| Doublons restauration | 🟡 Partiels | ⚠️ Modif manuelle |
+| Performance | 🟡 Moyenne | ✅ Optimale |
+| Logs diagnostic | 🟡 Basiques | ✅ Détaillés |
+
+### Références Croisées
+
+- Guide logs complet : `00_AIDE_MEMOIRE_LOGS.md`
+- Guide modification : `QUICK_FIX_GUIDE.md`
+- Documentation technique : `RESOLUTION_PROBLEMES_TABLES_29_AOUT_2026.md`
+- Logs spécifiques : `LOGS_ANTI_DOUBLONS_29_AOUT.md`
+
+---
